@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {ref, onMounted, computed, watch} from 'vue'
 import {type dataAnnotation ,type AnnotationTarget} from './types/Annotation';
+import {WordSnapper} from './stores/snapper'
+import {AnnotationRepository} from './stores/annotationRepository';
 import {AnnotationTextRule, TokenizeRule } from './annotation_utilities';
 import {textToLines, createWordBoundaryMaps, shiftUpdateToWordBoundary, type AnnotationFix} from './text_utilities';
 import {UpdateAnnotationState} from "@ghentcdh/vue-component-annotated-text"
@@ -14,9 +16,8 @@ const loading = ref(true);
 const error = ref<string | null>(null);   
 const text = ref<string>('');  
 const selectedFilters = ref<string[]>([]);
-let mapStartCharIndex: { [index: number]: number; } ;
-let mapStopCharIndex: { [index: number]: number; } ;
-
+let annotationRepository : AnnotationRepository;
+let snapper : WordSnapper;
 //Annotation objecten
 const processedAnnotaionsMap = ref<Map<string, Annotation>>(new Map()); 
 const dataAnnotationsMap = ref<Map<string, any>>(new Map()); // Nieuwe variabele voor de Map van annotaties
@@ -75,7 +76,9 @@ const fetchAnnotations = async (id: string) => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
+    annotationRepository = new AnnotationRepository(id);
     const result = await response.json();
+
     console.log(result);
     const map = new Map();
     const processedAnnotations = new Map();
@@ -92,9 +95,6 @@ const fetchAnnotations = async (id: string) => {
       normalizedAnnotaions.set(annotation.id, typedAnnotation);
       processedAnnotations.set(annotation.id, createTypedAnnotation(processedAnnotation.annotation, processedAnnotation.rule_applied));
 
-      //console.log('Processed Annotation:', processedAnnotation);  // Controleer de uitvoer van TokenizeRule
-      //console.log('Normalized Annotation:', createTypedAnnotation(processedAnnotation.annotation, processedAnnotation.rule_applied));  // Controleer de uitvoer van normalizeAnnotaion
-      
     });
     //annotations indexes zoals in de data
     dataAnnotationsMap.value = map;
@@ -103,11 +103,8 @@ const fetchAnnotations = async (id: string) => {
     processedAnnotaionsMap.value = processedAnnotations;
 
     text.value = result.text;
-    const maps = createWordBoundaryMaps(text.value);
-    mapStartCharIndex = maps.mapStartCharIndexToToken;
-    mapStopCharIndex = maps.mapStopCharIndexToToken;
-    console.log('Map Start:', mapStartCharIndex);
-    console.log('Map Stop:', mapStopCharIndex);
+    snapper = new WordSnapper(text.value);
+
     data.value = result;
   } catch (err) {
     error.value = String(err); 
@@ -139,12 +136,7 @@ const filterAnnotations = (annotationsMap: Map<any, any>, selectedFilters: strin
 
 const onAnnotationUpdateBegin = function (updateState : UpdateAnnotationState) {
   console.log('Annotation updating begin:', updateState.annotation);
-  const result = shiftUpdateToWordBoundary(
-    updateState.newStart,
-    updateState.newEnd, 
-    mapStartCharIndex, 
-    mapStopCharIndex
-  ) as AnnotationFix;
+  const result = snapper.fixOffset(updateState.newStart, updateState.newEnd);
   updateState.newStart = result.start;
   updateState.newEnd = result.end;
 
@@ -153,15 +145,15 @@ const onAnnotationUpdateBegin = function (updateState : UpdateAnnotationState) {
 
 const onAnnotationUpdating = function (updateState: UpdateAnnotationState) {
   console.log('Annotation updating:', updateState.annotation);
-  const result = shiftUpdateToWordBoundary(
+  const result = snapper.fixOffset(updateState.newStart, updateState.newEnd);
+  updateState.newStart = result.start;
+  updateState.newEnd = result.end;
+  /*const result = shiftUpdateToWordBoundary(
     updateState.newStart, 
     updateState.newEnd, 
     mapStartCharIndex, 
     mapStopCharIndex
-  ) as AnnotationFix;
-  updateState.newStart = result.start;
-  updateState.newEnd = result.end;
-
+  );*/
   updateState.confirmUpdate();
 };
 
@@ -207,15 +199,13 @@ const onAnnotationUpdateEnd = function (updateState : UpdateAnnotationState) {
       <h3>Verwerkte Tekst</h3>
       <AnnotatedText 
         :component-id="1"
-        :debug="true"
-        :verbose="true"
-        :show-labels="true"
+
         :annotations="filteredProcessedAnnotaions" 
         :lines="textLines"
         :allow-edit="true"
         :listen-to-on-update-start="true"
         :listen-to-on-updating="true"
-        :listen-to-on-key-pressed="true" 
+
         @annotation-update-begin="onAnnotationUpdateBegin"
         @annotation-updating="onAnnotationUpdating"
         @annotation-update-end="onAnnotationUpdateEnd"/>
@@ -224,50 +214,3 @@ const onAnnotationUpdateEnd = function (updateState : UpdateAnnotationState) {
 
   </div>
 </template>
-
-<style scoped>
-/* Algemene instellingen voor de header */
-header {
-  padding: 20px 10px;
-  background-color: #f8f9fa; /* Lichte achtergrondkleur voor de header */
-  border-bottom: 1px solid #dee2e6; /* Lichte rand onder de header */
-  display: flex;
-  justify-content: center; /* Centreer de inhoud horizontaal */
-  align-items: center; /* Centreer de inhoud verticaal */
-}
-/* Container voor de checkboxes */
-.checkbox-container {
-  display: flex;
-  flex-wrap: wrap; /* Zorg ervoor dat de checkboxes naar de volgende regel verplaatsen indien nodig */
-  gap: 15px; /* Ruimte tussen de checkboxes */
-}
-/* Stijl voor elk checkbox-item */
-.checkbox-container div {
-  display: flex;
-  align-items: center; /* Zorg ervoor dat het label en de checkbox uitgelijnd zijn */
-}
-/* Stijl voor de checkbox zelf */
-.checkbox-container input {
-  margin-right: 8px; /* Ruimte tussen de checkbox en het label */
-  cursor: pointer; /* Cursor verandert naar een pointer om aan te geven dat het klikbaar is */
-}
-/* Stijl voor de labels */
-.checkbox-container label {
-  font-size: 16px; /* Grotere tekstgrootte voor leesbaarheid */
-  cursor: pointer; /* Cursor verandert naar een pointer om aan te geven dat het klikbaar is */
-}
-.texts-container {
-  display: flex;
-  justify-content: space-between;
-}
-.annotation--rule-applied {
-  background-color: lightgreen;
-  border: 2px solid green;
-}
-.text-column {
-  width: 48%;
-  padding: 10px;
-  border: 1px solid #ccc;
-}
-
-</style>
