@@ -76,8 +76,7 @@ const fetchAnnotations = async (id: string) => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    annotationRepository = new AnnotationRepository(id);
-    const result = await response.json();
+    let result = await response.json();
 
     console.log(result);
     const map = new Map();

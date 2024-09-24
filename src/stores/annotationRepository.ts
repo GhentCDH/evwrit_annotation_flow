@@ -1,14 +1,12 @@
 export class AnnotationRepository {
 
-    private annotationId: string;
 
-    constructor(id: string) {
-        this.annotationId = id;
+    constructor() {
     }
 
-    async fetchAnnotation(){
+    async fetchAnnotation( annotationId: string) {
         try {
-            const response = await fetch(`/text/${this.annotationId}/annotations`, {
+            const response = await fetch(`/text/${annotationId}/annotations`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
