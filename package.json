@@ -11,13 +11,13 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
-    "@ghentcdh/vue-component-annotated-text": "^0.2.0",
     "diff": "^5.2.0",
     "pinia": "^2.2.2",
     "tokenizr": "^1.7.0",
     "vue": "^3.5.6"
   },
   "devDependencies": {
+    "@ghentcdh/vue-component-annotated-text": "^0.2.0",
     "@tsconfig/node20": "^20.1.4",
     "@types/node": "^20.16.5",
     "@vitejs/plugin-vue": "^5.1.4",
