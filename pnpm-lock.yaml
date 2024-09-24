@@ -22,8 +22,8 @@ importers:
         version: 3.5.6(typescript@5.4.5)
     devDependencies:
       '@ghentcdh/vue-component-annotated-text':
-        specifier: ^0.2.0
-        version: 0.2.0(vue@3.5.6(typescript@5.4.5))
+        specifier: ^0.3.1
+        version: 0.3.1(vue@3.5.6(typescript@5.4.5))
       '@tsconfig/node20':
         specifier: ^20.1.4
         version: 20.1.4
@@ -45,6 +45,9 @@ importers:
       vite:
         specifier: ^5.4.6
         version: 5.4.6(@types/node@20.16.5)
+      vue-component-annotated-text:0.3:
+        specifier: link:@ghentcdh/vue-component-annotated-text:0.3
+        version: link:@ghentcdh/vue-component-annotated-text:0.3
       vue-tsc:
         specifier: ^2.1.6
         version: 2.1.6(typescript@5.4.5)
@@ -206,8 +209,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@ghentcdh/vue-component-annotated-text@0.2.0':
-    resolution: {integrity: sha512-te7Mjz5JvNTiAO2OzFoxUfX7KkFMSk847+ZDjX/fCfHxxBoV1U1SDe4vSfg3Tke3wJI/Yrr68oqmSGV7MqqKwg==}
+  '@ghentcdh/vue-component-annotated-text@0.3.1':
+    resolution: {integrity: sha512-9unT3z0Ib3YI3LmW4WxpMlRrXNIkOUpyKFG36tPLnP3NetsXT/loXzoG21x9xszX1EhgeeBGc5xOPKgf+c3FEw==}
     peerDependencies:
       vue: ^3.0.0
 
@@ -675,7 +678,7 @@ snapshots:
   '@esbuild/win32-x64@0.21.5':
     optional: true
 
-  '@ghentcdh/vue-component-annotated-text@0.2.0(vue@3.5.6(typescript@5.4.5))':
+  '@ghentcdh/vue-component-annotated-text@0.3.1(vue@3.5.6(typescript@5.4.5))':
     dependencies:
       etali: 1.2.5
       vue: 3.5.6(typescript@5.4.5)
