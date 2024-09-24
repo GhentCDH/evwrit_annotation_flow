@@ -1,9 +1,5 @@
-import { type Line } from "@ghentcdh/vue-component-annotated-text";
-import {tokenize} from "./../text_utilities";
-
-export interface Snapper {
-    fixOffset(newStart: number, newEnd: number) : {start: number, end: number}
-}
+import { type Snapper } from "./Types";
+import {tokenize} from "./../../text_utilities";
 
 export class WordSnapper implements Snapper {
     private mapStartCharIndexToToken: { [index: number]: number } = {};
@@ -43,6 +39,5 @@ export class WordSnapper implements Snapper {
             end: closestEnd,
         } ;
     }
-    
 
 }
