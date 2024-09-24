@@ -1,21 +1,13 @@
-import { type Annotation, type AnnotationTarget } from '@ghentcdh/vue-component-annotated-text'
+import { type Annotation, type AnnotationTarget, type AnnotationMetaData } from './types/Annotation'
 
 import {
   shiftToAnnotationMetaDataText,
-  shiftToWordBoundary,
-  characterIndexMapping,
-  textSimilarity
+  shiftToWordBoundary
 } from './text_utilities'
 
 export interface AnnotationRuleResult {
   annotation: Annotation
   rule_applied: boolean
-}
-
-export interface AnnotationMetaData {
-  text: string
-  index: number
-  id: number
 }
 
 
@@ -148,29 +140,6 @@ export class TokenizeRule implements AnnotationRule {
 }
 
 
-export class MapCharacterIndexesRule implements AnnotationRule {
-  characterIndexMapper: Map<number, number>
-  name: string
-  text: string
-
-  constructor(text: string, otherText: string) {
-    this.name = 'map_character_indexes_rule'
-    this.text = text
-    this.characterIndexMapper = characterIndexMapping(text, otherText)
-  }
-
-  apply(annotation: Annotation): AnnotationRuleResult {
-    const fixedAnnotation = JSON.parse(JSON.stringify(annotation)) as Annotation
-    fixedAnnotation.start = this.characterIndexMapper.get(annotation.start) as number
-    fixedAnnotation.end = this.characterIndexMapper.get(annotation.end) as number
-    return {
-      annotation: fixedAnnotation,
-      rule_applied:
-        annotation.start != fixedAnnotation.start || annotation.end != fixedAnnotation.end
-    }
-  }
-}
-
 export class AnnotationTextRule implements AnnotationRule {
   name: string
   text: string
@@ -271,54 +240,55 @@ export class DuplicateRule implements AnnotationRule {
   }
 }
 
-/**
- * Find and reports annotations for which the text between the character index start and end is
- * not the same as the associated 'annotation text' from filemaker.
- */
-export class AnnotationTextUnreliableRule implements AnnotationRule {
-  name: string
-  text: string
-  textId: number
-  minWordSimilarity: number
-  minWordLength: number
+// /**
+//  * Find and reports annotations for which the text between the character index start and end is
+//  * not the same as the associated 'annotation text' from filemaker.
+//  */
 
-  /**
-   * 
-   * @param text The full annotated text.
-   * @param textId The identifier for the text for reporting. 
-   * @param minWordSimilarity The minimum similarity for two words to be seen as the same between 0 and 1
-   * @param minTexWordLength The minimum word length in characters. To skip very short words make this e.g. 3, 
-   * to skip no words make it zero.
-   */
-  constructor(textId:number, text:string, minWordSimilarity:number, minWordLength:number) {
-    this.name = 'annotation_text_unreliable_rule'
-    this.text = text
-    this.textId = textId
-    this.minWordLength = minWordLength
-    this.minWordSimilarity = minWordSimilarity
-  }
+// export class AnnotationTextUnreliableRule implements AnnotationRule {
+//   name: string
+//   text: string
+//   textId: number
+//   minWordSimilarity: number
+//   minWordLength: number
 
-  apply(annotation: Annotation): AnnotationRuleResult {
-    let annotationTextUnreliable = false;
-    if(annotation.metadata && annotation.metadata && (annotation.metadata as AnnotationMetaData).text){
-      const annotationMetaData = annotation.metadata as AnnotationMetaData
-      const annotationTextFromText = this.text.slice(annotation.start,annotation.end).trim()
-      const annotationTextFromMetadata = annotationMetaData.text.trim();
-      const textSimilarityScore = textSimilarity(annotationTextFromText,annotationTextFromMetadata)
+//   /**
+//    * 
+//    * @param text The full annotated text.
+//    * @param textId The identifier for the text for reporting. 
+//    * @param minWordSimilarity The minimum similarity for two words to be seen as the same between 0 and 1
+//    * @param minTexWordLength The minimum word length in characters. To skip very short words make this e.g. 3, 
+//    * to skip no words make it zero.
+//    */
+//   constructor(textId:number, text:string, minWordSimilarity:number, minWordLength:number) {
+//     this.name = 'annotation_text_unreliable_rule'
+//     this.text = text
+//     this.textId = textId
+//     this.minWordLength = minWordLength
+//     this.minWordSimilarity = minWordSimilarity
+//   }
 
-      let textIsLongEnough = (this.minWordLength === 0);
-      textIsLongEnough = (textIsLongEnough || Math.max(annotationTextFromMetadata.length,annotationTextFromText.length) > this.minWordLength)
-      annotationTextUnreliable = this.minWordSimilarity > textSimilarityScore
-      if(textIsLongEnough && annotationTextUnreliable){
-        console.log(this.textId,"'" + annotationTextFromText + "'" ,"'" + annotationTextFromMetadata + "'", Math.round(100 * textSimilarityScore))
-      }
-    }
-    return {
-      annotation: annotation,
-      rule_applied: annotationTextUnreliable
-    }
-  }
-}
+//   apply(annotation: Annotation): AnnotationRuleResult {
+//     let annotationTextUnreliable = false;
+//     if(annotation.metadata && annotation.metadata && (annotation.metadata as AnnotationMetaData).text){
+//       const annotationMetaData = annotation.metadata as AnnotationMetaData
+//       const annotationTextFromText = this.text.slice(annotation.start,annotation.end).trim()
+//       const annotationTextFromMetadata = annotationMetaData.text.trim();
+//       const textSimilarityScore = textSimilarity(annotationTextFromText,annotationTextFromMetadata)
+
+//       let textIsLongEnough = (this.minWordLength === 0);
+//       textIsLongEnough = (textIsLongEnough || Math.max(annotationTextFromMetadata.length,annotationTextFromText.length) > this.minWordLength)
+//       annotationTextUnreliable = this.minWordSimilarity > textSimilarityScore
+//       if(textIsLongEnough && annotationTextUnreliable){
+//         console.log(this.textId,"'" + annotationTextFromText + "'" ,"'" + annotationTextFromMetadata + "'", Math.round(100 * textSimilarityScore))
+//       }
+//     }
+//     return {
+//       annotation: annotation,
+//       rule_applied: annotationTextUnreliable
+//     }
+//   }
+// } 
 
 
 

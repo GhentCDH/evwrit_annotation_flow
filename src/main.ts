@@ -1,5 +1,5 @@
 import './assets/main.css'
-
+import '@ghentcdh/vue-component-annotated-text/style.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'

@@ -1,0 +1,85 @@
+
+/* Algemene instellingen voor de header */
+header {
+  padding: 20px 10px;
+  background-color: #f8f9fa; /* Lichte achtergrondkleur voor de header */
+  border-bottom: 1px solid #dee2e6; /* Lichte rand onder de header */
+  display: flex;
+  justify-content: center; /* Centreer de inhoud horizontaal */
+  align-items: center; /* Centreer de inhoud verticaal */
+}
+.annotation--rule-applied {
+  border-color: green ; 
+  border-width: 2px; 
+  
+  &.annotation--start::before {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+  }
+
+  &.annotation--end::before {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+  }
+  
+  &::before {
+    border-top: 2px solid green; 
+    border-bottom: 2px solid green; 
+  }
+
+  &.annotation--start::before {
+    border-left: 2px solid green; 
+  }
+
+  &.annotation--end::before {
+    border-right: 2px solid green;
+  }
+
+  &.annotation--active::before {
+    border-color: darkgreen ; 
+  }
+}
+
+
+/* Container voor de checkboxes */
+.checkbox-container {
+  display: flex;
+  flex-wrap: wrap; /* Zorg ervoor dat de checkboxes naar de volgende regel verplaatsen indien nodig */
+  gap: 15px; /* Ruimte tussen de checkboxes */
+}
+span.highlight {
+  background-color: yellow;
+  font-weight: bold;
+}
+/* Stijl voor elk checkbox-item */
+.checkbox-container div {
+  display: flex;
+  align-items: center; /* Zorg ervoor dat het label en de checkbox uitgelijnd zijn */
+}
+
+/* Stijl voor de checkbox zelf */
+.checkbox-container input {
+  margin-right: 8px; /* Ruimte tussen de checkbox en het label */
+  cursor: pointer; /* Cursor verandert naar een pointer om aan te geven dat het klikbaar is */
+}
+
+/* Stijl voor de labels */
+.checkbox-container label {
+  font-size: 16px; /* Grotere tekstgrootte voor leesbaarheid */
+  cursor: pointer; /* Cursor verandert naar een pointer om aan te geven dat het klikbaar is */
+}
+.texts-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.text-column {
+  width: 48%;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+/* Style for annotated text */
+.annotation {
+  background-color: yellow; /* Change this to your desired color */
+}
