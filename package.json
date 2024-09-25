@@ -11,7 +11,9 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
+    "axios": "^1.7.7",
     "diff": "^5.2.0",
+    "express": "^4.21.0",
     "pinia": "^2.2.2",
     "tokenizr": "^1.7.0",
     "vue": "^3.5.6"

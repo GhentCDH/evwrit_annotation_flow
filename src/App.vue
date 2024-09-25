@@ -1,60 +1,68 @@
 <script setup lang="ts">
 import {ref, onMounted, computed, watch} from 'vue'
-import {type dataAnnotation ,type AnnotationTarget} from './types/Annotation';
-import {WordSnapper} from './lib/snapper/WordSnapper';
-import {AnnotationRepository} from './stores/annotationRepository';
-import {AnnotationTextRule, TokenizeRule } from './annotation_utilities';
-import {textToLines, createWordBoundaryMaps, shiftUpdateToWordBoundary, type AnnotationFix} from './text_utilities';
 import {UpdateAnnotationState} from "@ghentcdh/vue-component-annotated-text"
 import {AnnotatedText, type Annotation} from '@ghentcdh/vue-component-annotated-text'
 //import Annotation from 'styles/Annotation.css';
+import {type Line} from '@ghentcdh/vue-component-annotated-text'
 import { 
   fetchAnnotations,
+  normalizedAnnotationsMap,
+  dataAnnotationsMap,
   processedAnnotaionsMap,
   textLines,
   snapper,
-  normalizedAnnotationsMap,
-  selectedFilters,
+  getAnnotatedLines,
+  modifiedAnnotations,
+  confirmAnnotations,
+  clearAllAnnotations,
+  confirmSelectedAnnotations,
+  selectedAnnotations,
 } from './annotation_utils';
-
 const filterTypes = ['language', 'typography', 'orthography', 'lexis', 'morpho_syntactical', 'handshift', 'ltsa', 'gtsa', 'gts', 'lts'];
+let selectedFilters = ref<string[]>([]);
+const textId = ref<number | null>(72423); 
 const filteredDataAnnotaitons = computed(() => filterAnnotations(normalizedAnnotationsMap.value, selectedFilters.value));
 const filteredProcessedAnnotaions = computed(() =>filterAnnotations(processedAnnotaionsMap.value, selectedFilters.value));
-const textId = ref<number | null>(72423); 
 
-onMounted(() => {
-  if (textId.value !== null) {
-    fetchAnnotations(textId.value.toString());
-  }
-});
-watch(textId, (newId) => {
-  if (newId !== null) {
-    fetchAnnotations(newId.toString());
-  }
-});
+
+
 const filterAnnotations = (annotationsMap: Map<any, any>, selectedFilters: string[]) => {
     if (!annotationsMap.size) return [];
     if (selectedFilters.length === 0) return Array.from(annotationsMap.values());
-  
+    console.log('id', annotationsMap.values().next().value);
     return Array.from(annotationsMap.values()).filter((annotation: any) =>
-      selectedFilters.includes(annotationsMap.get(annotation.id).type) // Filter op basis van het type
+      selectedFilters.includes(dataAnnotationsMap.value.get(annotation.id)?.type || '')
     );
 };
 
+onMounted(() => {
+  if (textId.value !== null)
+    fetchAnnotations(textId.value.toString());
+});
+watch(textId, (newId) => {
+  if (newId !== null) 
+    fetchAnnotations(newId.toString());
+});
+
 const onAnnotationUpdateBegin = function (updateState : UpdateAnnotationState) {
-  console.log('Annotation updating begin:', updateState.annotation);
+  //console.log('Annotation updating begin:', updateState.annotation);
   const result = snapper.fixOffset(updateState.newStart, updateState.newEnd);
   updateState.newStart = result.start;
   updateState.newEnd = result.end;
-
+  if(result.modified){
+    modifiedAnnotations.set(updateState.annotation.id, updateState.annotation);
+  }
   updateState.confirmStartUpdating();
 };
 
 const onAnnotationUpdating = function (updateState: UpdateAnnotationState) {
-  console.log('Annotation updating:', updateState.annotation);
+  //console.log('Annotation updating:', updateState.annotation);
   const result = snapper.fixOffset(updateState.newStart, updateState.newEnd);
   updateState.newStart = result.start;
   updateState.newEnd = result.end;
+  if(result.modified){
+    modifiedAnnotations.set(updateState.annotation.id, updateState.annotation);
+  }
   updateState.confirmUpdate();
 };
 
@@ -63,7 +71,6 @@ const onAnnotationUpdateEnd = function (updateState : UpdateAnnotationState) {
   processedAnnotaionsMap.value.set(updateState.annotation.id, updateState.annotation);
 
 };
-
 </script>
 
 <template>
@@ -93,7 +100,6 @@ const onAnnotationUpdateEnd = function (updateState : UpdateAnnotationState) {
       <h3>Originele Tekst</h3>
       <AnnotatedText :annotations="filteredDataAnnotaitons" :lines="textLines"/>
     </div>
-    
     <div class="text-column">
       <h3>Verwerkte Tekst</h3>
       <AnnotatedText 
@@ -107,7 +113,29 @@ const onAnnotationUpdateEnd = function (updateState : UpdateAnnotationState) {
         @annotation-updating="onAnnotationUpdating"
         @annotation-update-end="onAnnotationUpdateEnd"/>
     </div>
-  </div>
+    <div class="text-column">
+  <h3>Aangepaste Annotaties</h3>
+  <button @click="confirmAnnotations">Bevestig Alles</button>
+  <button @click="clearAllAnnotations">Verwijder Alles</button>
+  <button @click="confirmSelectedAnnotations">Bevestig Aangevinkte</button>
+  <div class="annotated-line" v-for="(annotation, index) in Array.from(modifiedAnnotations.values())" 
+  :key="annotation.id">
+  <label>
+        <input type="checkbox" v-model="selectedAnnotations[index]" />
 
+      </label>
+    <AnnotatedText 
+      :component-id="index"
+      :annotations="[annotation]"
+      :lines="getAnnotatedLines(textLines, annotation.start, annotation.end).lines" 
+      :allow-edit="true"
+      :listen-to-on-update-start="true"
+      :listen-to-on-updating="true"
+      @annotation-update-begin="onAnnotationUpdateBegin"
+      @annotation-updating="onAnnotationUpdating"
+      @annotation-update-end="onAnnotationUpdateEnd"/>
+  </div>
+  </div>
+  </div>
   </div>
 </template>

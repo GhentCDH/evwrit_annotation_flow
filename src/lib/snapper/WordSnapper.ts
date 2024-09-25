@@ -37,6 +37,7 @@ export class WordSnapper implements Snapper {
         return {
             start: closestStart,
             end: closestEnd,
+            modified: (closestStart !== newStart || closestEnd !== newEnd),
         } ;
     }
 

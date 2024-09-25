@@ -1,5 +1,5 @@
-import { type Annotation, type AnnotationTarget, type AnnotationMetaData } from './types/Annotation'
-
+import { type AnnotationMetaData } from './types/Annotation'
+import { type Annotation, type AnnotationTarget} from '@ghentcdh/vue-component-annotated-text'
 import {
   shiftToAnnotationMetaDataText,
   shiftToWordBoundary

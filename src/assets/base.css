@@ -8,6 +8,14 @@ header {
   justify-content: center; /* Centreer de inhoud horizontaal */
   align-items: center; /* Centreer de inhoud verticaal */
 }
+.annotated-line {
+  border: 2px solid #646061; /* Kleur van de rand (blauw) */
+  border-radius: 5px;        /* Ronde hoeken voor een zachtere uitstraling */
+  padding: 10px;       /* Ruimte binnen de rand */
+  
+  margin: 10px 0;            /* Ruimte boven en onder de regel */
+  position: relative;        /* Zorgt ervoor dat de pseudo-elementen relatief aan dit element worden geplaatst */
+}
 .annotation--rule-applied {
   border-color: green ; 
   border-width: 2px; 
