@@ -5,7 +5,7 @@ import {AnnotationRepository} from './stores/annotationRepository';
 import { textToLines } from './text_utilities';
 import { getAnnotatedLines,normalizeAnnotaion} from './annotation_utils';
 import {WordSnapper} from './lib/snapper/WordSnapper';
-import {AnnotationTextRule, TokenizeRule } from './annotation_utilities';
+import {AnnotationTextRule, TokenizeRule, SanitizeAnnotationRule, AnnotationRuleSet, type AnnotationRuleResult } from './annotation_utilities';
 
 //const data = ref<any>(null); // Variabele voor het object zelf
 const loading = ref(true); 
@@ -51,14 +51,14 @@ const handleFetchedData = async (id: string) => {
     try {
       const annotationRepository = new AnnotationRepository();//
       let result = await annotationRepository.fetchAnnotation(id);//
-
+      text.value = result.text;
       const annotationTextRule = new TokenizeRule(text.value, 3);
       result.annotations.forEach((annotation: any) => {
         const normalizedAnnotation = normalizeAnnotaion(annotation, text.value);
         originalAnnotations.value.set(annotation.id, normalizedAnnotation);
       });
-      applyRules(originalAnnotations.value, annotationTextRule);
-      text.value = result.text;
+      applyRules(originalAnnotations.value);
+      
       //data.value = result
 
       snapper = new WordSnapper(text.value);
@@ -70,27 +70,52 @@ const handleFetchedData = async (id: string) => {
 };
 
 
-const applyRules = (nomalizedAnnotations: Map<string,any>, annotationTextRule: any) => {
-  
+const applyRules = (nomalizedAnnotations: Map<string,any>) => {
+  const tokenizeRule = new TokenizeRule(text.value, 3);
+  const textRule = new AnnotationTextRule(text.value, 3);
+  const sanitizeRule = new SanitizeAnnotationRule(text.value);
+  const typographyRuleSet = new AnnotationRuleSet([sanitizeRule,textRule],true,false);
+  const orthographyRuleSet = new AnnotationRuleSet([sanitizeRule,textRule],true,true);
+  const lexisRuleSet = new AnnotationRuleSet([sanitizeRule,textRule],true,true);
+  const morphoSyntacticalRuleSet = new AnnotationRuleSet([sanitizeRule,textRule],true,true);
+  const handshiftRuleSet = new AnnotationRuleSet([sanitizeRule,textRule],true,true);
+
   nomalizedAnnotations.forEach((nolmalizedAnnotation: any) => {
+    let resultAnnotation : AnnotationRuleResult = { annotation: null, rule_applied: false };
     switch (nolmalizedAnnotation.type) {
       case 'typography':
-        console.log('Skiping typography');
-        return;
+      resultAnnotation = typographyRuleSet.apply(nolmalizedAnnotation);
+      //console.log('Typography:', resultAnnotation);
+      if(resultAnnotation.rule_applied){
+        console.log('true');
+      }
+        break;
+      case 'orthography':
+      //resultAnnotation = orthographyRuleSet.apply(nolmalizedAnnotation);
+        break;
+      case 'lexis':
+      //resultAnnotation = lexisRuleSet.apply(nolmalizedAnnotation);
+        break;
+      case 'morpho_syntactical':
+      //resultAnnotation = morphoSyntacticalRuleSet.apply(nolmalizedAnnotation);
+        break;
+      case 'handshift':
+      //resultAnnotation =handshiftRuleSet.apply(nolmalizedAnnotation);
+        break;
       default:
-        const ruleAppliedAnnotation = annotationTextRule.apply(nolmalizedAnnotation);
-        console.log('ruleAppliedAnnotation', ruleAppliedAnnotation);
-        const proceesedTypedAnnotation = ruleAppliedAnnotation.annotation;// formatAnnotation(ruleAppliedAnnotation.annotation, ruleAppliedAnnotation.rule_applied);
-        if(ruleAppliedAnnotation.rule_applied){
-          proceesedTypedAnnotation.class = 'annotation--rule-applied';
-        }
-        processedAnnotaionsMap.value.set(proceesedTypedAnnotation.id, { ...proceesedTypedAnnotation });
-        if(ruleAppliedAnnotation.rule_applied){
-              modifiedAnnotationsMap.set(proceesedTypedAnnotation.id, proceesedTypedAnnotation);
-        }
+        console.log('No rule set for type:', nolmalizedAnnotation.type);
         break;
     }
-    
+    let processedAnnotaion = resultAnnotation?.annotation;
+    //console.log('Processed:', processedAnnotaion);
+    //console.log('Original:', nolmalizedAnnotation);
+    if(resultAnnotation && resultAnnotation.rule_applied){
+      processedAnnotaion.class = 'annotation--rule-applied';
+      modifiedAnnotationsMap.set(nolmalizedAnnotation.id, processedAnnotaion);
+      console.log('Modified:', processedAnnotaion);
+      console.log('Original:', nolmalizedAnnotation);
+    }
+    processedAnnotaionsMap.value.set(nolmalizedAnnotation.id, processedAnnotaion? processedAnnotaion : nolmalizedAnnotation);
   });
 };
 
@@ -220,12 +245,22 @@ const getCombinedAnnotations = (annotationId: any) => {
   :key="annotation.id">
   <label>
         <input type="checkbox" :value="annotation.id" v-model="selectedAnnotationIds" />
-
       </label>
     <AnnotatedText 
       :component-id="index"
-      :annotations="getCombinedAnnotations(annotation.id)"
+      :annotations="[annotation]"
       :lines="getAnnotatedLines(textLines, annotation.start, annotation.end).lines" 
+      :allow-edit="true"
+      :listen-to-on-update-start="true"
+      :listen-to-on-updating="true"
+      @annotation-update-begin="onAnnotationUpdateBegin"
+      @annotation-updating="onAnnotationUpdating"
+      @annotation-update-end="onAnnotationUpdateEnd"/>
+      <hr>
+      <AnnotatedText 
+      :component-id="index"
+      :annotations="[originalAnnotations.get(annotation.id)]"
+      :lines="getAnnotatedLines(textLines, originalAnnotations.get(annotation.id).start, originalAnnotations.get(annotation.id).end).lines" 
       :allow-edit="true"
       :listen-to-on-update-start="true"
       :listen-to-on-updating="true"

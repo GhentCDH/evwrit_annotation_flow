@@ -82,6 +82,7 @@ export class SanitizeAnnotationRule implements AnnotationRule {
   constructor(text: string) {
     this.name = 'sanitize_annotation_rule'
     this.text = text
+    console.log('length', text.length)
   }
 
   apply(annotation: RuleAnnotation): AnnotationRuleResult {
@@ -104,63 +105,43 @@ export class AnnotationRuleSet implements AnnotationRule {
   name: string;
   text: string;
   rules: AnnotationRule[];
-  alwaysApplyFirstRule: boolean; // Nieuwe eigenschap om te controleren of de eerste regel altijd moet worden toegepast
-  stopWhenRuleApplied: boolean; // Bepaalt of we moeten stoppen na de eerste succesvolle toepassing
+  alwaysApplyFirstRule: boolean; // Eerste regel altijd toepassen
+  stopWhenRuleApplied: boolean;  // Stop bij de eerste succesvolle toepassing
 
   constructor(
-    rules: AnnotationRule[], 
-    alwaysApplyFirstRule: boolean = false, // Standaard is false
-    stopWhenRuleApplied: boolean = false // Standaard is false
+    rules: AnnotationRule[],
+    alwaysApplyFirstRule: boolean = false,
+    stopWhenRuleApplied: boolean = false
   ) {
     this.name = 'annotation_rule_set';
     this.rules = rules;
-    this.text = rules[0].text;
+    this.text = rules[0]?.text || '';
     this.alwaysApplyFirstRule = alwaysApplyFirstRule;
     this.stopWhenRuleApplied = stopWhenRuleApplied;
   }
 
   apply(annotation: RuleAnnotation): AnnotationRuleResult {
-    let fixedAnnotation = annotation;
     let applied_rule = false;
-
-    // Als altijd de eerste regel moet worden toegepast, pas die dan eerst toe
-    if (this.alwaysApplyFirstRule && this.rules.length > 0) {
-      const firstRuleResult = this.rules[0].apply(fixedAnnotation);
+    if (this.alwaysApplyFirstRule) {
+      const firstRuleResult = this.rules[0].apply(annotation);
       if (firstRuleResult.rule_applied) {
-        fixedAnnotation = firstRuleResult.annotation;
-        applied_rule = true;
-
-        // Stop als we moeten stoppen na de eerste succesvolle toepassing
+        annotation = firstRuleResult.annotation;
+        applied_rule = firstRuleResult.rule_applied;
+        console.log('rule applied', this.rules[0].name);
         if (this.stopWhenRuleApplied) {
-          return {
-            annotation: fixedAnnotation,
-            rule_applied: applied_rule
-          };
+          return { annotation: annotation, rule_applied: applied_rule };
         }
       }
     }
-
-    // Itereer door de andere regels
-    for (let i = (this.alwaysApplyFirstRule ? 1 : 0); i < this.rules.length; i++) {
-      const rule = this.rules[i];
-      const result = rule.apply(fixedAnnotation);
-
-      // Als de regel is toegepast, werk de vaste annotatie bij en markeer als toegepast
-      if (result.rule_applied) {
-        fixedAnnotation = result.annotation;
-        applied_rule = true;
-
-        // Stop bij de eerste succesvolle toepassing als dat is ingesteld
-        if (this.stopWhenRuleApplied) {
-          break; // Stop met toepassen van verdere regels
-        }
+    if (!this.stopWhenRuleApplied) {
+      const secondRuleResult = this.rules[1].apply(annotation);
+      if (secondRuleResult.rule_applied) {
+        console.log('rule applied', this.rules[1].name);
+        annotation = secondRuleResult.annotation;
+        applied_rule = secondRuleResult.rule_applied;
       }
-    }
-
-    return {
-      annotation: fixedAnnotation,
-      rule_applied: applied_rule
-    };
+    }          
+    return { annotation: annotation, rule_applied: applied_rule };
   }
 }
 
@@ -189,7 +170,7 @@ export class TokenizeRule implements AnnotationRule {
     const fixedAnnotation: RuleAnnotation = JSON.parse(JSON.stringify(annotation)) as RuleAnnotation
     let max_shift = this.max_shift
     if(max_shift < 0){
-      //
+      
       max_shift = 2 + Math.floor((annotation.end - annotation.start) / 3);
     }
     const result = shiftToWordBoundary(this.text, annotation.start, annotation.end,max_shift)
@@ -240,7 +221,7 @@ export class AnnotationTextRule implements AnnotationRule {
     return {
       annotation: fixedAnnotation,
       rule_applied: applied_rule
-    }
+    } as AnnotationRuleResult
   }
 }
 
@@ -414,6 +395,94 @@ const ruleAppliedAnnotation = tokenizeRule.apply(nolmalizedAnnotation);
       nolmalizedAnnotation.annotation.class = 'annotation--rule-applied';
     }
     processedAnnotaionsMap.value.set(nolmalizedAnnotation.id, nolmalizedAnnotation);
+  });
+};
+
+
+const applyRules = (nomalizedAnnotations: Map<string,any>, annotationTextRule: any) => {
+  nomalizedAnnotations.forEach((nolmalizedAnnotation: any) => {
+    switch (nolmalizedAnnotation.type) {
+      case 'typography':
+        console.log('Skiping typography');
+        return;
+      default:
+        const ruleAppliedAnnotation = annotationTextRule.apply(nolmalizedAnnotation);
+        console.log('ruleAppliedAnnotation', ruleAppliedAnnotation);
+        console.log()
+        const proceesedTypedAnnotation = ruleAppliedAnnotation.annotation;// formatAnnotation(ruleAppliedAnnotation.annotation, ruleAppliedAnnotation.rule_applied);
+        if(ruleAppliedAnnotation.rule_applied){
+          proceesedTypedAnnotation.class = 'annotation--rule-applied';
+        }
+        processedAnnotaionsMap.value.set(proceesedTypedAnnotation.id, { ...proceesedTypedAnnotation });
+        if(ruleAppliedAnnotation.rule_applied){
+              modifiedAnnotationsMap.set(proceesedTypedAnnotation.id, proceesedTypedAnnotation);
+        }
+        break;
+    }
+  });
+};
+
+
+
+const applyRules = (nomalizedAnnotations: Map<string,any>) => {
+  const tokenizeRule = new TokenizeRule(text.value, 3);
+  const textRule = new AnnotationTextRule(text.value, 3);
+  const sanitizeRule = new SanitizeAnnotationRule(text.value);
+
+  const typographyRuleSet = new AnnotationRuleSet([sanitizeRule,tokenizeRule],true,true);
+  const orthographyRuleSet = new AnnotationRuleSet([sanitizeRule,textRule],true,true);
+  const lexisRuleSet = new AnnotationRuleSet([sanitizeRule,textRule],true,true);
+  const morphoSyntacticalRuleSet = new AnnotationRuleSet([sanitizeRule,textRule],true,true);
+  const handshiftRuleSet = new AnnotationRuleSet([sanitizeRule,textRule],true,true);
+
+  nomalizedAnnotations.forEach((nolmalizedAnnotation: any) => {
+    let resultAnnotation ;
+    switch (nolmalizedAnnotation.type) {
+      case 'typography':
+      resultAnnotation = typographyRuleSet.apply(nolmalizedAnnotation);
+        break;
+      case 'orthography':
+      resultAnnotation = orthographyRuleSet.apply(nolmalizedAnnotation);
+        break;
+      case 'lexis':
+      resultAnnotation = lexisRuleSet.apply(nolmalizedAnnotation);
+        break;
+      case 'morpho_syntactical':
+      resultAnnotation = morphoSyntacticalRuleSet.apply(nolmalizedAnnotation);
+        break;
+      case 'handshift':
+      resultAnnotation =handshiftRuleSet.apply(nolmalizedAnnotation);
+        break;
+      default:
+        console.log('No rule set for type:', nolmalizedAnnotation.type);
+        break;
+    }
+    let processedAnnotaion = resultAnnotation?.annotation;
+    
+    processedAnnotaionsMap.value.set(nolmalizedAnnotation.id, normalizeAnnotaion(processedAnnotaion, text.value));
+  });
+};
+
+const applyRules = (nomalizedAnnotations: Map<string,any>, annotationTextRule: any) => {
+  nomalizedAnnotations.forEach((nolmalizedAnnotation: any) => {
+    switch (nolmalizedAnnotation.type) {
+      case 'typography':
+        console.log('Skiping typography');
+        return;
+      default:
+        const ruleAppliedAnnotation = annotationTextRule.apply(nolmalizedAnnotation);
+        console.log('ruleAppliedAnnotation', ruleAppliedAnnotation);
+        const proceesedTypedAnnotation = ruleAppliedAnnotation.annotation;// formatAnnotation(ruleAppliedAnnotation.annotation, ruleAppliedAnnotation.rule_applied);
+        if(ruleAppliedAnnotation.rule_applied){
+          proceesedTypedAnnotation.class = 'annotation--rule-applied';
+        }
+        processedAnnotaionsMap.value.set(proceesedTypedAnnotation.id, { ...proceesedTypedAnnotation });
+        if(ruleAppliedAnnotation.rule_applied){
+              modifiedAnnotationsMap.set(proceesedTypedAnnotation.id, proceesedTypedAnnotation);
+        }
+        break;
+    }
+    
   });
 };
  */
