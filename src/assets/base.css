@@ -46,6 +46,9 @@ header {
   &.annotation--active::before {
     border-color: darkgreen ; 
   }
+}.annotation-original {
+  background-color: rgb(127, 130, 127);
+
 }
 header {
   padding: 20px 10px;

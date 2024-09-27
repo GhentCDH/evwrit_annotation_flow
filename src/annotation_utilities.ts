@@ -1,12 +1,13 @@
-import { type AnnotationMetaData } from './types/Annotation'
-import { type Annotation, type AnnotationTarget} from '@ghentcdh/vue-component-annotated-text'
+import { type RuleAnnotation, type AnnotationTarget, type AnnotationMetaData } from './types/Annotation'
+import { type Annotation as EditorAnnotation } from '@ghentcdh/vue-component-annotated-text'
+
 import {
   shiftToAnnotationMetaDataText,
   shiftToWordBoundary
 } from './text_utilities'
 
 export interface AnnotationRuleResult {
-  annotation: Annotation
+  annotation: RuleAnnotation
   rule_applied: boolean
 }
 
@@ -17,7 +18,7 @@ export interface AnnotationRuleResult {
  * @param annotations annotations as received from elasticsearch.
  * @returns  A list of annotations fit for visualization in the component.
  */
-export function normalizeAnnotations(annotations: [], normAnnotations: Annotation[] ): Annotation[] {
+export function normalizeAnnotations(annotations: [], normAnnotations: RuleAnnotation[] ): RuleAnnotation[] {
   annotations.forEach((a, index) => {
     const annotation_type = a['type']
     const text_selection = a['text_selection']
@@ -36,7 +37,7 @@ export function normalizeAnnotations(annotations: [], normAnnotations: Annotatio
         index: index,
         //annotation_type: annotation_type
       }
-    } as Annotation
+    } as RuleAnnotation
     //filter length for debug
     normAnnotations.push(normalized)
   })
@@ -64,7 +65,7 @@ export interface AnnotationRule {
    * Apply the rule to a single annotation.
    * @param annotation The annotation to align.
    */
-  apply(annotation: Annotation): AnnotationRuleResult
+  apply(annotation: RuleAnnotation): AnnotationRuleResult
 }
 
 /**
@@ -83,8 +84,8 @@ export class SanitizeAnnotationRule implements AnnotationRule {
     this.text = text
   }
 
-  apply(annotation: Annotation): AnnotationRuleResult {
-    const fixedAnnotation: Annotation = JSON.parse(JSON.stringify(annotation)) as Annotation
+  apply(annotation: RuleAnnotation): AnnotationRuleResult {
+    const fixedAnnotation: RuleAnnotation = JSON.parse(JSON.stringify(annotation)) as RuleAnnotation
     if(annotation.start < 0){
       fixedAnnotation.start = 0;
     }
@@ -96,6 +97,70 @@ export class SanitizeAnnotationRule implements AnnotationRule {
       annotation: fixedAnnotation,
       rule_applied: changed
     }
+  }
+}
+
+export class AnnotationRuleSet implements AnnotationRule {
+  name: string;
+  text: string;
+  rules: AnnotationRule[];
+  alwaysApplyFirstRule: boolean; // Nieuwe eigenschap om te controleren of de eerste regel altijd moet worden toegepast
+  stopWhenRuleApplied: boolean; // Bepaalt of we moeten stoppen na de eerste succesvolle toepassing
+
+  constructor(
+    rules: AnnotationRule[], 
+    alwaysApplyFirstRule: boolean = false, // Standaard is false
+    stopWhenRuleApplied: boolean = false // Standaard is false
+  ) {
+    this.name = 'annotation_rule_set';
+    this.rules = rules;
+    this.text = rules[0].text;
+    this.alwaysApplyFirstRule = alwaysApplyFirstRule;
+    this.stopWhenRuleApplied = stopWhenRuleApplied;
+  }
+
+  apply(annotation: RuleAnnotation): AnnotationRuleResult {
+    let fixedAnnotation = annotation;
+    let applied_rule = false;
+
+    // Als altijd de eerste regel moet worden toegepast, pas die dan eerst toe
+    if (this.alwaysApplyFirstRule && this.rules.length > 0) {
+      const firstRuleResult = this.rules[0].apply(fixedAnnotation);
+      if (firstRuleResult.rule_applied) {
+        fixedAnnotation = firstRuleResult.annotation;
+        applied_rule = true;
+
+        // Stop als we moeten stoppen na de eerste succesvolle toepassing
+        if (this.stopWhenRuleApplied) {
+          return {
+            annotation: fixedAnnotation,
+            rule_applied: applied_rule
+          };
+        }
+      }
+    }
+
+    // Itereer door de andere regels
+    for (let i = (this.alwaysApplyFirstRule ? 1 : 0); i < this.rules.length; i++) {
+      const rule = this.rules[i];
+      const result = rule.apply(fixedAnnotation);
+
+      // Als de regel is toegepast, werk de vaste annotatie bij en markeer als toegepast
+      if (result.rule_applied) {
+        fixedAnnotation = result.annotation;
+        applied_rule = true;
+
+        // Stop bij de eerste succesvolle toepassing als dat is ingesteld
+        if (this.stopWhenRuleApplied) {
+          break; // Stop met toepassen van verdere regels
+        }
+      }
+    }
+
+    return {
+      annotation: fixedAnnotation,
+      rule_applied: applied_rule
+    };
   }
 }
 
@@ -120,8 +185,8 @@ export class TokenizeRule implements AnnotationRule {
     this.max_shift = max_shift
   }
 
-  apply(annotation: Annotation): AnnotationRuleResult {
-    const fixedAnnotation: Annotation = JSON.parse(JSON.stringify(annotation)) as Annotation
+  apply(annotation: RuleAnnotation): AnnotationRuleResult {
+    const fixedAnnotation: RuleAnnotation = JSON.parse(JSON.stringify(annotation)) as RuleAnnotation
     let max_shift = this.max_shift
     if(max_shift < 0){
       //
@@ -151,7 +216,7 @@ export class AnnotationTextRule implements AnnotationRule {
     this.maxShift = maxShift;
   }
 
-  apply(annotation: Annotation) {
+  apply(annotation: RuleAnnotation) {
     let fixedAnnotation = annotation
     let applied_rule = false
 
@@ -167,7 +232,7 @@ export class AnnotationTextRule implements AnnotationRule {
       )
       if (result.modified) {
         applied_rule = true
-        fixedAnnotation = JSON.parse(JSON.stringify(annotation)) as Annotation
+        fixedAnnotation = JSON.parse(JSON.stringify(annotation)) as RuleAnnotation
         fixedAnnotation.start = result.start
         fixedAnnotation.end = result.end
       }
@@ -189,7 +254,7 @@ export class AnnotationTextRule implements AnnotationRule {
  */
 export class DuplicateRule implements AnnotationRule {
   name: string
-  annotation_map: Map<number, Annotation[]>
+  annotation_map: Map<number, RuleAnnotation[]>
   text: string
   textId: number
 
@@ -198,7 +263,7 @@ export class DuplicateRule implements AnnotationRule {
    * @param text The full text to tokenize.
    * @param annotations Aal current annotations to check for duplicates. 
    */
-  constructor(textId:number, text:string, annotations: Annotation[]) {
+  constructor(textId:number, text:string, annotations: RuleAnnotation[]) {
     this.name = 'duplicate_rule'
     this.text = text
     this.textId = textId
@@ -212,8 +277,8 @@ export class DuplicateRule implements AnnotationRule {
     });
   }
 
-  apply(annotation: Annotation): AnnotationRuleResult {
-    const fixedAnnotation: Annotation = annotation as Annotation
+  apply(annotation: RuleAnnotation): AnnotationRuleResult {
+    const fixedAnnotation: RuleAnnotation = annotation as RuleAnnotation
     let duplicate = false;
     if(this.annotation_map.has(fixedAnnotation.start)){
       const otherAnnotations = this.annotation_map.get(fixedAnnotation.start)
@@ -289,8 +354,66 @@ export class DuplicateRule implements AnnotationRule {
 //     }
 //   }
 // } 
+/*
+const ruleAppliedAnnotation = tokenizeRule.apply(nolmalizedAnnotation);
+        console.log('ruleAppliedAnnotation', ruleAppliedAnnotation);
+        console.log('nomalizedAnnotation', nolmalizedAnnotation);
+        const proceesedTypedAnnotation = ruleAppliedAnnotation.annotation;// formatAnnotation(ruleAppliedAnnotation.annotation, ruleAppliedAnnotation.rule_applied);
+        if(ruleAppliedAnnotation.rule_applied){
+          proceesedTypedAnnotation.class = 'annotation--rule-applied';
+        }
+        else{
+          textRule.apply(proceesedTypedAnnotation);
+        }
+        processedAnnotaionsMap.value.set(proceesedTypedAnnotation.id, { ...proceesedTypedAnnotation });
+        if(ruleAppliedAnnotation.rule_applied){
+              modifiedAnnotationsMap.set(proceesedTypedAnnotation.id, proceesedTypedAnnotation);
+        }
+
+*/
 
 
 
 
+/**
+ * 
+ * 
+ * const applyRules = (nomalizedAnnotations: Map<string,any>) => {
+  const tokenizeRule = new TokenizeRule(text.value, 3);
+  const textRule = new AnnotationTextRule(text.value, 3);
+  const sanitizeRule = new SanitizeAnnotationRule(text.value);
 
+  const typographyRuleSet = new AnnotationRuleSet([sanitizeRule,tokenizeRule],true,true);
+  const orthographyRuleSet = new AnnotationRuleSet([sanitizeRule,textRule],true,true);
+  const lexisRuleSet = new AnnotationRuleSet([sanitizeRule,textRule],true,true);
+  const morphoSyntacticalRuleSet = new AnnotationRuleSet([sanitizeRule,textRule],true,true);
+  const handshiftRuleSet = new AnnotationRuleSet([sanitizeRule,textRule],true,true);
+
+  nomalizedAnnotations.forEach((nolmalizedAnnotation: any) => {
+    switch (nolmalizedAnnotation.type) {
+      case 'typography':
+        typographyRuleSet.apply(nolmalizedAnnotation);
+        break;
+      case 'orthography':
+        orthographyRuleSet.apply(nolmalizedAnnotation);
+        break;
+      case 'lexis':
+        lexisRuleSet.apply(nolmalizedAnnotation);
+        break;
+      case 'morpho_syntactical':
+        morphoSyntacticalRuleSet.apply(nolmalizedAnnotation);
+        break;
+      case 'handshift':
+        handshiftRuleSet.apply(nolmalizedAnnotation);
+        break;
+      default:
+        console.log('No rule set for type:', nolmalizedAnnotation.type);
+        break;
+    }
+    if(nolmalizedAnnotation.rule_applied){
+      nolmalizedAnnotation.annotation.class = 'annotation--rule-applied';
+    }
+    processedAnnotaionsMap.value.set(nolmalizedAnnotation.id, nolmalizedAnnotation);
+  });
+};
+ */

@@ -1,5 +1,5 @@
 import { ref, computed, reactive } from 'vue'; // Vue functies
-import {type AnnotationTarget,type dataAnnotation } from './types/Annotation'; // Importeer je types
+import {type AnnotationTarget } from './types/Annotation'; // Importeer je types
 import { textToLines } from './text_utilities';
 import {AnnotationRepository} from './stores/annotationRepository';
 import {AnnotationTextRule, TokenizeRule } from './annotation_utilities';
@@ -15,27 +15,47 @@ export let snapper : WordSnapper;
 export const processedAnnotaionsMap = ref<Map<string, Annotation>>(new Map()); 
 export const dataAnnotationsMap = ref<Map<string, any>>(new Map()); // Nieuwe variabele voor de Map van annotaties
 export const normalizedAnnotationsMap = ref<Map<string, any>>(new Map());  
+export const typedAnnotationsMap = ref<Map<string, any>>(new Map());  
+let modifiedAnnotations = reactive(new Map<string, Annotation>()); // Maak een nieuwe Map voor de gemodificeerde annotaties
 
-export const textLines = computed(() => textToLines(text.value)); // Bereken de lijnen van de tekst
-export let modifiedAnnotations = reactive(new Map<string, Annotation>()); // Maak een nieuwe Map voor de gemodificeerde annotaties
-export const createTypedAnnotation = (annotation: any, ruleApplied: boolean = false) : Annotation => {
-    const annotationClass = ruleApplied ? 'annotation--rule-applied' : 'annotation--color-1';
-    return {
-      id: annotation.id,  
-      start: annotation.start,
-      end: annotation.end,
-      class: annotationClass,
-      target: annotation.target,
-    };
-};
 
-export const normalizeAnnotaion = (annotation: any) : dataAnnotation => {
+/**
+ * 
+ * export function normalizeAnnotations(annotations: [], normAnnotations: DataAnnotation[] ): DataAnnotation[] {
+  annotations.forEach((a, index) => {
+    const annotation_type = a['type']
+    const text_selection = a['text_selection']
+    const textLength = text_selection['selection_end'] - text_selection['selection_start']
+    const annotationTarget = (textLength > 130 ? 'gutter' : "span") as AnnotationTarget
+    const normalized = {
+      start: text_selection['selection_start'],
+      end: text_selection['selection_end'],
+      class: 'annotation annotation--color-' + (1 + (index % 9)),
+      target: annotationTarget,
+      label: annotation_type,
+      metadata: {
+        text: text_selection['text'],
+        ///text_edited: text_selection['text_edited'],
+        id: text_selection['id'],
+        index: index,
+        //annotation_type: annotation_type
+      }
+    } as DataAnnotation
+    //filter length for debug
+    normAnnotations.push(normalized)
+  })
+  normAnnotations.sort((a,b) => (Number(a?.start) > Number(b?.start) ? 1 : -1))
+  return normAnnotations
+}
+ */
+
+export const normalizeAnnotaion = (annotation: any, text:string)  => {
     const textLength = annotation.text_selection.selection_end - annotation.text_selection.selection_start;
     const annotationTarget = (textLength > 130 ? 'gutter' : 'text') as AnnotationTarget;
     const startIndex = annotation.text_selection.selection_start - 1;  // 0-gebaseerde index
     const endIndex = annotation.text_selection.selection_end - 1;
   
-    const selectedText = text.value ? text.value.slice(startIndex, endIndex) : '';
+    const selectedText = text ? text.slice(startIndex, endIndex) : '';
     return {
       id: annotation.id,  
       start: annotation.text_selection.selection_start,
@@ -43,6 +63,7 @@ export const normalizeAnnotaion = (annotation: any) : dataAnnotation => {
       class: 'annotation--color-1',
       label: annotation.type,  
       target: annotationTarget, 
+      type: annotation.type,
       metadata: {
         text: selectedText,
         id: annotation.id,
@@ -50,47 +71,6 @@ export const normalizeAnnotaion = (annotation: any) : dataAnnotation => {
       }
     };
 };
-
-
-export const fetchAnnotations = async (id: string) => {
-    try {
-      const annotationRepository = new AnnotationRepository();
-      let result = await annotationRepository.fetchAnnotation(id);
-      const map = new Map();
-      const processedAnnotations = new Map();
-      const normalizedAnnotaions = new Map();
-      const annotationTextRule = new TokenizeRule(text.value, 3);
-
-      result.annotations.forEach((annotation: any) => {
-        map.set(annotation.id, (annotation));
-        const normalizedAnnotation = normalizeAnnotaion(annotation);
-        const typedAnnotation = createTypedAnnotation(normalizedAnnotation);
-        const processedAnnotation = annotationTextRule.apply(normalizedAnnotation);
-        normalizedAnnotaions.set(annotation.id, typedAnnotation);
-        const proceesedTypedAnnotation = createTypedAnnotation(processedAnnotation.annotation, processedAnnotation.rule_applied);
-        processedAnnotations.set(annotation.id,proceesedTypedAnnotation);
-        if(processedAnnotation.rule_applied){
-          modifiedAnnotations.set(annotation.id, proceesedTypedAnnotation);
-        }
-        
-      });
-      //annotations indexes zoals in de data
-      dataAnnotationsMap.value = map;
-      normalizedAnnotationsMap.value = normalizedAnnotaions;
-      processedAnnotaionsMap.value = processedAnnotations;
-
-      text.value = result.text;
-      snapper = new WordSnapper(text.value);
-      data.value = result;
-      //console.log("annotation lines", getAnnotatedLines(textLines.value, 183, 253));
-      //console.log("text lines", textLines.value);
-    } catch (err) {
-      error.value = String(err); 
-    } finally {
-      loading.value = false;  
-    }
-};
-
 
 
 export const getAnnotatedLines = (lines: Line[], start: number, end: number) => {
@@ -110,42 +90,5 @@ export const getAnnotatedLines = (lines: Line[], start: number, end: number) => 
     return {
         lines: annotatedLines,
         offset: offset,
-    }
-}
-
-export const confirmAnnotations = async () => {
-
-    try{
-        /*const response = await axios.post('http://localhost:3000/api/submit-annotations',{
-            annotations: modifiedAnnotations.values()
-        });*/
-        if(true){
-            console.log("Annotations submitted", modifiedAnnotations);
-            modifiedAnnotations.clear();
-        }else{
-            console.error("Error submitting annotations");
-        }
-    }
-    catch(error){
-        console.error("Error submitting annotations", error);
-    }
-    
-
-};
-export const clearAllAnnotations = () => {
-    modifiedAnnotations.clear();
-}
-export const selectedAnnotations = ref<string[]>([]); 
-export const confirmSelectedAnnotations = async () => {
-    try{
-        /*const response = await axios.post('http://localhost:3000/api/submit-annotations',{
-            annotations: modifiedAnnotations.values()
-        });*/
-        selectedAnnotations.value.forEach((annotationId)=>{
-            modifiedAnnotations.delete(annotationId);
-        });
-    }
-    catch(error){
-        console.error("Error submitting annotations", error);
     }
 }

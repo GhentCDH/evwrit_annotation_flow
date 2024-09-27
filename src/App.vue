@@ -1,47 +1,116 @@
 <script setup lang="ts">
-import {ref, onMounted, computed, watch} from 'vue'
-import {UpdateAnnotationState} from "@ghentcdh/vue-component-annotated-text"
-import {AnnotatedText, type Annotation} from '@ghentcdh/vue-component-annotated-text'
-//import Annotation from 'styles/Annotation.css';
-import {type Line} from '@ghentcdh/vue-component-annotated-text'
-import { 
-  fetchAnnotations,
-  normalizedAnnotationsMap,
-  dataAnnotationsMap,
-  processedAnnotaionsMap,
-  textLines,
-  snapper,
-  getAnnotatedLines,
-  modifiedAnnotations,
-  confirmAnnotations,
-  clearAllAnnotations,
-  confirmSelectedAnnotations,
-  selectedAnnotations,
-} from './annotation_utils';
+import {ref, onMounted, computed, watch, reactive} from 'vue'
+import {AnnotatedText, type Annotation, UpdateAnnotationState} from '@ghentcdh/vue-component-annotated-text'
+import {AnnotationRepository} from './stores/annotationRepository';
+import { textToLines } from './text_utilities';
+import { getAnnotatedLines,normalizeAnnotaion} from './annotation_utils';
+import {WordSnapper} from './lib/snapper/WordSnapper';
+import {AnnotationTextRule, TokenizeRule } from './annotation_utilities';
+
+//const data = ref<any>(null); // Variabele voor het object zelf
+const loading = ref(true); 
+const error = ref<string | null>(null);   
+const text = ref<string>('');  
+let snapper : WordSnapper;
+
+const processedAnnotaionsMap = ref<Map<string, Annotation>>(new Map()); 
+const originalAnnotations = ref<Map<string, any>>(new Map());
+let modifiedAnnotationsMap = reactive(new Map<string, Annotation>());
+
+
 const filterTypes = ['language', 'typography', 'orthography', 'lexis', 'morpho_syntactical', 'handshift', 'ltsa', 'gtsa', 'gts', 'lts'];
 let selectedFilters = ref<string[]>([]);
+let selectedRules = ref<string[]>([]);
 const textId = ref<number | null>(72423); 
-const filteredDataAnnotaitons = computed(() => filterAnnotations(normalizedAnnotationsMap.value, selectedFilters.value));
+const filteredDataAnnotaitons = computed(() => filterAnnotations(originalAnnotations.value, selectedFilters.value));
 const filteredProcessedAnnotaions = computed(() =>filterAnnotations(processedAnnotaionsMap.value, selectedFilters.value));
+const textLines = computed(() => textToLines(text.value)); 
+const selectedAnnotationIds = ref<string[]>([]);
+
+const clearAllAnnotations = () => {
+    modifiedAnnotationsMap.clear();
+}
+const confirmAnnotations = async () => {
+    try{
+        /*const response = await axios.post('http://localhost:3000/api/submit-annotations',{
+            annotations: modifiedAnnotations.values()
+        });*/
+        if(true){
+            console.log("Annotations submitted", modifiedAnnotationsMap);
+            modifiedAnnotationsMap.clear();
+        }else{
+            console.error("Error submitting annotations");
+        }
+    }
+    catch(error){
+        console.error("Error submitting annotations", error);
+    }
+};
+
+const handleFetchedData = async (id: string) => {
+    try {
+      const annotationRepository = new AnnotationRepository();//
+      let result = await annotationRepository.fetchAnnotation(id);//
+
+      const annotationTextRule = new TokenizeRule(text.value, 3);
+      result.annotations.forEach((annotation: any) => {
+        const normalizedAnnotation = normalizeAnnotaion(annotation, text.value);
+        originalAnnotations.value.set(annotation.id, normalizedAnnotation);
+      });
+      applyRules(originalAnnotations.value, annotationTextRule);
+      text.value = result.text;
+      //data.value = result
+
+      snapper = new WordSnapper(text.value);
+    } catch (err) {
+      error.value = String(err); 
+    } finally {
+      loading.value = false;  
+    }
+};
 
 
+const applyRules = (nomalizedAnnotations: Map<string,any>, annotationTextRule: any) => {
+  
+  nomalizedAnnotations.forEach((nolmalizedAnnotation: any) => {
+    switch (nolmalizedAnnotation.type) {
+      case 'typography':
+        console.log('Skiping typography');
+        return;
+      default:
+        const ruleAppliedAnnotation = annotationTextRule.apply(nolmalizedAnnotation);
+        console.log('ruleAppliedAnnotation', ruleAppliedAnnotation);
+        const proceesedTypedAnnotation = ruleAppliedAnnotation.annotation;// formatAnnotation(ruleAppliedAnnotation.annotation, ruleAppliedAnnotation.rule_applied);
+        if(ruleAppliedAnnotation.rule_applied){
+          proceesedTypedAnnotation.class = 'annotation--rule-applied';
+        }
+        processedAnnotaionsMap.value.set(proceesedTypedAnnotation.id, { ...proceesedTypedAnnotation });
+        if(ruleAppliedAnnotation.rule_applied){
+              modifiedAnnotationsMap.set(proceesedTypedAnnotation.id, proceesedTypedAnnotation);
+        }
+        break;
+    }
+    
+  });
+};
 
 const filterAnnotations = (annotationsMap: Map<any, any>, selectedFilters: string[]) => {
     if (!annotationsMap.size) return [];
     if (selectedFilters.length === 0) return Array.from(annotationsMap.values());
-    console.log('id', annotationsMap.values().next().value);
+    //console.log('id', annotationsMap.values().next().value);
+    
     return Array.from(annotationsMap.values()).filter((annotation: any) =>
-      selectedFilters.includes(dataAnnotationsMap.value.get(annotation.id)?.type || '')
+      selectedFilters.includes(originalAnnotations.value.get(annotation.id)?.type || '')
     );
 };
 
 onMounted(() => {
   if (textId.value !== null)
-    fetchAnnotations(textId.value.toString());
+  handleFetchedData(textId.value.toString());
 });
 watch(textId, (newId) => {
   if (newId !== null) 
-    fetchAnnotations(newId.toString());
+  handleFetchedData(newId.toString());
 });
 
 const onAnnotationUpdateBegin = function (updateState : UpdateAnnotationState) {
@@ -50,7 +119,7 @@ const onAnnotationUpdateBegin = function (updateState : UpdateAnnotationState) {
   updateState.newStart = result.start;
   updateState.newEnd = result.end;
   if(result.modified){
-    modifiedAnnotations.set(updateState.annotation.id, updateState.annotation);
+    modifiedAnnotationsMap.set(updateState.annotation.id, updateState.annotation);
   }
   updateState.confirmStartUpdating();
 };
@@ -61,7 +130,7 @@ const onAnnotationUpdating = function (updateState: UpdateAnnotationState) {
   updateState.newStart = result.start;
   updateState.newEnd = result.end;
   if(result.modified){
-    modifiedAnnotations.set(updateState.annotation.id, updateState.annotation);
+    modifiedAnnotationsMap.set(updateState.annotation.id, updateState.annotation);
   }
   updateState.confirmUpdate();
 };
@@ -69,6 +138,35 @@ const onAnnotationUpdating = function (updateState: UpdateAnnotationState) {
 const onAnnotationUpdateEnd = function (updateState : UpdateAnnotationState) {
   console.log("** Edited: ", updateState.annotation);
   processedAnnotaionsMap.value.set(updateState.annotation.id, updateState.annotation);
+
+};
+
+    // Maak een nieuwe Map voor de gemodificeerde annotaties
+const confirmSelectedAnnotations = async () => {
+    try {
+        // Stuur de annotaties naar de server (indien nodig)
+        const annotationsToSubmit = selectedAnnotationIds.value.map(id => modifiedAnnotationsMap.get(id));
+        
+        /* const response = await axios.post('http://localhost:3000/api/submit-annotations', {
+            annotations: annotationsToSubmit
+        }); */
+
+        // Verwijder de geselecteerde annotaties uit modifiedAnnotations
+        selectedAnnotationIds.value.forEach((annotationId) => {
+            modifiedAnnotationsMap.delete(annotationId);
+        });
+
+        // Reset de geselecteerde annotaties
+        selectedAnnotationIds.value = [];
+    } catch (error) {
+        console.error('Error submitting annotations', error);
+    }
+};
+const getCombinedAnnotations = (annotationId: any) => {
+  const originalAnnotation = originalAnnotations.value.get(annotationId);
+  const modifiedAnnotation = modifiedAnnotationsMap.get(annotationId);
+  return [originalAnnotation,modifiedAnnotation];
+
 
 };
 </script>
@@ -116,17 +214,17 @@ const onAnnotationUpdateEnd = function (updateState : UpdateAnnotationState) {
     <div class="text-column">
   <h3>Aangepaste Annotaties</h3>
   <button @click="confirmAnnotations">Bevestig Alles</button>
-  <button @click="clearAllAnnotations">Verwijder Alles</button>
+  <button @click="clearAllAnnotations">Annuleer Alle wijzigingen</button>
   <button @click="confirmSelectedAnnotations">Bevestig Aangevinkte</button>
-  <div class="annotated-line" v-for="(annotation, index) in Array.from(modifiedAnnotations.values())" 
+  <div class="annotated-line" v-for="(annotation, index) in Array.from(modifiedAnnotationsMap.values())" 
   :key="annotation.id">
   <label>
-        <input type="checkbox" v-model="selectedAnnotations[index]" />
+        <input type="checkbox" :value="annotation.id" v-model="selectedAnnotationIds" />
 
       </label>
     <AnnotatedText 
       :component-id="index"
-      :annotations="[annotation]"
+      :annotations="getCombinedAnnotations(annotation.id)"
       :lines="getAnnotatedLines(textLines, annotation.start, annotation.end).lines" 
       :allow-edit="true"
       :listen-to-on-update-start="true"

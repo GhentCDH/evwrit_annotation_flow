@@ -1,10 +1,11 @@
-export type dataAnnotation = {
+export type DataAnnotation = {
     id: string;
     start: number;
     end: number;
     class?: string;
     label?: string;
     target: AnnotationTarget;
+    type?: string;
     weight?: number;
     text?: string;
     metadata?: AnnotationMetaData;
