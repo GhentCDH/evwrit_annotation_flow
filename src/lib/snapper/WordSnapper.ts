@@ -6,7 +6,7 @@ export class WordSnapper implements Snapper {
     private mapStopCharIndexToToken: { [index: number]: number } = {};
 
     constructor(private text: string) {
-        console.log(text);
+        //console.log(text);
         tokenize(text).forEach((token: any) => {
             const start = token.pos;
             const end = token.pos + token.value.length - 1;

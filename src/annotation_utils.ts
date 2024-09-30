@@ -1,5 +1,5 @@
 import { ref, computed, reactive } from 'vue'; // Vue functies
-import {type AnnotationTarget } from './types/Annotation'; // Importeer je types
+import {type AnnotationTarget, type RuleAnnotation } from './types/Annotation'; // Importeer je types
 import { textToLines } from './text_utilities';
 import {AnnotationRepository} from './stores/annotationRepository';
 import {AnnotationTextRule, TokenizeRule } from './annotation_utilities';
@@ -49,7 +49,7 @@ let modifiedAnnotations = reactive(new Map<string, Annotation>()); // Maak een n
 }
  */
 
-export const normalizeAnnotaion = (annotation: any, text:string)  => {
+export const normalizeAnnotaion = (annotation: any, text:string) : RuleAnnotation => {
     const textLength = annotation.text_selection.selection_end - annotation.text_selection.selection_start;
     const annotationTarget = (textLength > 130 ? 'gutter' : 'text') as AnnotationTarget;
     const startIndex = annotation.text_selection.selection_start - 1;  // 0-gebaseerde index
@@ -76,8 +76,24 @@ export const normalizeAnnotaion = (annotation: any, text:string)  => {
 export const getAnnotatedLines = (lines: Line[], start: number, end: number) => {
     let annotatedLines  = [] as Line[];
     let offset: number = 0;
-
+    console.log("getAnnotatedLines (in)", lines, start, end);
     lines.forEach((line)=>{
+      if((start >= line.start && start < line.end) ||
+      (end > line.start && end <= line.end) ||
+      (start < line.start && end > line.end)){
+          annotatedLines.push(line);
+          if(start >= line.start && start < line.end){
+              offset = start - line.start;
+          }
+      }
+    });
+    console.log("getAnnotatedLines (out)", annotatedLines, offset);
+    return {
+        lines: annotatedLines,
+        offset: offset,
+    }
+}
+/*    lines.forEach((line)=>{
         if((start >= line.start && start < line.end) ||
         (end > line.start && end <= line.end) ||
         (start < line.start && end > line.end)){
@@ -86,9 +102,4 @@ export const getAnnotatedLines = (lines: Line[], start: number, end: number) => 
                 offset = start - line.start;
             }
         }
-    });
-    return {
-        lines: annotatedLines,
-        offset: offset,
-    }
-}
+    });*/ 

@@ -25,6 +25,7 @@ export function normalizeAnnotations(annotations: [], normAnnotations: RuleAnnot
     const textLength = text_selection['selection_end'] - text_selection['selection_start']
     const annotationTarget = (textLength > 130 ? 'gutter' : "span") as AnnotationTarget
     const normalized = {
+      id: text_selection['id'],
       start: text_selection['selection_start'],
       end: text_selection['selection_end'],
       class: 'annotation annotation--color-' + (1 + (index % 9)),
@@ -121,10 +122,12 @@ export class AnnotationRuleSet implements AnnotationRule {
   }
 
   apply(annotation: RuleAnnotation): AnnotationRuleResult {
+    console.log('applying rule set');
     let applied_rule = false;
     if (this.alwaysApplyFirstRule) {
       const firstRuleResult = this.rules[0].apply(annotation);
       if (firstRuleResult.rule_applied) {
+        console.log('rule applied', this.rules[0].name);
         annotation = firstRuleResult.annotation;
         applied_rule = firstRuleResult.rule_applied;
         console.log('rule applied', this.rules[0].name);

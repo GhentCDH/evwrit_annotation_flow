@@ -1,4 +1,4 @@
-export type DataAnnotation = {
+export type RuleAnnotation = {
     id: string;
     start: number;
     end: number;
