@@ -122,28 +122,32 @@ export class AnnotationRuleSet implements AnnotationRule {
   }
 
   apply(annotation: RuleAnnotation): AnnotationRuleResult {
-    console.log('applying rule set');
     let applied_rule = false;
     if (this.alwaysApplyFirstRule) {
       const firstRuleResult = this.rules[0].apply(annotation);
       if (firstRuleResult.rule_applied) {
-        console.log('rule applied', this.rules[0].name);
+        //console.log('rule applied', this.rules[0].name);
         annotation = firstRuleResult.annotation;
         applied_rule = firstRuleResult.rule_applied;
-        console.log('rule applied', this.rules[0].name);
+        //console.log('rule applied', this.rules[0].name);
         if (this.stopWhenRuleApplied) {
           return { annotation: annotation, rule_applied: applied_rule };
         }
       }
     }
-    if (!this.stopWhenRuleApplied) {
-      const secondRuleResult = this.rules[1].apply(annotation);
-      if (secondRuleResult.rule_applied) {
-        console.log('rule applied', this.rules[1].name);
-        annotation = secondRuleResult.annotation;
-        applied_rule = secondRuleResult.rule_applied;
+    for (let i = this.alwaysApplyFirstRule ? 1 : 0; i < this.rules.length; i++) {
+      const ruleResult = this.rules[i].apply(annotation);
+      if (ruleResult.rule_applied) {
+        //console.log('rule applied', this.rules[i].name);
+        annotation = ruleResult.annotation;
+        applied_rule = ruleResult.rule_applied;
+
+        // Stop als stopWhenRuleApplied true is
+        if (this.stopWhenRuleApplied) {
+          return { annotation: annotation, rule_applied: applied_rule };
+        }
       }
-    }          
+    }
     return { annotation: annotation, rule_applied: applied_rule };
   }
 }

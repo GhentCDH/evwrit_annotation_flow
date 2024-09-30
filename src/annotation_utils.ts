@@ -6,11 +6,6 @@ import {AnnotationTextRule, TokenizeRule } from './annotation_utilities';
 import {WordSnapper} from './lib/snapper/WordSnapper';
 import {type Annotation } from '@ghentcdh/vue-component-annotated-text';
 import {type Line} from '@ghentcdh/vue-component-annotated-text'; // Importeer je types
-import axios from 'axios' // Axios voor de API calls
-const data = ref<any>(null); // Variabele voor het object zelf
-const loading = ref(true); 
-const error = ref<string | null>(null);   
-const text = ref<string>('');  
 export let snapper : WordSnapper;
 export const processedAnnotaionsMap = ref<Map<string, Annotation>>(new Map()); 
 export const dataAnnotationsMap = ref<Map<string, any>>(new Map()); // Nieuwe variabele voor de Map van annotaties
@@ -76,7 +71,6 @@ export const normalizeAnnotaion = (annotation: any, text:string) : RuleAnnotatio
 export const getAnnotatedLines = (lines: Line[], start: number, end: number) => {
     let annotatedLines  = [] as Line[];
     let offset: number = 0;
-    console.log("getAnnotatedLines (in)", lines, start, end);
     lines.forEach((line)=>{
       if((start >= line.start && start < line.end) ||
       (end > line.start && end <= line.end) ||
@@ -87,19 +81,8 @@ export const getAnnotatedLines = (lines: Line[], start: number, end: number) => 
           }
       }
     });
-    console.log("getAnnotatedLines (out)", annotatedLines, offset);
     return {
         lines: annotatedLines,
         offset: offset,
     }
 }
-/*    lines.forEach((line)=>{
-        if((start >= line.start && start < line.end) ||
-        (end > line.start && end <= line.end) ||
-        (start < line.start && end > line.end)){
-            annotatedLines.push(line);
-            if(start >= line.start && start < line.end){
-                offset = start - line.start;
-            }
-        }
-    });*/ 
