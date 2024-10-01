@@ -20,7 +20,7 @@
     <div class="texts-container">
       <div class="text-column">
         <h3>Originele Tekst</h3>
-        <AnnotatedText :annotations="filteredDataAnnotaitons" :lines="textLines"/>
+        <AnnotatedText :annotations="filteredDataAnnotations" :lines="textLines"/>
       </div>
       <div class="text-column">
         <h3>Verwerkte Tekst</h3>
@@ -72,22 +72,22 @@ import {WordSnapper} from './lib/snapper/WordSnapper';
 import {AnnotationTextRule, TokenizeRule, SanitizeAnnotationRule, AnnotationRuleSet, type AnnotationRuleResult } from './annotation_utilities';
 import type { RuleAnnotation } from './types/Annotation';
 import AnnotationViewer from './components/AnnotationViewer.vue';
-
+// 
 let snapper : WordSnapper;
 const loading = ref(true); 
 const error = ref<string | null>(null);   
 const text = ref<string>('');  
-let selectedFilters = ref<string[]>([]);
+const selectedFilters = ref<string[]>([]);
 const textId = ref<number | null>(72424); 
 const selectedAnnotationIds = ref<string[]>([]);
 const showModified = ref<boolean>(false);
 const allSelected = ref<boolean>(false);
-let processedAnnotaionsMap = ref<Map<string, RuleAnnotation>>(new Map()); 
+const processedAnnotationsMap = ref<Map<string, RuleAnnotation>>(new Map()); 
 let originalAnnotations = ref<Map<string, RuleAnnotation>>(new Map());
 let modifiedAnnotationsMap = ref<Map<string, RuleAnnotation>>(new Map());;
 
-const filteredDataAnnotaitons = computed(() => filterAnnotations(originalAnnotations.value, selectedFilters.value));
-const filteredProcessedAnnotaions = computed(() =>filterAnnotations(processedAnnotaionsMap.value, selectedFilters.value));
+const filteredDataAnnotations = computed(() => filterAnnotations(originalAnnotations.value, selectedFilters.value));
+const filteredProcessedAnnotaions = computed(() =>filterAnnotations(processedAnnotationsMap.value, selectedFilters.value));
 const filteredModifiedAnnotations = computed(() => filterAnnotations(modifiedAnnotationsMap.value, selectedFilters.value));
 const textLines = computed(() => textToLines(text.value)); 
 const filterTypes = ['language', 'typography', 'orthography', 'lexis', 'morpho_syntactical', 'handshift', 'ltsa', 'gtsa', 'gts', 'lts'];
@@ -151,13 +151,13 @@ const applyRules = (nomalizedAnnotations: Map<string,RuleAnnotation>) => {
       processedAnnotaion.class = 'annotation--rule-applied';
       modifiedAnnotationsMap.value.set(nolmalizedAnnotation.id, processedAnnotaion);
     }
-    processedAnnotaionsMap.value.set(nolmalizedAnnotation.id, processedAnnotaion);
+    processedAnnotationsMap.value.set(nolmalizedAnnotation.id, processedAnnotaion);
   });
 };
 
 const resetMaps = () => {
     modifiedAnnotationsMap.value.clear();
-    processedAnnotaionsMap.value.clear();
+    processedAnnotationsMap.value.clear();
     originalAnnotations.value.clear();
 };
 onMounted(() => {
@@ -207,11 +207,11 @@ const confirmSelectedAnnotations = async () => {
         console.error('Error submitting annotations', error);
     }
 };
-const confirmAnnotation = (annotation: any) => {
+const confirmAnnotation = (annotation: RuleAnnotation) => {
   console.log(`Annotatie met id ${annotation.id} is bevestigd.`);
   modifiedAnnotationsMap.value.delete(annotation.id);
 };
-const cancelAnnotation = (annotation: any) => {
+const cancelAnnotation = (annotation: RuleAnnotation) => {
   console.log(`Annotatie met id ${annotation.id} is geannuleerd.`);
   modifiedAnnotationsMap.value.delete(annotation.id);
 };
@@ -258,6 +258,6 @@ const onAnnotationUpdating = function (updateState: UpdateAnnotationState) {
 };
 const onAnnotationUpdateEnd = function (updateState : UpdateAnnotationState) {
   console.log("** Edited: ", updateState.annotation);
-  processedAnnotaionsMap.value.set(updateState.annotation.id, updateState.annotation);
+  processedAnnotationsMap.value.set(updateState.annotation.id, updateState.annotation);
 };
 </script>
