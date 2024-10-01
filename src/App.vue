@@ -1,13 +1,78 @@
+
+<template>
+  <div>
+    <label for="textId">Text ID </label>
+    <input type="number" v-model="textId" id="textId" placeholder="Tekst-ID" />
+  </div>
+  <div>
+    <header>
+      <div class="checkbox-container">
+        <div v-for="type in filterTypes" :key="type">
+          <input type="checkbox" :id="type" :value="type" v-model="selectedFilters"/>
+          <label :for="type"> {{ type }} </label>
+        </div>
+      </div>
+    </header>
+    <button class="primary-button" @click="showRuleModifiedAnnotations">
+      {{ showModified ? 'Toon Alle Annotaties' : 'Toon Gewijzigde Annotaties' }}
+    </button>
+
+    <div class="texts-container">
+      <div class="text-column">
+        <h3>Originele Tekst</h3>
+        <AnnotatedText :annotations="filteredDataAnnotaitons" :lines="textLines"/>
+      </div>
+      <div class="text-column">
+        <h3>Verwerkte Tekst</h3>
+        <AnnotatedText 
+          :annotations="filteredProcessedAnnotaions" 
+          :lines="textLines"
+          :allow-edit="true"
+          :listen-to-on-update-start="true"
+          :listen-to-on-updating="true"
+          @annotation-update-begin="onAnnotationUpdateBegin"
+          @annotation-updating="onAnnotationUpdating"
+          @annotation-update-end="onAnnotationUpdateEnd"/>
+      </div>
+      <div class="text-column">
+        <h3 class="section-title">Aangepaste Annotaties</h3>
+        <div class="action-buttons">
+          <button class="primary-button" @click="confirmAllAnnotations">Bevestig Alles</button>
+          <button class="primary-button" @click="confirmSelectedAnnotations">Bevestig Aangevinkte</button>
+          <button class="secondary-button" @click="clearAllAnnotations">Annuleer Alle wijzigingen</button>
+          <button class="primary-button" @click="toggleSelectAll">
+            {{ allSelected ? 'Deselecteer Alle' : 'Selecteer Alle' }} Annotaties
+          </button>
+        </div>
+
+        <div class="annotated-line" v-for="(annotation) in filteredModifiedAnnotations" :key="annotation.id">
+          <div class="annotation-header">
+            <label>
+              <input type="checkbox" :value="annotation.id" v-model="selectedAnnotationIds" />
+            </label>
+            <div class="annotation-actions">
+              <input type="button" value="✔️"  @click="confirmAnnotation(annotation)" />
+              <input type="button" value="✖️" @click="cancelAnnotation(annotation)" />
+            </div>
+          </div>
+            <AnnotationViewer :annotation="annotation" :originalAnnotation="originalAnnotations.get(annotation.id)" :textLines="textLines"/>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
-import {ref, onMounted, computed, watch, reactive} from 'vue'
+import {ref, onMounted, computed, watch} from 'vue'
 import {AnnotatedText, type Annotation, UpdateAnnotationState} from '@ghentcdh/vue-component-annotated-text'
 import {AnnotationRepository} from './stores/annotationRepository';
-import { textToLines } from './text_utilities';
-import { getAnnotatedLines,normalizeAnnotaion} from './annotation_utils';
+import {textToLines} from './text_utilities';
+import {normalizeAnnotaion} from './annotation_utils';
 import {WordSnapper} from './lib/snapper/WordSnapper';
 import {AnnotationTextRule, TokenizeRule, SanitizeAnnotationRule, AnnotationRuleSet, type AnnotationRuleResult } from './annotation_utilities';
 import type { RuleAnnotation } from './types/Annotation';
 import AnnotationViewer from './components/AnnotationViewer.vue';
+
 let snapper : WordSnapper;
 const loading = ref(true); 
 const error = ref<string | null>(null);   
@@ -39,7 +104,6 @@ const handleFetchedData = async (id: string) => {
         originalAnnotations.value.set(annotation.id, normalizedAnnotation);
       });
       applyRules(originalAnnotations.value);
-      
       snapper = new WordSnapper(text.value);
     } catch (err) {
       error.value = String(err); 
@@ -128,33 +192,6 @@ const filterAnnotations = (annotationsMap: Map<any, any>, selectedFilters: strin
     }
 };
 
-const onAnnotationUpdateBegin = function (updateState : UpdateAnnotationState) {
-  //console.log('Annotation updating begin:', updateState.annotation);
-  const result = snapper.fixOffset(updateState.newStart, updateState.newEnd);
-  updateState.newStart = result.start;
-  updateState.newEnd = result.end;
-  if(result.modified){
-    modifiedAnnotationsMap.value.set(updateState.annotation.id, updateState.annotation);
-  }
-  updateState.confirmStartUpdating();
-};
-
-const onAnnotationUpdating = function (updateState: UpdateAnnotationState) {
-  //console.log('Annotation updating:', updateState.annotation);
-  const result = snapper.fixOffset(updateState.newStart, updateState.newEnd);
-  updateState.newStart = result.start;
-  updateState.newEnd = result.end;
-  if(result.modified){
-    modifiedAnnotationsMap.value.set(updateState.annotation.id, updateState.annotation);
-  }
-  updateState.confirmUpdate();
-};
-
-const onAnnotationUpdateEnd = function (updateState : UpdateAnnotationState) {
-  console.log("** Edited: ", updateState.annotation);
-  processedAnnotaionsMap.value.set(updateState.annotation.id, updateState.annotation);
-
-};
 const clearAllAnnotations = () => {
     modifiedAnnotationsMap.value.clear();
 }
@@ -177,7 +214,6 @@ const confirmAnnotation = (annotation: any) => {
   console.log(`Annotatie met id ${annotation.id} is bevestigd.`);
   modifiedAnnotationsMap.value.delete(annotation.id);
 };
-
 const cancelAnnotation = (annotation: any) => {
   console.log(`Annotatie met id ${annotation.id} is geannuleerd.`);
   modifiedAnnotationsMap.value.delete(annotation.id);
@@ -202,67 +238,29 @@ const confirmAllAnnotations = async () => {
         console.error("Error submitting annotations", error);
     }
 };
+
+const onAnnotationUpdateBegin = function (updateState : UpdateAnnotationState) {
+  //console.log('Annotation updating begin:', updateState.annotation);
+  const result = snapper.fixOffset(updateState.newStart, updateState.newEnd);
+  updateState.newStart = result.start;
+  updateState.newEnd = result.end;
+  if(result.modified){
+    modifiedAnnotationsMap.value.set(updateState.annotation.id, updateState.annotation);
+  }
+  updateState.confirmStartUpdating();
+};
+const onAnnotationUpdating = function (updateState: UpdateAnnotationState) {
+  //console.log('Annotation updating:', updateState.annotation);
+  const result = snapper.fixOffset(updateState.newStart, updateState.newEnd);
+  updateState.newStart = result.start;
+  updateState.newEnd = result.end;
+  if(result.modified){
+    modifiedAnnotationsMap.value.set(updateState.annotation.id, updateState.annotation);
+  }
+  updateState.confirmUpdate();
+};
+const onAnnotationUpdateEnd = function (updateState : UpdateAnnotationState) {
+  console.log("** Edited: ", updateState.annotation);
+  processedAnnotaionsMap.value.set(updateState.annotation.id, updateState.annotation);
+};
 </script>
-
-<template>
-  <div>
-    <label for="textId">Text ID </label>
-    <input type="number" v-model="textId" id="textId" placeholder="Tekst-ID" />
-  </div>
-  <div>
-    <header>
-      <div class="checkbox-container">
-        <div v-for="type in filterTypes" :key="type">
-          <input type="checkbox" :id="type" :value="type" v-model="selectedFilters"/>
-          <label :for="type"> {{ type }} </label>
-        </div>
-      </div>
-    </header>
-    <button class="primary-button" @click="showRuleModifiedAnnotations">
-      {{ showModified ? 'Toon Alle Annotaties' : 'Toon Gewijzigde Annotaties' }}
-    </button>
-
-    <div class="texts-container">
-      <div class="text-column">
-        <h3>Originele Tekst</h3>
-        <AnnotatedText :annotations="filteredDataAnnotaitons" :lines="textLines"/>
-      </div>
-      <div class="text-column">
-        <h3>Verwerkte Tekst</h3>
-        <AnnotatedText 
-          :annotations="filteredProcessedAnnotaions" 
-          :lines="textLines"
-          :allow-edit="true"
-          :listen-to-on-update-start="true"
-          :listen-to-on-updating="true"
-          @annotation-update-begin="onAnnotationUpdateBegin"
-          @annotation-updating="onAnnotationUpdating"
-          @annotation-update-end="onAnnotationUpdateEnd"/>
-      </div>
-      <div class="text-column">
-        <h3 class="section-title">Aangepaste Annotaties</h3>
-        <div class="action-buttons">
-          <button class="primary-button" @click="confirmAllAnnotations">Bevestig Alles</button>
-          <button class="primary-button" @click="confirmSelectedAnnotations">Bevestig Aangevinkte</button>
-          <button class="secondary-button" @click="clearAllAnnotations">Annuleer Alle wijzigingen</button>
-          <button class="primary-button" @click="toggleSelectAll">
-            {{ allSelected ? 'Deselecteer Alle' : 'Selecteer Alle' }} Annotaties
-          </button>
-        </div>
-
-        <div class="annotated-line" v-for="(annotation) in filteredModifiedAnnotations" :key="annotation.id">
-          <div class="annotation-header">
-            <label>
-              <input type="checkbox" :value="annotation.id" v-model="selectedAnnotationIds" />
-            </label>
-            <div class="annotation-actions">
-              <input type="button" value="✔️"  @click="confirmAnnotation(annotation)" />
-              <input type="button" value="✖️" @click="cancelAnnotation(annotation)" />
-            </div>
-          </div>
-            <AnnotationViewer :annotation="annotation" :originalAnnotation="originalAnnotations.get(annotation.id)" :textLines="textLines"/>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>

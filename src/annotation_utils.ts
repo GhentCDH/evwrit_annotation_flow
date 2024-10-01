@@ -1,18 +1,5 @@
-import { ref, computed, reactive } from 'vue'; // Vue functies
 import {type AnnotationTarget, type RuleAnnotation } from './types/Annotation'; // Importeer je types
-import { textToLines } from './text_utilities';
-import {AnnotationRepository} from './stores/annotationRepository';
-import {AnnotationTextRule, TokenizeRule } from './annotation_utilities';
-import {WordSnapper} from './lib/snapper/WordSnapper';
-import {type Annotation } from '@ghentcdh/vue-component-annotated-text';
 import {type Line} from '@ghentcdh/vue-component-annotated-text'; // Importeer je types
-export let snapper : WordSnapper;
-export const processedAnnotaionsMap = ref<Map<string, Annotation>>(new Map()); 
-export const dataAnnotationsMap = ref<Map<string, any>>(new Map()); // Nieuwe variabele voor de Map van annotaties
-export const normalizedAnnotationsMap = ref<Map<string, any>>(new Map());  
-export const typedAnnotationsMap = ref<Map<string, any>>(new Map());  
-let modifiedAnnotations = reactive(new Map<string, Annotation>()); // Maak een nieuwe Map voor de gemodificeerde annotaties
-
 
 /**
  * 
