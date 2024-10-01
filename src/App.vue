@@ -82,9 +82,9 @@ const textId = ref<number | null>(72424);
 const selectedAnnotationIds = ref<string[]>([]);
 const showModified = ref<boolean>(false);
 const allSelected = ref<boolean>(false);
-let processedAnnotaionsMap = ref<Map<string, Annotation>>(new Map()); 
-let originalAnnotations = ref<Map<string, any>>(new Map());
-let modifiedAnnotationsMap = ref<Map<string, any>>(new Map());;
+let processedAnnotaionsMap = ref<Map<string, RuleAnnotation>>(new Map()); 
+let originalAnnotations = ref<Map<string, RuleAnnotation>>(new Map());
+let modifiedAnnotationsMap = ref<Map<string, RuleAnnotation>>(new Map());;
 
 const filteredDataAnnotaitons = computed(() => filterAnnotations(originalAnnotations.value, selectedFilters.value));
 const filteredProcessedAnnotaions = computed(() =>filterAnnotations(processedAnnotaionsMap.value, selectedFilters.value));
@@ -92,13 +92,11 @@ const filteredModifiedAnnotations = computed(() => filterAnnotations(modifiedAnn
 const textLines = computed(() => textToLines(text.value)); 
 const filterTypes = ['language', 'typography', 'orthography', 'lexis', 'morpho_syntactical', 'handshift', 'ltsa', 'gtsa', 'gts', 'lts'];
 
-
 const handleFetchedData = async (id: string) => {
     try {
       const annotationRepository = new AnnotationRepository();//
       let result = await annotationRepository.fetchAnnotation(id);//
       text.value = result.text;
-      const annotationTextRule = new TokenizeRule(text.value, 3);
       result.annotations.forEach((annotation: any) => {
         const normalizedAnnotation = normalizeAnnotaion(annotation, text.value);
         originalAnnotations.value.set(annotation.id, normalizedAnnotation);
@@ -111,7 +109,7 @@ const handleFetchedData = async (id: string) => {
       loading.value = false;  
     }
 };
-const applyRules = (nomalizedAnnotations: Map<string,any>) => {
+const applyRules = (nomalizedAnnotations: Map<string,RuleAnnotation>) => {
   const tokenizeRule = new TokenizeRule(text.value, 3);
   const textRule = new AnnotationTextRule(text.value, 3);
   const sanitizeRule = new SanitizeAnnotationRule(text.value);
@@ -123,12 +121,11 @@ const applyRules = (nomalizedAnnotations: Map<string,any>) => {
   const morphoSyntacticalRuleSet = new AnnotationRuleSet([sanitizeRule,tokenizeRule],true,true);
   const handshiftRuleSet = new AnnotationRuleSet([sanitizeRule,tokenizeRule],true,true);
 
-  nomalizedAnnotations.forEach((nolmalizedAnnotation: any) => {
+  nomalizedAnnotations.forEach((nolmalizedAnnotation: RuleAnnotation) => {
     let resultAnnotation : AnnotationRuleResult = { annotation: {} as RuleAnnotation, rule_applied: false};
     switch (nolmalizedAnnotation.type) {
       case 'typography':
         resultAnnotation = typographyRuleSet.apply(nolmalizedAnnotation);
-        //console.log('Typography:', resultAnnotation);
         break;
       case 'orthography':
         resultAnnotation = orthographyRuleSet.apply(nolmalizedAnnotation);
@@ -174,19 +171,19 @@ watch(textId, (newId) => {
   }
 });
 
-const filterAnnotations = (annotationsMap: Map<any, any>, selectedFilters: string[]) => {
+const filterAnnotations = (annotationsMap: Map<string, RuleAnnotation>, selectedFilters: string[]) => {
     if (showModified.value) {
         const modifiedAnnotations = Array.from(annotationsMap.values()).filter(annotation =>
             modifiedAnnotationsMap.value.has(annotation.id)  
         );
         if (selectedFilters.length === 0) return modifiedAnnotations;
-        return modifiedAnnotations.filter((annotation: any) =>
+        return modifiedAnnotations.filter((annotation: RuleAnnotation) =>
             selectedFilters.includes(originalAnnotations.value.get(annotation.id)?.type || '')
         );
     } else {  
         if (selectedFilters.length === 0) return Array.from(annotationsMap.values());
 
-        return Array.from(annotationsMap.values()).filter((annotation: any) =>
+        return Array.from(annotationsMap.values()).filter((annotation: RuleAnnotation) =>
             selectedFilters.includes(originalAnnotations.value.get(annotation.id)?.type || '')
         );
     }

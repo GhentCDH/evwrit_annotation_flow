@@ -1,35 +1,6 @@
 import {type AnnotationTarget, type RuleAnnotation } from './types/Annotation'; // Importeer je types
 import {type Line} from '@ghentcdh/vue-component-annotated-text'; // Importeer je types
 
-/**
- * 
- * export function normalizeAnnotations(annotations: [], normAnnotations: DataAnnotation[] ): DataAnnotation[] {
-  annotations.forEach((a, index) => {
-    const annotation_type = a['type']
-    const text_selection = a['text_selection']
-    const textLength = text_selection['selection_end'] - text_selection['selection_start']
-    const annotationTarget = (textLength > 130 ? 'gutter' : "span") as AnnotationTarget
-    const normalized = {
-      start: text_selection['selection_start'],
-      end: text_selection['selection_end'],
-      class: 'annotation annotation--color-' + (1 + (index % 9)),
-      target: annotationTarget,
-      label: annotation_type,
-      metadata: {
-        text: text_selection['text'],
-        ///text_edited: text_selection['text_edited'],
-        id: text_selection['id'],
-        index: index,
-        //annotation_type: annotation_type
-      }
-    } as DataAnnotation
-    //filter length for debug
-    normAnnotations.push(normalized)
-  })
-  normAnnotations.sort((a,b) => (Number(a?.start) > Number(b?.start) ? 1 : -1))
-  return normAnnotations
-}
- */
 
 export const normalizeAnnotaion = (annotation: any, text:string) : RuleAnnotation => {
     const textLength = annotation.text_selection.selection_end - annotation.text_selection.selection_start;
@@ -51,7 +22,7 @@ export const normalizeAnnotaion = (annotation: any, text:string) : RuleAnnotatio
         id: annotation.id,
         index: annotation.index
       }
-    };
+    } as RuleAnnotation;
 };
 
 
@@ -71,5 +42,5 @@ export const getAnnotatedLines = (lines: Line[], start: number, end: number) => 
     return {
         lines: annotatedLines,
         offset: offset,
-    }
+    } as {lines: Line[], offset: number};
 }
