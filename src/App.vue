@@ -190,7 +190,7 @@ const cancelAnnotation = (annotation: any) => {
   modifiedAnnotationsMap.value.delete(annotation.id);
 };
 const toggleSelectAll = () =>{
-      if (allSelected) {
+      if (allSelected.value) {
         selectedAnnotationIds.value = [];
       } else {
         selectedAnnotationIds.value = filteredModifiedAnnotations.value.map(annotation => annotation.id);
@@ -199,8 +199,11 @@ const toggleSelectAll = () =>{
 };
 const confirmAllAnnotations = async () => {
     try{
+      console.log('filteredModifiedAnnotations', filteredModifiedAnnotations.value);
       console.log('modifiedAnnotationsMap', modifiedAnnotationsMap.value);
-      modifiedAnnotationsMap.value.clear();
+      filteredModifiedAnnotations.value.forEach((annotation) => {
+        modifiedAnnotationsMap.value.delete(annotation.id);
+      });
     }
     catch(error){
         console.error("Error submitting annotations", error);
