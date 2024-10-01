@@ -165,7 +165,7 @@ const onAnnotationUpdateEnd = function (updateState : UpdateAnnotationState) {
 
 };
 const showRuleModifiedAnnotations = () => {
-    showModified.value = !showModified.value; // Toggle the state
+    showModified.value = !showModified.value;
 };
     // Maak een nieuwe Map voor de gemodificeerde annotaties
 const confirmSelectedAnnotations = async () => {
