@@ -7,54 +7,38 @@ import { getAnnotatedLines,normalizeAnnotaion} from './annotation_utils';
 import {WordSnapper} from './lib/snapper/WordSnapper';
 import {AnnotationTextRule, TokenizeRule, SanitizeAnnotationRule, AnnotationRuleSet, type AnnotationRuleResult } from './annotation_utilities';
 import type { RuleAnnotation } from './types/Annotation';
-import { nextTick } from 'vue';
 
-//const data = ref<any>(null); // Variabele voor het object zelf
+let snapper : WordSnapper;
 const loading = ref(true); 
 const error = ref<string | null>(null);   
 const text = ref<string>('');  
-let snapper : WordSnapper;
+let selectedFilters = ref<string[]>([]);
+const textId = ref<number | null>(72424); 
+const selectedAnnotationIds = ref<string[]>([]);
 const showModified = ref<boolean>(false);
+const allSelected = ref<boolean>(false);
 let processedAnnotaionsMap = ref<Map<string, Annotation>>(new Map()); 
 let originalAnnotations = ref<Map<string, any>>(new Map());
 let modifiedAnnotationsMap = ref<Map<string, any>>(new Map());;
 
-const filterTypes = ['language', 'typography', 'orthography', 'lexis', 'morpho_syntactical', 'handshift', 'ltsa', 'gtsa', 'gts', 'lts'];
-let selectedFilters = ref<string[]>([]);
-let selectedRules = ref<string[]>([]);
-const textId = ref<number | null>(72424); 
 const filteredDataAnnotaitons = computed(() => filterAnnotations(originalAnnotations.value, selectedFilters.value));
 const filteredProcessedAnnotaions = computed(() =>filterAnnotations(processedAnnotaionsMap.value, selectedFilters.value));
 const filteredModifiedAnnotations = computed(() => filterAnnotations(modifiedAnnotationsMap.value, selectedFilters.value));
 const textLines = computed(() => textToLines(text.value)); 
-const selectedAnnotationIds = ref<string[]>([]);
 const filteredVisibleModifiedAnnotations = computed(() => {
     return filteredModifiedAnnotations.value.filter(annotation =>
         selectedAnnotationIds.value.includes(annotation.id)
     );
 });
+const filterTypes = ['language', 'typography', 'orthography', 'lexis', 'morpho_syntactical', 'handshift', 'ltsa', 'gtsa', 'gts', 'lts'];
 
 const clearAllAnnotations = () => {
     modifiedAnnotationsMap.value.clear();
 }
 const resetMaps = () => {
-    // Leeg de annotatie maps
     modifiedAnnotationsMap.value.clear();
     processedAnnotaionsMap.value.clear();
     originalAnnotations.value.clear();
-};
-
-const confirmAnnotations = async () => {
-    try{
-      const annotationsToSubmit = filteredVisibleModifiedAnnotations.value.map(
-        annotation => modifiedAnnotationsMap.value.get(annotation.id)
-      );
-      selectedAnnotationIds.value = [];
-      console.log("Annotations submitted", annotationsToSubmit);
-    }
-    catch(error){
-        console.error("Error submitting annotations", error);
-    }
 };
 const handleFetchedData = async (id: string) => {
     try {
@@ -75,8 +59,6 @@ const handleFetchedData = async (id: string) => {
       loading.value = false;  
     }
 };
-
-
 const applyRules = (nomalizedAnnotations: Map<string,any>) => {
   const tokenizeRule = new TokenizeRule(text.value, 3);
   const textRule = new AnnotationTextRule(text.value, 3);
@@ -144,10 +126,6 @@ const filterAnnotations = (annotationsMap: Map<any, any>, selectedFilters: strin
     }
 };
 
-
-const showRuleModifiedAnnotations = () => {
-    showModified.value = !showModified.value; // Toggle the state
-};
 onMounted(() => {
   if (textId.value !== null)
     handleFetchedData(textId.value.toString());
@@ -186,23 +164,18 @@ const onAnnotationUpdateEnd = function (updateState : UpdateAnnotationState) {
   processedAnnotaionsMap.value.set(updateState.annotation.id, updateState.annotation);
 
 };
-
+const showRuleModifiedAnnotations = () => {
+    showModified.value = !showModified.value; // Toggle the state
+};
     // Maak een nieuwe Map voor de gemodificeerde annotaties
 const confirmSelectedAnnotations = async () => {
     try {
-        // Stuur de annotaties naar de server (indien nodig)
         const annotationsToSubmit = selectedAnnotationIds.value.map(id => modifiedAnnotationsMap.value.get(id));
-        
-        /* const response = await axios.post('http://localhost:3000/api/submit-annotations', {
-            annotations: annotationsToSubmit
-        }); */
-
         selectedAnnotationIds.value.forEach((annotationId) => {
             modifiedAnnotationsMap.value.delete(annotationId);
         });
-
-        // Reset de geselecteerde annotaties
         selectedAnnotationIds.value = [];
+        console.log('Annotations submitted', annotationsToSubmit);
     } catch (error) {
         console.error('Error submitting annotations', error);
     }
@@ -216,7 +189,23 @@ const cancelAnnotation = (annotation: any) => {
   console.log(`Annotatie met id ${annotation.id} is geannuleerd.`);
   modifiedAnnotationsMap.value.delete(annotation.id);
 };
-
+const toggleSelectAll = () =>{
+      if (allSelected) {
+        selectedAnnotationIds.value = [];
+      } else {
+        selectedAnnotationIds.value = filteredModifiedAnnotations.value.map(annotation => annotation.id);
+      }
+      allSelected.value = !allSelected.value;
+};
+const confirmAllAnnotations = async () => {
+    try{
+      console.log('modifiedAnnotationsMap', modifiedAnnotationsMap.value);
+      modifiedAnnotationsMap.value.clear();
+    }
+    catch(error){
+        console.error("Error submitting annotations", error);
+    }
+};
 </script>
 
 <template>
@@ -267,9 +256,12 @@ const cancelAnnotation = (annotation: any) => {
   <h3 class="section-title">Aangepaste Annotaties</h3>
 
   <div class="action-buttons">
-    <button class="primary-button" @click="confirmAnnotations">Bevestig Alles</button>
+    <button class="primary-button" @click="confirmAllAnnotations">Bevestig Alles</button>
     <button class="primary-button" @click="confirmSelectedAnnotations">Bevestig Aangevinkte</button>
     <button class="secondary-button" @click="clearAllAnnotations">Annuleer Alle wijzigingen</button>
+    <button class="primary-button" @click="toggleSelectAll">
+      {{ allSelected ? 'Deselecteer Alle' : 'Selecteer Alle' }} Annotaties
+    </button>
   </div>
 
   <div class="annotated-line" v-for="(annotation) in filteredModifiedAnnotations" :key="annotation.id">
