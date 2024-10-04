@@ -93,6 +93,24 @@ const handleChangedId = (event: Event) => {
   const target = event.target as HTMLInputElement;
   textId.value = target.value;
 };
+const resetMaps = () => {
+  modifiedAnnotationsMap.value.clear();
+  processedAnnotationsMap.value.clear();
+  originalAnnotations.value.clear();
+};
+onMounted(() => {
+  if (textId.value !== null)
+    handleFetchedData(textId.value);
+});
+watch(textId, (newId) => {
+  if (newId !== null) {
+    resetMaps();
+    handleFetchedData(newId);
+  }
+});
+watch(text, (newText) => {
+  snapper = new WordSnapper(newText);
+});
 
 const handleFetchedData = async (id: string) => {
   try {
@@ -156,25 +174,6 @@ const applyRules = (nomalizedAnnotations: Map<string,RuleAnnotation>) => {
     processedAnnotationsMap.value.set(nolmalizedAnnotation.id, processedAnnotaion);
   });
 };
-
-const resetMaps = () => {
-  modifiedAnnotationsMap.value.clear();
-  processedAnnotationsMap.value.clear();
-  originalAnnotations.value.clear();
-};
-onMounted(() => {
-  if (textId.value !== null)
-    handleFetchedData(textId.value);
-});
-watch(textId, (newId) => {
-  if (newId !== null) {
-    resetMaps();
-    handleFetchedData(newId);
-  }
-});
-watch(text, (newText) => {
-  snapper = new WordSnapper(newText);
-});
 
 const filterAnnotations = (annotationsMap: Map<string, RuleAnnotation>, selectedFilters: string[]) => {
   if (showModified.value) {

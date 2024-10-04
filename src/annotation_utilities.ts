@@ -11,14 +11,13 @@ export interface AnnotationRuleResult {
   rule_applied: boolean
 }
 
-
 /**
  * Receives a list of annotations from elasticsearch, transform them into 
  * Annotation's supported by the vue-component-annotated-text
  * @param annotations annotations as received from elasticsearch.
  * @returns  A list of annotations fit for visualization in the component.
  */
-export function normalizeAnnotations(annotations: [], normAnnotations: RuleAnnotation[] ): RuleAnnotation[] {
+export function normalizeAnnotations(annotations: any[], normAnnotations: RuleAnnotation[] ): RuleAnnotation[] {
   annotations.forEach((a, index) => {
     const annotation_type = a['type']
     const text_selection = a['text_selection']
