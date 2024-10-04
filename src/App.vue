@@ -1,7 +1,7 @@
 <template>
   <div>
     <label for="textId">Text ID </label>
-    <input type="number" @change="handleChangedId" id="textId" placeholder="Tekst-ID" />
+    <input type="number" @change="handleChangedId" :value="textId" id="textId" placeholder="Tekst-ID" />
   </div>
   <div>
     <header>

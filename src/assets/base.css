@@ -11,11 +11,17 @@ header {
 }
 .annotated-line {
   border: 2px solid #646061; /* Kleur van de rand (blauw) */
-  border-radius: 5px;        /* Ronde hoeken voor een zachtere uitstraling */
-  padding: 10px;       /* Ruimte binnen de rand */
+  border-radius: 5px; /* Ronde hoeken voor een zachtere uitstraling */
+  padding: 10px; /* Ruimte binnen de rand */
+  margin: 10px 0; /* Ruimte boven en onder de regel */
+  position: relative; /* Zorgt ervoor dat de pseudo-elementen relatief aan dit element worden geplaatst */
   
-  margin: 10px 0;            /* Ruimte boven en onder de regel */
-  position: relative;        /* Zorgt ervoor dat de pseudo-elementen relatief aan dit element worden geplaatst */
+  /* Nieuwe regels voor tekstoverloop en afbreking */
+  overflow-wrap: break-word; /* Zorgt ervoor dat lange woorden worden afgebroken */
+  word-wrap: break-word; /* Ondersteuning voor oudere browsers */
+  white-space: normal; /* Zorgt ervoor dat tekst normaal wordt gewrapt */
+  max-width: 100%; /* Zorgt ervoor dat de container niet breder is dan zijn ouder */
+  box-sizing: border-box; /* Zorgt ervoor dat padding en rand worden meegeteld in de breedte */
 }
 .annotated-line:hover {
   border-color: #556e89; /* Blauwe kleur bij hover */

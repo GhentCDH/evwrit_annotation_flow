@@ -55,3 +55,24 @@ The following packages are used for development:
 3. Run the development server:
    ```sh
    pnpm run dev
+
+## Known Issues
+1. Performance with Large Texts:
+   - The UI may become unresponsive when dealing with very large texts or numerous annotaions.
+2. Text Overflow in UI
+   - In specific cases, particularly when there are numerous lines of annotations (e.g., annotations of type `morpho_syntactical`), the text may overflow its container boundaries. This can lead to layout issues where the text is no longer properly confined within its designated space, as illustrated in the provided screenshot.
+
+   ![Screenshot of the annotation fixer](media/text_overflow.png)
+
+   but when we turn this type off, we get the right layout
+
+   ![Screenshot of the annotation fixer](media/text_overflow_better.png)
+3. **Selection of More or Fewer Lines**:
+   - In the screenshot where arrows are visible, users may need to select more or fewer lines for optimal viewing or interaction. It will allow for better control over the number of displayed lines.
+
+   ![Screenshot of the annotation fixer](media/arrows.png)
+4. **Incorrect Word Selection When Applying Rules**:
+   - When applying certain rules, instead of simply shifting the start and end indices, an additional word is sometimes selected. This causes the annotation to incorrectly expand beyond the intended text segment, as highlighted in the screenshot.
+   ![Screenshot of the annotation fixer](media/Rule_issue.png)
+5. **Right-to-Left Text Direction for Arabic**:
+   - Currently, the application doesn't properly handle the right-to-left reading order for Arabic texts. There should be an option allowing users to switch to right-to-left (RTL) text alignment when working with Arabic or other RTL languages, ensuring correct display and interaction with annotations. As example the text with id 3.

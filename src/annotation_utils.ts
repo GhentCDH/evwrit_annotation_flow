@@ -27,6 +27,7 @@ export const normalizeAnnotaion = (annotation: any, text:string) : RuleAnnotatio
 
 
 export const getAnnotatedLines = (lines: Line[], start: number, end: number) => {
+  //console.log('Length', start, end)
     let annotatedLines  = [] as Line[];
     let offset: number = 0;
     lines.forEach((line)=>{
