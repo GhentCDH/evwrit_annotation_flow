@@ -1,33 +1,57 @@
-# combined_vue
+# Vue Annotation Manager
 
-This template should help get you started developing with Vue 3 in Vite.
+This project processes and manages text annotations using a set of predefined rules. Each annotation has a start and end character index, along with metadata. The system allows users to edit, filter, and apply custom rules to annotations and text, ensuring that character indices are properly aligned with the content. The tool provides real-time visualization for original, processed, and modified annotations using the [vue-component-annotated-text](https://www.npmjs.com/package/@ghentcdh/vue-component-annotated-text) package.
 
-## Recommended IDE Setup
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Using the Annotation Manager
 
-## Type Support for `.vue` Imports in TS
+1. **Text and Annotation Display**:
+   - Input the `Text ID` and press **Enter** to fetch the corresponding text and annotations.
+   - View original and processed annotations in a side-by-side layout.
+   - Annotations are filtered and can be toggled based on their type (e.g., typography, orthography, language).
+   
+2. **Editing Annotations**:
+   - You can interact with the `Processed Text` section to edit annotations.
+   - Any modifications to annotations are temporarily stored until confirmed or canceled.
+   
+3. **Rules Application**:
+   - Rules such as tokenization or text-based alignment can be applied to adjust character indices.
+   - Toggle specific rules on or off using the interface to see how they impact annotations.
+   - The system attempts to align annotations based on context and nearby tokens if an exact match isn't found.
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+4. **Confirm or Cancel Changes**:
+   - Users can confirm all or selected annotations using the provided action buttons.
+   - Modified annotations are clearly marked and displayed separately for review.
 
-## Customize configuration
+## Features
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+- **Text Filtering**: Apply filters to annotations by type.
+- **Editable Annotations**: Annotations can be edited and modified in real time.
+- **Rule-Based Fixing**: Character index fixes based on tokenization, text matches, and other rule sets.
+- **Visualization**: Displays original, processed, and modified annotations side by side for comparison.
 
-## Project Setup
+## Dependencies
+The following packages are used for development:
 
-```sh
-pnpm install
-```
+- @ghentcdh/vue-component-annotated-text: A component for rendering annotated text.
 
-### Compile and Hot-Reload for Development
+- [Vue.js](https://vuejs.org/) and [Vite](https://vitejs.dev/) for frontend development.
+- [vue-component-annotated-text](https://www.npmjs.com/package/@ghentcdh/vue-component-annotated-text) for rendering and visualizing annotated text.
+- [Tokenizr](https://www.npmjs.com/package/tokenizr) to split text into tokens.
+- [diff](https://www.npmjs.com/package/diff) to align original and modified texts.
+- **Elasticsearch** via the [EvWrit elasticsearch](https://www.evwrit.ugent.be/) instance for fetching text and annotations.
 
-```sh
-pnpm dev
-```
+## Setup and Installation
 
-### Type-Check, Compile and Minify for Production
+### Project Setup
 
-```sh
-pnpm build
-```
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/GhentCDH/evwrit_annotation_flow.git
+   cd Vue-Annotation-Manager
+2. Install dependecncies:
+   ```sh
+   pnpm install
+3. Run the development server:
+   ```sh
+   pnpm run dev
