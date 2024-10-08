@@ -53,7 +53,7 @@
               <input type="button" value="✖️" @click="cancelAnnotation(annotation)" />
             </div>
           </div>
-            <AnnotationViewer :annotation="annotation" :originalAnnotation="getOriginalAnnotation(annotation)" :textLines="textLines"/>
+            <AnnotationViewer :annotation="annotation" :originalAnnotation="getOriginalAnnotation(annotation.id)" :textLines="textLines"/>
         </div>
       </div>
     </div>
@@ -175,8 +175,8 @@ const applyRules = (nomalizedAnnotations: Map<string,RuleAnnotation>) => {
   });
 };
 
-const getOriginalAnnotation = (annotation: RuleAnnotation)=>{
-  return originalAnnotations.value.get(annotation.id) as RuleAnnotation
+const getOriginalAnnotation = (annotationId: string)=>{
+  return originalAnnotations.value.get(annotationId) as RuleAnnotation
 }
 
 const filterAnnotations = (annotationsMap: Map<string, RuleAnnotation>, selectedFilters: string[]) => {
