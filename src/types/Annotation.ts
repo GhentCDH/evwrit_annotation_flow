@@ -17,3 +17,5 @@ export type AnnotationMetaData = {
   index: number;
   id: string;
 };
+
+export type AnnotationMap = Map<string, RuleAnnotation>
