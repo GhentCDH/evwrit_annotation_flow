@@ -1,2 +1,2 @@
-export { LineSnapper } from './LineSnapper';
-export { WordSnapper } from './WordSnapper';
+export { LineSnapper } from "./LineSnapper";
+export { WordSnapper } from "./WordSnapper";
