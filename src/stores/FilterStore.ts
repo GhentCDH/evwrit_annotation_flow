@@ -37,7 +37,7 @@ const filterAnnotationsById = (annotations: AnnotationMap, filteredAnnotationIds
 const filterAnnotationIdsById = (annotationsIds: string[], filteredAnnotationIds: string[]): string[] =>
   annotationsIds.filter((id) => filteredAnnotationIds.includes(id));
 
-export class FilterAnnotations {
+export class FilterAnnotationsStore {
   public static filterTypes = filterTypes;
   private readonly originalAnnotations: Ref<AnnotationMap>;
   private readonly processedAnnotationsMap: Ref<AnnotationMap>;
@@ -58,13 +58,13 @@ export class FilterAnnotations {
     this.showModified.value ? this.filteredModdifiedAnnotationIds.value : this.filteredAnnotationIds.value,
   );
 
-  readonly filteredDataAnnotations: Ref<RuleAnnotation[]> = computed(() =>
+  readonly filteredDataAnnotations = computed(() =>
     filterAnnotationsById(this.originalAnnotations.value, this.useFilteredIds.value),
   );
-  readonly filteredProcessedAnnotations: Ref<RuleAnnotation[]> = computed(() =>
+  readonly filteredProcessedAnnotations = computed(() =>
     filterAnnotationsById(this.processedAnnotationsMap.value, this.useFilteredIds.value),
   );
-  readonly filteredModifiedAnnotations: Ref<RuleAnnotation[]> = computed(() =>
+  readonly filteredModifiedAnnotations = computed(() =>
     filterAnnotationsById(this.modifiedAnnotationsMap.value, this.useFilteredIds.value),
   );
 

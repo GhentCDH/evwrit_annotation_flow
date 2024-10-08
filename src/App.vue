@@ -19,11 +19,11 @@
     <div class="texts-container">
       <div class="text-column">
         <h3>Originele Tekst</h3>
-        <AnnotatedText :annotations="filterAnnotations.filteredDataAnnotations" :lines="textLines" />
+        <AnnotatedText :annotations="filterAnnotations.filteredDataAnnotations.value" :lines="textLines" />
       </div>
       <div class="text-column">
         <h3>Verwerkte Tekst</h3>
-        <AnnotatedText :annotations="filterAnnotations.filteredProcessedAnnotations" :lines="textLines"
+        <AnnotatedText :annotations="filterAnnotations.filteredProcessedAnnotations.value" :lines="textLines"
           :allow-edit="true" :listen-to-on-update-start="true" :listen-to-on-updating="true"
           @annotation-update-begin="onAnnotationUpdateBegin" @annotation-updating="onAnnotationUpdating"
           @annotation-update-end="onAnnotationUpdateEnd" />
@@ -39,7 +39,7 @@
           <button class="secondary-button" @click="clearAllAnnotations">Annuleer Alle wijzigingen</button>
         </div>
 
-        <div class="annotated-line" v-for="annotation in filterAnnotations.filteredModifiedAnnotations"
+        <div class="annotated-line" v-for="annotation in filterAnnotations.filteredModifiedAnnotations.value"
           :key="annotation.id">
           <div class="annotation-header">
             <label>
@@ -74,7 +74,7 @@ import {
 } from "./annotation_utilities";
 import type { RuleAnnotation } from "./types/Annotation";
 import AnnotationViewer from "./components/AnnotationViewer.vue";
-import { FilterAnnotations, type FilterValue } from "./utils/filter";
+import { FilterAnnotationsStore, type FilterValue } from "./stores/FilterStore";
 
 let snapper: WordSnapper;
 const loading = ref(true);
@@ -90,8 +90,8 @@ const originalAnnotations = ref<Map<string, RuleAnnotation>>(new Map());
 
 //#region Filter
 const modifiedAnnotationsMap = ref<Map<string, RuleAnnotation>>(new Map());
-const filterTypes = FilterAnnotations.filterTypes;
-const filterAnnotations = new FilterAnnotations({
+const filterTypes = FilterAnnotationsStore.filterTypes;
+const filterAnnotations = new FilterAnnotationsStore({
   originalAnnotations,
   processedAnnotationsMap,
   modifiedAnnotationsMap,
