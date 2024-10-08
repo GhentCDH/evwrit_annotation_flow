@@ -1,14 +1,7 @@
 import { type Annotation as EditorAnnotation } from "@ghentcdh/vue-component-annotated-text";
-import {
-  type RuleAnnotation,
-  type AnnotationTarget,
-  type AnnotationMetaData,
-} from "./types/Annotation";
+import { type RuleAnnotation, type AnnotationTarget, type AnnotationMetaData } from "./types/Annotation";
 
-import {
-  shiftToAnnotationMetaDataText,
-  shiftToWordBoundary,
-} from "./text_utilities";
+import { shiftToAnnotationMetaDataText, shiftToWordBoundary } from "./text_utilities";
 
 export interface AnnotationRuleResult {
   annotation: RuleAnnotation;
@@ -21,18 +14,12 @@ export interface AnnotationRuleResult {
  * @param annotations annotations as received from elasticsearch.
  * @returns  A list of annotations fit for visualization in the component.
  */
-export function normalizeAnnotations(
-  annotations: any[],
-  normAnnotations: RuleAnnotation[],
-): RuleAnnotation[] {
+export function normalizeAnnotations(annotations: any[], normAnnotations: RuleAnnotation[]): RuleAnnotation[] {
   annotations.forEach((a, index) => {
     const annotation_type = a["type"];
     const text_selection = a["text_selection"];
-    const textLength =
-      text_selection["selection_end"] - text_selection["selection_start"];
-    const annotationTarget = (
-      textLength > 130 ? "gutter" : "span"
-    ) as AnnotationTarget;
+    const textLength = text_selection["selection_end"] - text_selection["selection_start"];
+    const annotationTarget = (textLength > 130 ? "gutter" : "span") as AnnotationTarget;
     const normalized = {
       id: text_selection["id"],
       start: text_selection["selection_start"],
@@ -51,9 +38,7 @@ export function normalizeAnnotations(
     //filter length for debug
     normAnnotations.push(normalized);
   });
-  normAnnotations.sort((a, b) =>
-    Number(a?.start) > Number(b?.start) ? 1 : -1,
-  );
+  normAnnotations.sort((a, b) => (Number(a?.start) > Number(b?.start) ? 1 : -1));
   return normAnnotations;
 }
 
@@ -98,18 +83,14 @@ export class SanitizeAnnotationRule implements AnnotationRule {
   }
 
   apply(annotation: RuleAnnotation): AnnotationRuleResult {
-    const fixedAnnotation: RuleAnnotation = JSON.parse(
-      JSON.stringify(annotation),
-    ) as RuleAnnotation;
+    const fixedAnnotation: RuleAnnotation = JSON.parse(JSON.stringify(annotation)) as RuleAnnotation;
     if (annotation.start < 0) {
       fixedAnnotation.start = 0;
     }
     if (annotation.end >= this.text.length) {
       fixedAnnotation.end = this.text.length - 1;
     }
-    const changed =
-      annotation.start != fixedAnnotation.start ||
-      annotation.end != fixedAnnotation.end;
+    const changed = annotation.start != fixedAnnotation.start || annotation.end != fixedAnnotation.end;
     return {
       annotation: fixedAnnotation,
       rule_applied: changed,
@@ -124,11 +105,7 @@ export class AnnotationRuleSet implements AnnotationRule {
   alwaysApplyFirstRule: boolean; // Eerste regel altijd toepassen
   stopWhenRuleApplied: boolean; // Stop bij de eerste succesvolle toepassing
 
-  constructor(
-    rules: AnnotationRule[],
-    alwaysApplyFirstRule: boolean = false,
-    stopWhenRuleApplied: boolean = false,
-  ) {
+  constructor(rules: AnnotationRule[], alwaysApplyFirstRule: boolean = false, stopWhenRuleApplied: boolean = false) {
     this.name = "annotation_rule_set";
     this.rules = rules;
     this.text = rules[0]?.text || "";
@@ -150,11 +127,7 @@ export class AnnotationRuleSet implements AnnotationRule {
         }
       }
     }
-    for (
-      let i = this.alwaysApplyFirstRule ? 1 : 0;
-      i < this.rules.length;
-      i++
-    ) {
+    for (let i = this.alwaysApplyFirstRule ? 1 : 0; i < this.rules.length; i++) {
       const ruleResult = this.rules[i].apply(annotation);
       if (ruleResult.rule_applied) {
         //console.log('rule applied', this.rules[i].name);
@@ -193,19 +166,12 @@ export class TokenizeRule implements AnnotationRule {
   }
 
   apply(annotation: RuleAnnotation): AnnotationRuleResult {
-    const fixedAnnotation: RuleAnnotation = JSON.parse(
-      JSON.stringify(annotation),
-    ) as RuleAnnotation;
+    const fixedAnnotation: RuleAnnotation = JSON.parse(JSON.stringify(annotation)) as RuleAnnotation;
     let max_shift = this.max_shift;
     if (max_shift < 0) {
       max_shift = 2 + Math.floor((annotation.end - annotation.start) / 3);
     }
-    const result = shiftToWordBoundary(
-      this.text,
-      annotation.start,
-      annotation.end,
-      max_shift,
-    );
+    const result = shiftToWordBoundary(this.text, annotation.start, annotation.end, max_shift);
     if (result.modified) {
       fixedAnnotation.start = result.start;
       fixedAnnotation.end = result.end;
@@ -244,9 +210,7 @@ export class AnnotationTextRule implements AnnotationRule {
       );
       if (result.modified) {
         applied_rule = true;
-        fixedAnnotation = JSON.parse(
-          JSON.stringify(annotation),
-        ) as RuleAnnotation;
+        fixedAnnotation = JSON.parse(JSON.stringify(annotation)) as RuleAnnotation;
         fixedAnnotation.start = result.start;
         fixedAnnotation.end = result.end;
       }

@@ -1,16 +1,9 @@
 import { type Line } from "@ghentcdh/vue-component-annotated-text"; // Importeer je types
 import { type AnnotationTarget, type RuleAnnotation } from "./types/Annotation"; // Importeer je types
 
-export const normalizeAnnotaion = (
-  annotation: any,
-  text: string,
-): RuleAnnotation => {
-  const textLength =
-    annotation.text_selection.selection_end -
-    annotation.text_selection.selection_start;
-  const annotationTarget = (
-    textLength > 130 ? "gutter" : "text"
-  ) as AnnotationTarget;
+export const normalizeAnnotaion = (annotation: any, text: string): RuleAnnotation => {
+  const textLength = annotation.text_selection.selection_end - annotation.text_selection.selection_start;
+  const annotationTarget = (textLength > 130 ? "gutter" : "text") as AnnotationTarget;
   const startIndex = annotation.text_selection.selection_start - 1; // 0-gebaseerde index
   const endIndex = annotation.text_selection.selection_end - 1;
 
@@ -31,11 +24,7 @@ export const normalizeAnnotaion = (
   } as RuleAnnotation;
 };
 
-export const getAnnotatedLines = <L extends Line>(
-  lines: L[],
-  start: number,
-  end: number,
-) => {
+export const getAnnotatedLines = <L extends Line>(lines: L[], start: number, end: number) => {
   //console.log('Length', start, end)
   const annotatedLines = [] as Line[];
   let offset: number = 0;
