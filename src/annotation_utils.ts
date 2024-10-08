@@ -31,8 +31,8 @@ export const normalizeAnnotaion = (
   } as RuleAnnotation;
 };
 
-export const getAnnotatedLines = (
-  lines: Line[],
+export const getAnnotatedLines = <L extends Line>(
+  lines: L[],
   start: number,
   end: number,
 ) => {

@@ -25,12 +25,18 @@
 </template>
 
 <script setup lang="ts">
-import { AnnotatedText } from "@ghentcdh/vue-component-annotated-text";
+import {
+  AnnotatedText,
+  type Line,
+} from "@ghentcdh/vue-component-annotated-text";
+import type { RuleAnnotation } from "src/types/Annotation";
 import { getAnnotatedLines } from "./../annotation_utils";
 
-const props = defineProps({
-  annotation: Object,
-  originalAnnotation: Object,
-  textLines: Array,
-});
+interface AnnotationViewerProps {
+  annotation: RuleAnnotation;
+  originalAnnotation: RuleAnnotation;
+  textLines: Line[];
+}
+
+const props = defineProps<AnnotationViewerProps>();
 </script>
