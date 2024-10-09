@@ -1,0 +1,52 @@
+
+
+
+  @mixin show-border($borders: ()) {
+    @apply border-2 border-x-0 border-y-0 border-success;
+
+    @if index($borders, 'top') {
+      border-top-style:solid;
+      @apply border-t-2;
+    }@else {
+      border-top-style: none;
+    } 
+    
+    @if index($borders, 'bottom') {
+      border-bottom-style:solid;
+      @apply border-b-2;
+   } @else {
+      border-bottom-style: none;
+    }
+    
+    @if index($borders, 'left') {
+      border-left-style:solid;
+      @apply border-l-2;
+   } @else {
+      border-left-style: none;
+    }
+    
+    @if index($borders, 'right') {
+      border-right-style:solid;
+      @apply border-r-2;
+   } @else {
+      border-right-style: none;
+    }
+    
+  }
+
+
+.annotation--rule-applied {
+  &.annotation--start::before {
+    @include show-border(('top', 'bottom', 'left'));
+  
+   }
+
+  &.annotation--end::before {
+    @include show-border(('top', 'bottom', 'right'));
+  }
+  
+  &::before {
+    @include show-border(('top', 'bottom'));
+  }
+ 
+} 
