@@ -18,4 +18,4 @@ export type AnnotationMetaData = {
   id: string;
 };
 
-export type AnnotationMap = Map<string, RuleAnnotation>
+export type AnnotationMap = Map<string, RuleAnnotation>;

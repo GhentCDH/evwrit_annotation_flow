@@ -25,11 +25,11 @@
 </template>
 
 <script setup lang="ts">
-import type { RuleAnnotation } from "../types/Annotation";
 import type { Line } from "@ghentcdh/vue-component-annotated-text";
 
 import { CheckIcon, XMarkIcon } from "@heroicons/vue/16/solid";
 import AnnotationViewer from "./AnnotationViewer.vue";
+import type { RuleAnnotation } from "../types/Annotation";
 import { FilterColor, type FilterValue } from "../stores/FilterStore";
 
 const selectedAnnotationIds = defineModel<string[]>();
@@ -52,6 +52,6 @@ const cancelAnnotation = () => {
 };
 
 const getTypeClass = () => {
-  return `badge badge-outline ${FilterColor[annotation.type as FilterValue]}`
-}
+  return `badge badge-outline ${FilterColor[annotation.type as FilterValue]}`;
+};
 </script>

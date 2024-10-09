@@ -5,12 +5,11 @@
       <slot></slot>
     </div>
   </div>
-
 </template>
 
 <script setup lang="ts">
 interface CardProps {
-  title: string
+  title: string;
 }
 
 const props = defineProps<CardProps>();
