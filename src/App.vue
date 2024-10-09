@@ -20,7 +20,7 @@
         <div class="swap-off">Enkel Gewijzigde annotaties</div>
       </label>
       <div class="flex-grow">
-        <Filter v-model="selectedFilters" />
+        <TypeFilter v-model="selectedFilters" />
       </div>
     </div>
   </header>
@@ -86,8 +86,8 @@ import {
 } from "./annotation_utilities";
 import type { RuleAnnotation } from "./types/Annotation";
 import AnnotationEdit from "./components/AnnotationEdit.vue";
-import Card from "./components/Card.vue";
-import Filter from "./components/Filter.vue";
+import Card from "./components/UiCard.vue";
+import TypeFilter from "./components/TypeFilter.vue";
 import { FilterAnnotationsStore, type FilterValue } from "./stores/FilterStore";
 import ActionButtons from "./components/ActionButtons.vue";
 
