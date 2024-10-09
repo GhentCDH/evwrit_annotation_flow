@@ -1,66 +1,55 @@
 <template>
-  <div>
-    <label for="textId">Text ID </label>
-    <input type="number" @change="handleChangedId" :value="textId" id="textId" placeholder="Tekst-ID" />
-  </div>
-  <div>
-    <header>
-      <div class="checkbox-container">
-        <div v-for="type in filterTypes" :key="type">
-          <input type="checkbox" :id="type" :value="type" v-model="selectedFilters" />
-          <label :for="type"> {{ type }} </label>
-        </div>
+  <header class="border border-x-0 mb-2 p-2 shadow">
+    <div class="pb-2">
+      <label class="flex items-center gap-2" for="textId">Text ID
+        <input class="input input-bordered w-full max-w-xs" type="number" @change="handleChangedId" :value="textId"
+          id="textId" placeholder="Tekst-ID" />
+      </label>
+    </div>
+    <div class="flex">
+      <label class="swap btn">
+        <input type="checkbox" @click="showRuleModifiedAnnotations" />
+        <div class="swap-on">Alle annotaties</div>
+        <div class="swap-off">Enkel Gewijzigde annotaties</div>
+      </label>
+      <div class="flex-grow">
+        <Filter v-model="selectedFilters" />
       </div>
-    </header>
+    </div>
+  </header>
 
-    <button class="primary-button" @click="showRuleModifiedAnnotations">
-      {{ showModified ? "Toon Alle Annotaties" : "Toon Gewijzigde Annotaties" }}
-    </button>
-    <div class="texts-container">
-      <div class="text-column">
-        <h3>Originele Tekst</h3>
+  <div>
+    <div class="grid grid-cols-3">
+      <Card :title="'Originele Tekst'">
         <AnnotatedText :annotations="filterAnnotations.filteredDataAnnotations.value" :lines="textLines" />
-      </div>
-      <div class="text-column">
-        <h3>Verwerkte Tekst</h3>
-        <AnnotatedText :annotations="filterAnnotations.filteredProcessedAnnotations.value" :lines="textLines"
-          :allow-edit="true" :listen-to-on-update-start="true" :listen-to-on-updating="true"
-          @annotation-update-begin="onAnnotationUpdateBegin" @annotation-updating="onAnnotationUpdating"
-          @annotation-update-end="onAnnotationUpdateEnd" />
-      </div>
-      <div class="text-column">
-        <h3 class="section-title">Aangepaste Annotaties</h3>
-        <div class="action-buttons">
-          <button class="primary-button" @click="confirmAllAnnotations">Bevestig Alles</button>
-          <button class="primary-button" @click="confirmSelectedAnnotations">Bevestig Aangevinkte</button>
-          <button class="primary-button" @click="toggleSelectAll">
-            {{ allSelected ? "Deselecteer" : "Selecteer" }} Alle Annotaties
-          </button>
-          <button class="secondary-button" @click="clearAllAnnotations">Annuleer Alle wijzigingen</button>
+      </Card>
+      <Card :title="'Verwerkte Tekst'">
+        <div class="all-initial">
+          <AnnotatedText :annotations="filterAnnotations.filteredProcessedAnnotations.value" :lines="textLines"
+            :allow-edit="true" :listen-to-on-update-start="true" :listen-to-on-updating="true"
+            @annotation-update-begin="onAnnotationUpdateBegin" @annotation-updating="onAnnotationUpdating"
+            @annotation-update-end="onAnnotationUpdateEnd" />
         </div>
+      </Card>
+      <Card :title="'Aangepaste Annotaties'">
+        <ActionButtons :modifiedAnnotationsMap="modifiedAnnotationsMap"
+          :filteredModifiedAnnotations="filterAnnotations.filteredModifiedAnnotations.value"
+          v-model=selectedAnnotationIds />
 
-        <div class="annotated-line" v-for="annotation in filterAnnotations.filteredModifiedAnnotations.value"
+        <div class="flex flex-row gap-2" v-for="annotation in filterAnnotations.filteredModifiedAnnotations.value"
           :key="annotation.id">
-          <div class="annotation-header">
-            <label>
-              <input type="checkbox" :value="annotation.id" v-model="selectedAnnotationIds" />
-            </label>
-            <div class="annotation-actions">
-              <input type="button" value="✔️" @click="confirmAnnotation(annotation)" />
-              <input type="button" value="✖️" @click="cancelAnnotation(annotation)" />
-            </div>
-          </div>
-          <AnnotationViewer :annotation="annotation"
-            :originalAnnotation="filterAnnotations.getOriginalAnnotation(annotation.id)" :textLines="textLines" />
+          <AnnotationEdit :annotation="annotation" v-model="selectedAnnotationIds"
+            :originalAnnotation="filterAnnotations.getOriginalAnnotation(annotation.id)" :textLines="textLines"
+            @confirmAnnotation="confirmAnnotation" @cancelAnnotation="cancelAnnotation" />
         </div>
-      </div>
+      </Card>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
-import { AnnotatedText, UpdateAnnotationState } from "@ghentcdh/vue-component-annotated-text";
+import { AnnotatedText, UpdateAnnotationState } from "@ghentcdh/vue-component-annotated-text"
 import { AnnotationRepository } from "./stores/annotationRepository";
 import { textToLines } from "./text_utilities";
 import { normalizeAnnotaion } from "./annotation_utils";
@@ -73,24 +62,25 @@ import {
   type AnnotationRuleResult,
 } from "./annotation_utilities";
 import type { RuleAnnotation } from "./types/Annotation";
-import AnnotationViewer from "./components/AnnotationViewer.vue";
+import AnnotationEdit from "./components/AnnotationEdit.vue";
+import Card from "./components/Card.vue";
+import Filter from "./components/Filter.vue";
 import { FilterAnnotationsStore, type FilterValue } from "./stores/FilterStore";
+import ActionButtons from "./components/ActionButtons.vue";
 
 let snapper: WordSnapper;
 const loading = ref(true);
 const error = ref<string | null>(null);
 const text = ref<string>("");
 const selectedFilters = ref<FilterValue[]>([]);
-const textId = ref<string | "">("72424");
+const textId = ref<string | "">("72427");
 const selectedAnnotationIds = ref<string[]>([]);
 const showModified = ref<boolean>(false);
-const allSelected = ref<boolean>(false);
 const processedAnnotationsMap = ref<Map<string, RuleAnnotation>>(new Map());
 const originalAnnotations = ref<Map<string, RuleAnnotation>>(new Map());
 
 //#region Filter
 const modifiedAnnotationsMap = ref<Map<string, RuleAnnotation>>(new Map());
-const filterTypes = FilterAnnotationsStore.filterTypes;
 const filterAnnotations = new FilterAnnotationsStore({
   originalAnnotations,
   processedAnnotationsMap,
@@ -192,21 +182,6 @@ const applyRules = (nomalizedAnnotations: Map<string, RuleAnnotation>) => {
 };
 
 // Button event handlers
-const clearAllAnnotations = () => {
-  modifiedAnnotationsMap.value.clear();
-};
-const confirmSelectedAnnotations = async () => {
-  try {
-    const annotationsToSubmit = selectedAnnotationIds.value.map((id) => modifiedAnnotationsMap.value.get(id));
-    selectedAnnotationIds.value.forEach((annotationId) => {
-      modifiedAnnotationsMap.value.delete(annotationId);
-    });
-    selectedAnnotationIds.value = [];
-    console.log("Annotations submitted", annotationsToSubmit);
-  } catch (error) {
-    console.error("Error submitting annotations", error);
-  }
-};
 const confirmAnnotation = (annotation: RuleAnnotation) => {
   console.log(`Annotatie met id ${annotation.id} is bevestigd.`);
   modifiedAnnotationsMap.value.delete(annotation.id);
@@ -214,25 +189,6 @@ const confirmAnnotation = (annotation: RuleAnnotation) => {
 const cancelAnnotation = (annotation: RuleAnnotation) => {
   console.log(`Annotatie met id ${annotation.id} is geannuleerd.`);
   modifiedAnnotationsMap.value.delete(annotation.id);
-};
-const toggleSelectAll = () => {
-  if (allSelected.value) selectedAnnotationIds.value = [];
-  else
-    selectedAnnotationIds.value = filterAnnotations.filteredModifiedAnnotations.value.map(
-      (annotation) => annotation.id,
-    );
-  allSelected.value = !allSelected.value;
-};
-const confirmAllAnnotations = async () => {
-  try {
-    console.log("filteredModifiedAnnotations", filterAnnotations.filteredModifiedAnnotations.value);
-    console.log("modifiedAnnotationsMap", modifiedAnnotationsMap.value);
-    filterAnnotations.filteredModifiedAnnotations.value.forEach((annotation) => {
-      modifiedAnnotationsMap.value.delete(annotation.id);
-    });
-  } catch (error) {
-    console.error("Error submitting annotations", error);
-  }
 };
 const showRuleModifiedAnnotations = () => {
   showModified.value = !showModified.value;
