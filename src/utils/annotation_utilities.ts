@@ -1,8 +1,8 @@
 import { type Annotation as EditorAnnotation } from "@ghentcdh/vue-component-annotated-text";
+import { cloneDeep } from "lodash-es";
 import { type RuleAnnotation, type AnnotationTarget, type AnnotationMetaData } from "../types/Annotation";
 
 import { shiftToAnnotationMetaDataText, shiftToWordBoundary } from "../text_utilities";
- import {cloneDeep}from 'lodash-es'
 
 export interface AnnotationRuleResult {
   annotation: RuleAnnotation;
@@ -50,7 +50,7 @@ export class SanitizeAnnotationRule implements AnnotationRule {
   }
 
   apply(annotation: RuleAnnotation): AnnotationRuleResult {
-    const fixedAnnotation =  cloneDeep(annotation) as RuleAnnotation
+    const fixedAnnotation = cloneDeep(annotation) as RuleAnnotation;
     if (annotation.start < 0) {
       fixedAnnotation.start = 0;
     }
@@ -134,7 +134,7 @@ export class TokenizeRule implements AnnotationRule {
   }
 
   apply(annotation: RuleAnnotation): AnnotationRuleResult {
-    const fixedAnnotation =cloneDeep(annotation) as RuleAnnotation;
+    const fixedAnnotation = cloneDeep(annotation) as RuleAnnotation;
     let max_shift = this.max_shift;
     if (max_shift < 0) {
       max_shift = 2 + Math.floor((annotation.end - annotation.start) / 3);
@@ -178,7 +178,7 @@ export class AnnotationTextRule implements AnnotationRule {
       );
       if (result.modified) {
         applied_rule = true;
-        fixedAnnotation =  cloneDeep(annotation) as RuleAnnotation;
+        fixedAnnotation = cloneDeep(annotation) as RuleAnnotation;
         fixedAnnotation.start = result.start;
         fixedAnnotation.end = result.end;
       }

@@ -10,11 +10,11 @@ export const annotationHtmlColors: Partial<Record<FilterValue, string | null>> =
   morpho_syntactical: "#18aa2a",
   lexis: "#f032e6",
   language: "#1E64C8",
-//   handshift: null,
-//   ltsa: null,
-//   gtsa: null,
-//   gts: null,
-//   lts: null,
+  //   handshift: null,
+  //   ltsa: null,
+  //   gtsa: null,
+  //   gts: null,
+  //   lts: null,
 };
 
 export const annotationColors = createAnnotationColors(annotationHtmlColors);

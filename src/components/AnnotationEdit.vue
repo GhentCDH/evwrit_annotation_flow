@@ -6,8 +6,7 @@
           <label>
             <input class="checkbox" type="checkbox" :value="annotation.id" v-model="selectedAnnotationIds" />
           </label>
-          <div class="badge badge-outline badge-sm text-color-custom"
-          :style="getColor()">{{ annotation.type }}</div>
+          <div class="badge badge-outline badge-sm text-color-custom" :style="getColor()">{{ annotation.type }}</div>
         </div>
         <div class="flex gap-2">
           <button class="btn btn-circle btn-xs btn-success btn-outline" @click="confirmAnnotation()">
@@ -53,7 +52,7 @@ const cancelAnnotation = () => {
 };
 
 const getColor = () => {
-  const type = annotation.type as string
+  const type = annotation.type as string;
   return `--text-color-custom:${annotationHtmlColors[type]}`;
 };
 </script>

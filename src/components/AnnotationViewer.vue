@@ -1,13 +1,18 @@
 <template>
   <div class="annotation-body">
     <!-- Gewijzigde annotatie -->
-    <AnnotatedText :annotations="[annotation]"
-      :lines="getAnnotatedLines(textLines, annotation.start, annotation.end).lines" :allow-edit="false" />
+    <AnnotatedText
+      :annotations="[annotation]"
+      :lines="getAnnotatedLines(textLines, annotation.start, annotation.end).lines"
+      :allow-edit="false"
+    />
     <hr />
     <!-- Originele annotatie -->
-    <AnnotatedText :annotations="[originalAnnotation]"
+    <AnnotatedText
+      :annotations="[originalAnnotation]"
       :lines="getAnnotatedLines(textLines, originalAnnotation.start, originalAnnotation.end).lines"
-      :allow-edit="false" />
+      :allow-edit="false"
+    />
   </div>
 </template>
 

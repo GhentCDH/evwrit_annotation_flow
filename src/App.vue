@@ -1,9 +1,16 @@
 <template>
   <header class="border border-x-0 mb-2 p-2 shadow">
     <div class="pb-2">
-      <label class="flex items-center gap-2" for="textId">Text ID
-        <input class="input input-bordered w-full max-w-xs" type="number" @change="handleChangedId" :value="textId"
-          id="textId" placeholder="Tekst-ID" />
+      <label class="flex items-center gap-2" for="textId"
+        >Text ID
+        <input
+          class="input input-bordered w-full max-w-xs"
+          type="number"
+          @change="handleChangedId"
+          :value="textId"
+          id="textId"
+          placeholder="Tekst-ID"
+        />
       </label>
     </div>
     <div class="flex">
@@ -25,22 +32,38 @@
       </Card>
       <Card :title="'Verwerkte Tekst'">
         <div class="all-initial">
-          <AnnotatedText :annotations="filterAnnotations.filteredProcessedAnnotations.value" :lines="textLines"
-            :allow-edit="true" :listen-to-on-update-start="true" :listen-to-on-updating="true"
-            @annotation-update-begin="onAnnotationUpdateBegin" @annotation-updating="onAnnotationUpdating"
-            @annotation-update-end="onAnnotationUpdateEnd" />
+          <AnnotatedText
+            :annotations="filterAnnotations.filteredProcessedAnnotations.value"
+            :lines="textLines"
+            :allow-edit="true"
+            :listen-to-on-update-start="true"
+            :listen-to-on-updating="true"
+            @annotation-update-begin="onAnnotationUpdateBegin"
+            @annotation-updating="onAnnotationUpdating"
+            @annotation-update-end="onAnnotationUpdateEnd"
+          />
         </div>
       </Card>
       <Card :title="'Aangepaste Annotaties'">
-        <ActionButtons :modifiedAnnotationsMap="modifiedAnnotationsMap"
+        <ActionButtons
+          :modifiedAnnotationsMap="modifiedAnnotationsMap"
           :filteredModifiedAnnotations="filterAnnotations.filteredModifiedAnnotations.value"
-          v-model="selectedAnnotationIds" />
+          v-model="selectedAnnotationIds"
+        />
 
-        <div class="flex flex-row gap-2" v-for="annotation in filterAnnotations.filteredModifiedAnnotations.value"
-          :key="annotation.id">
-          <AnnotationEdit :annotation="annotation" v-model="selectedAnnotationIds"
-            :originalAnnotation="filterAnnotations.getOriginalAnnotation(annotation.id)" :textLines="textLines"
-            @confirmAnnotation="confirmAnnotation" @cancelAnnotation="cancelAnnotation" />
+        <div
+          class="flex flex-row gap-2"
+          v-for="annotation in filterAnnotations.filteredModifiedAnnotations.value"
+          :key="annotation.id"
+        >
+          <AnnotationEdit
+            :annotation="annotation"
+            v-model="selectedAnnotationIds"
+            :originalAnnotation="filterAnnotations.getOriginalAnnotation(annotation.id)"
+            :textLines="textLines"
+            @confirmAnnotation="confirmAnnotation"
+            @cancelAnnotation="cancelAnnotation"
+          />
         </div>
       </Card>
     </div>
@@ -174,7 +197,7 @@ const applyRules = (nomalizedAnnotations: Map<string, RuleAnnotation>) => {
     }
     const processedAnnotion = resultAnnotation.rule_applied ? resultAnnotation.annotation : nolmalizedAnnotation;
     if (resultAnnotation.rule_applied) {
-      processedAnnotion.color = annotationHighlightColors[processedAnnotion.type]
+      processedAnnotion.color = annotationHighlightColors[processedAnnotion.type];
       modifiedAnnotationsMap.value.set(nolmalizedAnnotation.id, processedAnnotion);
     }
     processedAnnotationsMap.value.set(nolmalizedAnnotation.id, processedAnnotion);
