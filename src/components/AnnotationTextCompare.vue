@@ -1,5 +1,5 @@
 <template>
-  <div class="flex gap-4">
+  <div class="flex gap-4 overflow-auto h-full">
     <div>
       <div class="text-lg font-bold">Originele Tekst</div>
       <AnnotatedText :annotations="filteredDataAnnotations" :lines="textLines" />
