@@ -1,6 +1,5 @@
-import { type Annotation as EditorAnnotation } from "@ghentcdh/vue-component-annotated-text";
 import { cloneDeep } from "lodash-es";
-import { type RuleAnnotation, type AnnotationTarget, type AnnotationMetaData } from "../types/Annotation";
+import { type RuleAnnotation, type AnnotationMetaData } from "../types/Annotation";
 
 import { shiftToAnnotationMetaDataText, shiftToWordBoundary } from "../text_utilities";
 
