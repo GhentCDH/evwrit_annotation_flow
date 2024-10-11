@@ -12,16 +12,9 @@ interface AnnotationEditProps {
   filteredModifiedAnnotations: RuleAnnotation[];
 }
 
-const { modifiedAnnotationsMap, filteredModifiedAnnotations } = defineProps<AnnotationEditProps>();
+const { modifiedAnnotationsMap } = defineProps<AnnotationEditProps>();
 
-const emit = defineEmits([]);
 const selectedAnnotationIds = defineModel<string[]>();
-
-const allSelected = () => selectedAnnotationIds.value?.length === modifiedAnnotationsMap.size;
-
-const clearAllAnnotations = () => {
-  modifiedAnnotationsMap.clear();
-};
 
 const confirmSelectedAnnotations = async () => {
   try {
@@ -31,23 +24,6 @@ const confirmSelectedAnnotations = async () => {
     });
     selectedAnnotationIds.value = [];
     console.log("Annotations submitted", annotationsToSubmit);
-  } catch (error) {
-    console.error("Error submitting annotations", error);
-  }
-};
-
-const toggleSelectAll = () => {
-  if (allSelected()) selectedAnnotationIds.value = [];
-  else selectedAnnotationIds.value = filteredModifiedAnnotations.map((annotation) => annotation.id);
-};
-
-const confirmAllAnnotations = async () => {
-  try {
-    console.log("filteredModifiedAnnotations", filteredModifiedAnnotations);
-    console.log("modifiedAnnotationsMap", modifiedAnnotationsMap);
-    filteredModifiedAnnotations.forEach((annotation) => {
-      modifiedAnnotationsMap.delete(annotation.id);
-    });
   } catch (error) {
     console.error("Error submitting annotations", error);
   }

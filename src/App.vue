@@ -71,7 +71,6 @@ const error = ref<string | null>(null);
 const text = ref<string>("");
 const selectedFilters = ref<FilterValue[]>([]);
 const textId = ref<string | "">("72427");
-const selectedAnnotationIds = ref<string[]>([]);
 const processedAnnotationsMap = ref<Map<string, RuleAnnotation>>(new Map());
 const originalAnnotations = ref<Map<string, RuleAnnotation>>(new Map());
 
