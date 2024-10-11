@@ -15,18 +15,6 @@ export const filterTypes = [
 ] as const;
 
 export type FilterValue = (typeof filterTypes)[number];
-export const FilterColor: Record<FilterValue, string> = {
-  language: "text-annotation-language",
-  typography: "text-annotation-typography",
-  orthography: "text-annotation-orthography",
-  lexis: "text-annotation-lexis",
-  morpho_syntactical: "text-annotation-morpho_syntactical",
-  handshift: "text-annotation-handshift",
-  ltsa: "text-annotation-ltsa",
-  gtsa: "text-annotation-gtsa",
-  gts: "text-annotation-gts",
-  lts: "text-annotation-lts",
-};
 
 const isAnnotationTypeFiltered = (selectedFilters: FilterValue[], annotation: RuleAnnotation) => {
   const type = (annotation?.type ?? "") as FilterValue;

@@ -1,45 +1,12 @@
 import { type Annotation as EditorAnnotation } from "@ghentcdh/vue-component-annotated-text";
-import { type RuleAnnotation, type AnnotationTarget, type AnnotationMetaData } from "./types/Annotation";
+import { cloneDeep } from "lodash-es";
+import { type RuleAnnotation, type AnnotationTarget, type AnnotationMetaData } from "../types/Annotation";
 
-import { shiftToAnnotationMetaDataText, shiftToWordBoundary } from "./text_utilities";
+import { shiftToAnnotationMetaDataText, shiftToWordBoundary } from "../text_utilities";
 
 export interface AnnotationRuleResult {
   annotation: RuleAnnotation;
   rule_applied: boolean;
-}
-
-/**
- * Receives a list of annotations from elasticsearch, transform them into
- * Annotation's supported by the vue-component-annotated-text
- * @param annotations annotations as received from elasticsearch.
- * @returns  A list of annotations fit for visualization in the component.
- */
-export function normalizeAnnotations(annotations: any[], normAnnotations: RuleAnnotation[]): RuleAnnotation[] {
-  annotations.forEach((a, index) => {
-    const annotation_type = a["type"];
-    const text_selection = a["text_selection"];
-    const textLength = text_selection["selection_end"] - text_selection["selection_start"];
-    const annotationTarget = (textLength > 130 ? "gutter" : "span") as AnnotationTarget;
-    const normalized = {
-      id: text_selection["id"],
-      start: text_selection["selection_start"],
-      end: text_selection["selection_end"],
-      class: "annotation annotation--color-" + (1 + (index % 9)),
-      target: annotationTarget,
-      label: annotation_type,
-      metadata: {
-        text: text_selection["text"],
-        ///text_edited: text_selection['text_edited'],
-        id: text_selection["id"],
-        index: index,
-        //annotation_type: annotation_type
-      },
-    } as RuleAnnotation;
-    //filter length for debug
-    normAnnotations.push(normalized);
-  });
-  normAnnotations.sort((a, b) => (Number(a?.start) > Number(b?.start) ? 1 : -1));
-  return normAnnotations;
 }
 
 /**
@@ -83,7 +50,7 @@ export class SanitizeAnnotationRule implements AnnotationRule {
   }
 
   apply(annotation: RuleAnnotation): AnnotationRuleResult {
-    const fixedAnnotation: RuleAnnotation = JSON.parse(JSON.stringify(annotation)) as RuleAnnotation;
+    const fixedAnnotation = cloneDeep(annotation) as RuleAnnotation;
     if (annotation.start < 0) {
       fixedAnnotation.start = 0;
     }
@@ -91,6 +58,7 @@ export class SanitizeAnnotationRule implements AnnotationRule {
       fixedAnnotation.end = this.text.length - 1;
     }
     const changed = annotation.start != fixedAnnotation.start || annotation.end != fixedAnnotation.end;
+
     return {
       annotation: fixedAnnotation,
       rule_applied: changed,
@@ -166,7 +134,7 @@ export class TokenizeRule implements AnnotationRule {
   }
 
   apply(annotation: RuleAnnotation): AnnotationRuleResult {
-    const fixedAnnotation: RuleAnnotation = JSON.parse(JSON.stringify(annotation)) as RuleAnnotation;
+    const fixedAnnotation = cloneDeep(annotation) as RuleAnnotation;
     let max_shift = this.max_shift;
     if (max_shift < 0) {
       max_shift = 2 + Math.floor((annotation.end - annotation.start) / 3);
@@ -210,7 +178,7 @@ export class AnnotationTextRule implements AnnotationRule {
       );
       if (result.modified) {
         applied_rule = true;
-        fixedAnnotation = JSON.parse(JSON.stringify(annotation)) as RuleAnnotation;
+        fixedAnnotation = cloneDeep(annotation) as RuleAnnotation;
         fixedAnnotation.start = result.start;
         fixedAnnotation.end = result.end;
       }

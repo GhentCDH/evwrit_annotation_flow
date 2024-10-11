@@ -75,7 +75,7 @@ import { ref, onMounted, computed, watch } from "vue";
 import { AnnotatedText, UpdateAnnotationState } from "@ghentcdh/vue-component-annotated-text";
 import { AnnotationRepository } from "./stores/annotationRepository";
 import { textToLines } from "./text_utilities";
-import { normalizeAnnotaion } from "./annotation_utils";
+import { normalizeAnnotation } from "./utils";
 import { WordSnapper } from "./lib/snapper/WordSnapper";
 import {
   AnnotationTextRule,
@@ -83,13 +83,14 @@ import {
   SanitizeAnnotationRule,
   AnnotationRuleSet,
   type AnnotationRuleResult,
-} from "./annotation_utilities";
+} from "./utils/annotation_utilities";
 import type { RuleAnnotation } from "./types/Annotation";
 import AnnotationEdit from "./components/AnnotationEdit.vue";
 import Card from "./components/UiCard.vue";
 import TypeFilter from "./components/TypeFilter.vue";
 import { FilterAnnotationsStore, type FilterValue } from "./stores/FilterStore";
 import ActionButtons from "./components/ActionButtons.vue";
+import { annotationHighlightColors } from "./styles/annotation-colors";
 
 let snapper: WordSnapper;
 const loading = ref(true);
@@ -144,7 +145,7 @@ const handleFetchedData = async (id: string) => {
     const result = await annotationRepository.fetchAnnotation(id);
     text.value = result.text;
     result.annotations.forEach((annotation: any) => {
-      const normalizedAnnotation = normalizeAnnotaion(annotation, text.value);
+      const normalizedAnnotation = normalizeAnnotation(annotation, text.value);
       originalAnnotations.value.set(annotation.id, normalizedAnnotation);
     });
     applyRules(originalAnnotations.value);
@@ -194,13 +195,12 @@ const applyRules = (nomalizedAnnotations: Map<string, RuleAnnotation>) => {
         //resultAnnotation = defaultRuleSet.apply(nolmalizedAnnotation);
         break;
     }
-    const processedAnnotaion = resultAnnotation.rule_applied ? resultAnnotation.annotation : nolmalizedAnnotation;
+    const processedAnnotion = resultAnnotation.rule_applied ? resultAnnotation.annotation : nolmalizedAnnotation;
     if (resultAnnotation.rule_applied) {
-      console.log("true");
-      processedAnnotaion.class = "annotation--rule-applied";
-      modifiedAnnotationsMap.value.set(nolmalizedAnnotation.id, processedAnnotaion);
+      processedAnnotion.color = annotationHighlightColors[processedAnnotion.type as FilterValue];
+      modifiedAnnotationsMap.value.set(nolmalizedAnnotation.id, processedAnnotion);
     }
-    processedAnnotationsMap.value.set(nolmalizedAnnotation.id, processedAnnotaion);
+    processedAnnotationsMap.value.set(nolmalizedAnnotation.id, processedAnnotion);
   });
 };
 

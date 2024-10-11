@@ -19,7 +19,7 @@
 <script setup lang="ts">
 import { AnnotatedText, type Line } from "@ghentcdh/vue-component-annotated-text";
 import type { RuleAnnotation } from "src/types/Annotation";
-import { getAnnotatedLines } from "./../annotation_utils";
+import { getAnnotatedLines } from "../utils/annotation_utils";
 
 interface AnnotationViewerProps {
   annotation: RuleAnnotation;

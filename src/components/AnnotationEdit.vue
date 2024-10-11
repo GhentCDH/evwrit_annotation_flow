@@ -6,7 +6,7 @@
           <label>
             <input class="checkbox" type="checkbox" :value="annotation.id" v-model="selectedAnnotationIds" />
           </label>
-          <div :class="getTypeClass()">{{ annotation.type }}</div>
+          <div class="badge badge-outline badge-sm text-color-custom" :style="getColor()">{{ annotation.type }}</div>
         </div>
         <div class="flex gap-2">
           <button class="btn btn-circle btn-xs btn-success btn-outline" @click="confirmAnnotation()">
@@ -30,7 +30,8 @@ import type { Line } from "@ghentcdh/vue-component-annotated-text";
 import { CheckIcon, XMarkIcon } from "@heroicons/vue/16/solid";
 import AnnotationViewer from "./AnnotationViewer.vue";
 import type { RuleAnnotation } from "../types/Annotation";
-import { FilterColor, type FilterValue } from "../stores/FilterStore";
+import { annotationHtmlColors } from "../styles/annotation-colors";
+import type { FilterValue } from "src/stores/FilterStore";
 
 const selectedAnnotationIds = defineModel<string[]>();
 
@@ -51,7 +52,8 @@ const cancelAnnotation = () => {
   emit("cancelAnnotation", annotation);
 };
 
-const getTypeClass = () => {
-  return `badge badge-outline ${FilterColor[annotation.type as FilterValue]}`;
+const getColor = () => {
+  const type = annotation.type as FilterValue;
+  return `--text-color-custom:${annotationHtmlColors[type]}`;
 };
 </script>
