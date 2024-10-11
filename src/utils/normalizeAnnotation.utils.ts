@@ -1,7 +1,7 @@
 import { type Line } from "@ghentcdh/vue-component-annotated-text"; // Importeer je types
+import type { FilterValue } from "src/stores/FilterStore";
 import { type AnnotationTarget, type RuleAnnotation } from "../types/Annotation"; // Importeer je types
 import { annotationColors } from "../styles/annotation-colors";
-import type { FilterValue } from "src/stores/FilterStore";
 
 export const normalizeAnnotation = (annotation: any, text: string): RuleAnnotation => {
   const textLength = annotation.text_selection.selection_end - annotation.text_selection.selection_start;

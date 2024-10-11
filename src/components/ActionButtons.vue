@@ -1,16 +1,12 @@
 <template>
-  <div class="grid grid-cols-4 gap-2">
-    <button class="btn" @click="confirmAllAnnotations">Bevestig Alles</button>
-    <button class="btn" @click="confirmSelectedAnnotations">Bevestig Aangevinkte</button>
-    <button class="btn" @click="toggleSelectAll">
-      {{ allSelected() ? "Deselecteer" : "Selecteer" }} Alle Annotaties
-    </button>
-    <button class="btn btn-error" @click="clearAllAnnotations">Annuleer Alle wijzigingen</button>
+  <div class="flex justify-end">
+    <button class="btn" @click="confirmSelectedAnnotations">Bevestig Selectie</button>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { RuleAnnotation } from "src/types/Annotation";
+
 interface AnnotationEditProps {
   modifiedAnnotationsMap: Map<string, RuleAnnotation>;
   filteredModifiedAnnotations: RuleAnnotation[];

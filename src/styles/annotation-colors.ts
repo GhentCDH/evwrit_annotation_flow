@@ -4,7 +4,7 @@ import type { FilterValue } from "../stores/FilterStore";
 // FIXME after update @ghentcdh/vue-component-annotated-text
 type AnnotationColor = any;
 
-export const annotationHtmlColors: Partial<Record<FilterValue, string >> = {
+export const annotationHtmlColors: Partial<Record<FilterValue, string>> = {
   orthography: "#f58231",
   typography: "#e61919",
   morpho_syntactical: "#18aa2a",
