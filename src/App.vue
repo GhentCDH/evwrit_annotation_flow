@@ -19,13 +19,12 @@
   </div>
 
   <div class="flex p-1 gap-1 viewer">
-    <div class="w-2/3 overflow-auto border p-4">
+    <div class="w-2/3 p-4 border">
       <label class="swap btn">
         <input type="checkbox" @click="showRuleModifiedAnnotations" />
         <div class="swap-on">Alle annotaties</div>
         <div class="swap-off">Enkel Gewijzigde annotaties</div>
       </label>
-
       <AnnotationTextCompare
         :filteredDataAnnotations="filterAnnotations.filteredDataAnnotations.value"
         :filteredProcessedAnnotations="filterAnnotations.filteredProcessedAnnotations.value"
