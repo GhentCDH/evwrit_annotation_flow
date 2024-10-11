@@ -1,4 +1,6 @@
-export type RuleAnnotation = {
+import type { Annotation } from "@ghentcdh/vue-component-annotated-text";
+
+export interface RuleAnnotation extends Annotation {
   id: string;
   start: number;
   end: number;
@@ -9,7 +11,7 @@ export type RuleAnnotation = {
   weight?: number;
   text?: string;
   metadata?: AnnotationMetaData;
-};
+}
 export type AnnotationTarget = "gutter" | "text";
 
 export type AnnotationMetaData = {

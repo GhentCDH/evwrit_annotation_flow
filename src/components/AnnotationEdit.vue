@@ -31,6 +31,7 @@ import { CheckIcon, XMarkIcon } from "@heroicons/vue/16/solid";
 import AnnotationViewer from "./AnnotationViewer.vue";
 import type { RuleAnnotation } from "../types/Annotation";
 import { annotationHtmlColors } from "../styles/annotation-colors";
+import type { FilterValue } from "src/stores/FilterStore";
 
 const selectedAnnotationIds = defineModel<string[]>();
 
@@ -52,7 +53,7 @@ const cancelAnnotation = () => {
 };
 
 const getColor = () => {
-  const type = annotation.type as string;
+  const type = annotation.type as FilterValue;
   return `--text-color-custom:${annotationHtmlColors[type]}`;
 };
 </script>

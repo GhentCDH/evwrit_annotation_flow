@@ -197,7 +197,7 @@ const applyRules = (nomalizedAnnotations: Map<string, RuleAnnotation>) => {
     }
     const processedAnnotion = resultAnnotation.rule_applied ? resultAnnotation.annotation : nolmalizedAnnotation;
     if (resultAnnotation.rule_applied) {
-      processedAnnotion.color = annotationHighlightColors[processedAnnotion.type];
+      processedAnnotion.color = annotationHighlightColors[processedAnnotion.type as FilterValue];
       modifiedAnnotationsMap.value.set(nolmalizedAnnotation.id, processedAnnotion);
     }
     processedAnnotationsMap.value.set(nolmalizedAnnotation.id, processedAnnotion);
