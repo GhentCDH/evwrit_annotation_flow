@@ -117,9 +117,8 @@ const handleFetchedData = async (id: string) => {
     const value = await annotationService.getAnnotation(id);
     text.value = value.text;
     originalAnnotations.value = value.originalAnnotations;
-    // // normalizedAnnotations.value = value.normalizedAnnotations;
-    modifiedAnnotationsMap.value = value.processedAnnotationsMap;
-    processedAnnotationsMap.value = value.modifiedAnnotationsMap;
+    modifiedAnnotationsMap.value = value.modifiedAnnotationsMap;
+    processedAnnotationsMap.value = value.processedAnnotationsMap;
   } catch (error) {
     alert("Fout bij het laden van de annotatie");
   }

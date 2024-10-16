@@ -45,7 +45,6 @@ export class SanitizeAnnotationRule implements AnnotationRule {
   constructor(text: string) {
     this.name = "sanitize_annotation_rule";
     this.text = text;
-    console.log("length", text.length);
   }
 
   apply(annotation: RuleAnnotation): AnnotationRuleResult {

@@ -73,18 +73,18 @@ export class AnnotationService {
     const originalAnnotations = new Map<string, RuleAnnotation>();
     try {
       const { text, annotations } = await this.annotationRepository.fetchAnnotation(id);
-      console.log("Totaal aantal annotaties", annotations.length);
-      console.time();
+      console.log("Totaal aantal annotaties", annotations.length, "textlengte", text.length);
+      console.time(`process_${id}`);
       annotations.forEach((annotation: any) => {
         const normalizedAnnotation = normalizeAnnotation(annotation, text);
         originalAnnotations.set(annotation.id, normalizedAnnotation);
       });
-
       const { normalizedAnnotations, modifiedAnnotationsMap, processedAnnotationsMap } = applyRules(
         originalAnnotations,
         text,
       );
-      console.timeEnd();
+
+      console.timeEnd(`process_${id}`);
       return { text, normalizedAnnotations, processedAnnotationsMap, modifiedAnnotationsMap, originalAnnotations };
     } catch (err) {
       console.error(err);
