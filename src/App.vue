@@ -18,7 +18,7 @@
     </div>
   </div>
 
-  <div class="flex p-1 gap-1 viewer">
+  <div :class="loadingClass()">
     <div class="w-2/3 p-4 border">
       <label class="swap btn">
         <input type="checkbox" @click="showRuleModifiedAnnotations" />
@@ -42,14 +42,13 @@
         :text-lines="textLines"
       />
     </div>
+    <span v-if="loading" class="absolute left-1/2 top-1/2 loading loading-bars loading-lg"></span>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
-import { AnnotationRepository } from "./data-access/annotationRepository";
 import { textToLines } from "./text_utilities";
-import { normalizeAnnotation } from "./utils";
 import { WordSnapper } from "./lib/snapper/WordSnapper";
 
 import type { RuleAnnotation } from "./types/Annotation";
@@ -113,6 +112,9 @@ watch(text, (newText) => {
 const annotationService = new AnnotationService();
 
 const handleFetchedData = async (id: string) => {
+  loading.value = true;
+  resetMaps();
+  text.value = "";
   try {
     const value = await annotationService.getAnnotation(id);
     text.value = value.text;
@@ -121,8 +123,12 @@ const handleFetchedData = async (id: string) => {
     processedAnnotationsMap.value = value.processedAnnotationsMap;
   } catch (error) {
     alert("Fout bij het laden van de annotatie");
+  } finally {
+    loading.value = false;
   }
 };
 
-// Button event handlers
+const loadingClass = () => {
+  return [`flex p-1 gap-1 viewer`, loading?.value ? "opacity-30" : ""];
+};
 </script>
