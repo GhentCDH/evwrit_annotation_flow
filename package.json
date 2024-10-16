@@ -15,7 +15,7 @@
     "lint:staged": "lint-staged --allow-empty"
   },
   "dependencies": {
-    "@ghentcdh/vue-component-annotated-text": "0.4.0",
+    "@ghentcdh/vue-component-annotated-text": "0.4.1",
     "@heroicons/vue": "^2.1.5",
     "axios": "^1.7.7",
     "diff": "^5.2.0",

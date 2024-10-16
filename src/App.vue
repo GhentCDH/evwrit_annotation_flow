@@ -47,23 +47,17 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
-import { AnnotationRepository } from "./stores/annotationRepository";
+import { AnnotationRepository } from "./data-access/annotationRepository";
 import { textToLines } from "./text_utilities";
 import { normalizeAnnotation } from "./utils";
 import { WordSnapper } from "./lib/snapper/WordSnapper";
-import {
-  AnnotationTextRule,
-  TokenizeRule,
-  SanitizeAnnotationRule,
-  AnnotationRuleSet,
-  type AnnotationRuleResult,
-} from "./utils/annotation_utilities";
+
 import type { RuleAnnotation } from "./types/Annotation";
 import AnnotationEditList from "./components/AnnotationEditList.vue";
 import AnnotationTextCompare from "./components/AnnotationTextCompare.vue";
 import TypeFilter from "./components/TypeFilter.vue";
 import { FilterAnnotationsStore, type FilterValue } from "./stores/FilterStore";
-import { annotationHighlightColors } from "./styles/annotation-colors";
+import { AnnotationService } from "@/data-access/annotation.service";
 
 let snapper: WordSnapper;
 const loading = ref(true);
@@ -97,6 +91,7 @@ const handleChangedId = (event: Event) => {
   const target = event.target as HTMLInputElement;
   textId.value = target.value;
 };
+
 const resetMaps = () => {
   modifiedAnnotationsMap.value.clear();
   processedAnnotationsMap.value.clear();
@@ -115,69 +110,19 @@ watch(text, (newText) => {
   snapper = new WordSnapper(newText);
 });
 
+const annotationService = new AnnotationService();
+
 const handleFetchedData = async (id: string) => {
   try {
-    const annotationRepository = new AnnotationRepository();
-    const result = await annotationRepository.fetchAnnotation(id);
-    text.value = result.text;
-    result.annotations.forEach((annotation: any) => {
-      const normalizedAnnotation = normalizeAnnotation(annotation, text.value);
-      originalAnnotations.value.set(annotation.id, normalizedAnnotation);
-    });
-    applyRules(originalAnnotations.value);
-  } catch (err) {
-    error.value = String(err);
-  } finally {
-    loading.value = false;
+    const value = await annotationService.getAnnotation(id);
+    text.value = value.text;
+    originalAnnotations.value = value.originalAnnotations;
+    // // normalizedAnnotations.value = value.normalizedAnnotations;
+    modifiedAnnotationsMap.value = value.processedAnnotationsMap;
+    processedAnnotationsMap.value = value.modifiedAnnotationsMap;
+  } catch (error) {
+    alert("Fout bij het laden van de annotatie");
   }
-};
-const applyRules = (nomalizedAnnotations: Map<string, RuleAnnotation>) => {
-  const tokenizeRule = new TokenizeRule(text.value, 3);
-  const textRule = new AnnotationTextRule(text.value, 3);
-  const sanitizeRule = new SanitizeAnnotationRule(text.value);
-
-  const languageRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule], true, true);
-  const typographyRuleSet = new AnnotationRuleSet([sanitizeRule, textRule], true, true);
-  const orthographyRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule, textRule], true, true);
-  const lexisRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule], true, true);
-  const morphoSyntacticalRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule], true, false);
-  const handshiftRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule], true, true);
-  const defaultRuleSet = new AnnotationRuleSet([sanitizeRule], true, false);
-  nomalizedAnnotations.forEach((nolmalizedAnnotation: RuleAnnotation) => {
-    let resultAnnotation: AnnotationRuleResult = {
-      annotation: {} as RuleAnnotation,
-      rule_applied: false,
-    };
-    switch (nolmalizedAnnotation.type) {
-      case "typography":
-        resultAnnotation = typographyRuleSet.apply(nolmalizedAnnotation);
-        break;
-      case "orthography":
-        resultAnnotation = orthographyRuleSet.apply(nolmalizedAnnotation);
-        break;
-      case "lexis":
-        resultAnnotation = lexisRuleSet.apply(nolmalizedAnnotation);
-        break;
-      case "morpho_syntactical":
-        resultAnnotation = morphoSyntacticalRuleSet.apply(nolmalizedAnnotation);
-        break;
-      case "handshift":
-        resultAnnotation = handshiftRuleSet.apply(nolmalizedAnnotation);
-        break;
-      case "language":
-        resultAnnotation = languageRuleSet.apply(nolmalizedAnnotation);
-        break;
-      default:
-        //resultAnnotation = defaultRuleSet.apply(nolmalizedAnnotation);
-        break;
-    }
-    const processedAnnotion = resultAnnotation.rule_applied ? resultAnnotation.annotation : nolmalizedAnnotation;
-    if (resultAnnotation.rule_applied) {
-      processedAnnotion.color = annotationHighlightColors[processedAnnotion.type as FilterValue];
-      modifiedAnnotationsMap.value.set(nolmalizedAnnotation.id, processedAnnotion);
-    }
-    processedAnnotationsMap.value.set(nolmalizedAnnotation.id, processedAnnotion);
-  });
 };
 
 // Button event handlers
