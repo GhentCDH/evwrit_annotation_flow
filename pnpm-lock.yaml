@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@ghentcdh/vue-component-annotated-text':
-        specifier: 0.4.1
-        version: 0.4.1(vue@3.5.6(typescript@5.4.5))
+        specifier: 0.4.2
+        version: 0.4.2(vue@3.5.6(typescript@5.4.5))
       '@heroicons/vue':
         specifier: ^2.1.5
         version: 2.1.5(vue@3.5.6(typescript@5.4.5))
@@ -310,8 +310,8 @@ packages:
     resolution: {integrity: sha512-vH9PiIMMwvhCx31Af3HiGzsVNULDbyVkHXwlemn/B0TFj/00ho3y55efXrUZTfQipxoHC5u4xq6zblww1zm1Ig==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@ghentcdh/vue-component-annotated-text@0.4.1':
-    resolution: {integrity: sha512-c9sVeHQJmmp1Gg/fMYAZclI4ruvA9ulQ/71GZ4cvXLdDgYeHJjNQAtDBYnhDzV7hu121KsuVu7wqeysVtfHSJQ==}
+  '@ghentcdh/vue-component-annotated-text@0.4.2':
+    resolution: {integrity: sha512-qoLDGSqbA4NanHLRegqmy1Hfl1XsaYZNfEz6mgUYw2Bgk/zWz6RCO9uemPe8AZ8kfhUhdSk2JwGtfDDaKsexWg==}
     peerDependencies:
       vue: ^3.0.0
 
@@ -2485,7 +2485,7 @@ snapshots:
     dependencies:
       levn: 0.4.1
 
-  '@ghentcdh/vue-component-annotated-text@0.4.1(vue@3.5.6(typescript@5.4.5))':
+  '@ghentcdh/vue-component-annotated-text@0.4.2(vue@3.5.6(typescript@5.4.5))':
     dependencies:
       etali: 1.2.5
       lodash-es: 4.17.21
