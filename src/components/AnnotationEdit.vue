@@ -78,12 +78,14 @@ interface AnnotationEditProps {
 const props = defineProps<AnnotationEditProps>();
 const { annotation } = props;
 const emit = defineEmits(["confirmAnnotation", "cancelAnnotation", "changeSelected"]);
+
 watch(
   () => props.selected,
   (newVal) => {
     selectedAnnotation.value = newVal;
   },
 );
+
 const confirmAnnotation = () => {
   emit("confirmAnnotation", annotation);
 };
@@ -96,6 +98,7 @@ const getColor = () => {
   const type = annotation.type as AnnotationType;
   return `--text-color-custom:${annotationHtmlColors[type]}`;
 };
+
 const changeSelected = (changeSelected: ConfirmAnnotationType) => {
   selectedAnnotation.value = changeSelected === selectedAnnotation.value ? null : changeSelected;
 };

@@ -46,6 +46,7 @@ const fixOffset = function (updateState: UpdateAnnotationState) {
   const result = snapper!.fixOffset(updateState.newStart, updateState.newEnd);
   updateState.newStart = result.start;
   updateState.newEnd = result.end;
+
   if (result.modified) {
     emit("modifyAnnotations", { ...result, id: updateState.annotation.id });
   }
