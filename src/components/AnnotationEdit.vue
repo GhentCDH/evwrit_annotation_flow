@@ -21,8 +21,8 @@
               type="radio"
               :name="annotation.id"
               class="radio radio-success"
-              :checked="selectedAnnotation === 'edited'"
-              @click="changeSelected('edited')"
+              :checked="selectedAnnotation === 'modified'"
+              @click="changeSelected('modified')"
             />
             <!-- Gewijzigde annotatie -->
             <div class="w-full">
@@ -59,21 +59,20 @@
 
 <script setup lang="ts">
 import { CheckIcon, XMarkIcon } from "@heroicons/vue/16/solid";
-import type { FilterValue } from "src/stores/FilterStore";
 import { AnnotatedText, type Line } from "@ghentcdh/vue-component-annotated-text";
 import { ref, watch } from "vue";
-import type { RuleAnnotation } from "../types/Annotation";
+import type { RuleAnnotation, AnnotationType } from "../types/Annotation";
 import { annotationHtmlColors } from "../styles/annotation-colors";
 import { getAnnotatedLines } from "../utils/annotation_utils";
+import type { ConfirmAnnotationType } from "../stores/annotation.store";
 
-type Selected = "original" | "edited" | null | undefined;
-const selectedAnnotation = ref<Selected>();
+const selectedAnnotation = ref<ConfirmAnnotationType>();
 
 interface AnnotationEditProps {
   annotation: RuleAnnotation;
   originalAnnotation: RuleAnnotation;
   textLines: Line[];
-  selected: Selected;
+  selected: ConfirmAnnotationType;
 }
 
 const props = defineProps<AnnotationEditProps>();
@@ -94,10 +93,10 @@ const cancelAnnotation = () => {
 };
 
 const getColor = () => {
-  const type = annotation.type as FilterValue;
+  const type = annotation.type as AnnotationType;
   return `--text-color-custom:${annotationHtmlColors[type]}`;
 };
-const changeSelected = (changeSelected: Selected) => {
+const changeSelected = (changeSelected: ConfirmAnnotationType) => {
   selectedAnnotation.value = changeSelected === selectedAnnotation.value ? null : changeSelected;
 };
 </script>

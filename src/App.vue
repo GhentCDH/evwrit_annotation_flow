@@ -2,7 +2,7 @@
   <div class="navbar bg-base-100">
     <div class="flex-1">
       <label class="flex items-center gap-2 whitespace-nowrap" for="textId"
-      >Text ID
+        >Text ID
         <input
           class="input input-bordered w-full max-w-xs input-sm"
           type="number"
@@ -17,29 +17,30 @@
       <TypeFilter v-model="selectedFilters" />
     </div>
   </div>
-
   <div :class="loadingClass()">
-    <div class="w-2/3 p-4 border">
-      <label class="swap btn">
-        <input type="checkbox" @click="showRuleModifiedAnnotations" />
-        <div class="swap-on">Alle annotaties</div>
-        <div class="swap-off">Enkel Gewijzigde annotaties</div>
-      </label>
+    <div class="w-2/3 p-4 border flex flex-col">
+      <div>
+        <label class="swap btn">
+          <input type="checkbox" @click="showRuleModifiedAnnotations" />
+          <div class="swap-on">Alle annotaties</div>
+          <div class="swap-off">Enkel Gewijzigde annotaties</div>
+        </label>
+      </div>
       <AnnotationTextCompare
-        :filteredDataAnnotations="filterAnnotations.filteredDataAnnotations.value"
-        :filteredProcessedAnnotations="filterAnnotations.filteredProcessedAnnotations.value"
-        :modifiedAnnotationsMap="modifiedAnnotationsMap"
+        :originalAnnotations="originalAnnotations"
+        :processedAnnotations="processedAnnotations"
         :text-lines="textLines"
-        :processedAnnotationsMap="processedAnnotationsMap"
         :snapper="snapper"
+        @modify-annotations="modifyAnnotation"
+        @processes-annotation="processAnnotation"
       />
     </div>
     <div class="w-1/3 border p-4">
       <annotation-edit-list
-        :getOriginalAnnotation="filterAnnotations.getOriginalAnnotation"
-        :modifiedAnnotationsMap="modifiedAnnotationsMap"
-        :filteredModifiedAnnotations="filterAnnotations.filteredModifiedAnnotations.value"
+        :modifiedAnnotations="modifiedAnnotations"
         :text-lines="textLines"
+        @confirm-annotation="confirmAnnotation"
+        @confirm-annotations="confirmAnnotations"
       />
     </div>
     <span v-if="loading" class="absolute left-1/2 top-1/2 loading loading-bars loading-lg"></span>
@@ -51,78 +52,53 @@ import { ref, onMounted, computed, watch } from "vue";
 import { textToLines } from "./text_utilities";
 import { WordSnapper } from "./lib/snapper/WordSnapper";
 
-import type { RuleAnnotation } from "./types/Annotation";
 import AnnotationEditList from "./components/AnnotationEditList.vue";
 import AnnotationTextCompare from "./components/AnnotationTextCompare.vue";
 import TypeFilter from "./components/TypeFilter.vue";
-import { FilterAnnotationsStore, type FilterValue } from "./stores/FilterStore";
-import { AnnotationService } from "@/data-access/annotation.service";
+import { AnnotationStore, type ConfirmAnnotationType, type UpdateAnnotation } from "./stores/annotation.store";
 
 let snapper: WordSnapper;
+const annotationStore = new AnnotationStore();
 const loading = ref(true);
-const error = ref<string | null>(null);
 const text = ref<string>("");
-const selectedFilters = ref<FilterValue[]>([]);
 const textId = ref<string | "">("72427");
-const processedAnnotationsMap = ref<Map<string, RuleAnnotation>>(new Map());
-const originalAnnotations = ref<Map<string, RuleAnnotation>>(new Map());
+
+const { originalAnnotations, processedAnnotations, modifiedAnnotations, selectedFilters } = annotationStore;
 
 const showModified = ref<boolean>(false);
+
 const showRuleModifiedAnnotations = () => {
   showModified.value = !showModified.value;
+  annotationStore.changeShowModified(showModified.value);
 };
 
-//#region Filter
-const modifiedAnnotationsMap = ref<Map<string, RuleAnnotation>>(new Map());
-const filterAnnotations = new FilterAnnotationsStore({
-  originalAnnotations,
-  processedAnnotationsMap,
-  modifiedAnnotationsMap,
-  selectedFilters,
-  showModified,
-});
-
 const textLines = computed(() => textToLines(text.value));
-
-//#endregion
 
 const handleChangedId = (event: Event) => {
   const target = event.target as HTMLInputElement;
   textId.value = target.value;
 };
 
-const resetMaps = () => {
-  modifiedAnnotationsMap.value.clear();
-  processedAnnotationsMap.value.clear();
-  originalAnnotations.value.clear();
-};
 onMounted(() => {
   if (textId.value !== null) handleFetchedData(textId.value);
 });
 watch(textId, (newId) => {
   if (newId !== null) {
-    resetMaps();
     handleFetchedData(newId);
   }
 });
-watch(text, (newText) => {
-  snapper = new WordSnapper(newText);
-});
-
-const annotationService = new AnnotationService();
 
 const handleFetchedData = async (id: string) => {
   loading.value = true;
-  resetMaps();
   text.value = "";
   try {
-    const value = await annotationService.getAnnotation(id);
+    const value = await annotationStore.getAnnotation(id);
     text.value = value.text;
-    originalAnnotations.value = value.originalAnnotations;
-    modifiedAnnotationsMap.value = value.modifiedAnnotationsMap;
-    processedAnnotationsMap.value = value.processedAnnotationsMap;
+    snapper = new WordSnapper(text.value);
   } catch (error) {
-    alert("Fout bij het laden van de annotatie");
+    console.error(error);
+    console.error("Fout bij het laden van de annotaties");
+    // alert("Fout bij het laden van de annotatie");
   } finally {
     loading.value = false;
   }
@@ -130,5 +106,19 @@ const handleFetchedData = async (id: string) => {
 
 const loadingClass = () => {
   return [`flex p-1 gap-1 viewer`, loading?.value ? "opacity-30" : ""];
+};
+
+const processAnnotation = (annotation: UpdateAnnotation) => {
+  annotationStore.processAnnotation(annotation);
+};
+const modifyAnnotation = (annotation: UpdateAnnotation) => {
+  annotationStore.modifyAnnotation(annotation);
+};
+
+const confirmAnnotation = (id: string, confirm: ConfirmAnnotationType) => {
+  annotationStore.confirmAnnotation(id, confirm);
+};
+const confirmAnnotations = (annotation: Map<string, ConfirmAnnotationType>) => {
+  annotationStore.confirmAnnotations(annotation);
 };
 </script>
