@@ -1,6 +1,4 @@
-import { type Line } from "@ghentcdh/vue-component-annotated-text"; // Importeer je types
-import type { FilterValue } from "src/stores/FilterStore";
-import { type AnnotationTarget, type RuleAnnotation } from "../types/Annotation"; // Importeer je types
+import { type AnnotationTarget, type AnnotationType, type RuleAnnotation } from "../types/Annotation"; // Importeer je types
 import { annotationColors } from "../styles/annotation-colors";
 
 export const normalizeAnnotation = (annotation: any, text: string): RuleAnnotation => {
@@ -11,7 +9,7 @@ export const normalizeAnnotation = (annotation: any, text: string): RuleAnnotati
 
   const selectedText = text ? text.slice(startIndex, endIndex) : "";
 
-  const type = annotation.type as FilterValue;
+  const type = annotation.type as AnnotationType;
 
   return {
     id: annotation.id,

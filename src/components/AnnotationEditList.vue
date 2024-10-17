@@ -3,7 +3,7 @@
     <div class="card-title flex justify-between">
       <div class="flex-grow">Aangepaste Annotaties</div>
       <div class="gap-2 text-right">
-        <button class="btn btn-xs btn-outline text-gray-500" @click="selectAll('edited')">
+        <button class="btn btn-xs btn-outline text-gray-500" @click="selectAll('modified')">
           Selecteer alle aangepaste
         </button>
         <button class="btn btn-xs btn-outline text-gray-500" @click="selectAll('original')">
@@ -12,17 +12,17 @@
       </div>
     </div>
     <div class="flex flex-col gap-2 overflow-auto">
-      <div v-for="annotation in filteredModifiedAnnotations" :key="annotation.id">
+      <Lazy v-for="annotation in modifiedAnnotations" :key="annotation.original.id">
         <AnnotationEdit
-          :annotation="annotation"
-          :originalAnnotation="getOriginalAnnotation(annotation.id)"
+          :annotation="annotation.modified!"
+          :originalAnnotation="annotation.original"
           :textLines="textLines"
-          :selected="annotationSelected.get(annotation.id)"
+          :selected="annotationSelected.get(annotation.original.id)"
           @confirmAnnotation="confirmAnnotation"
           @cancelAnnotation="cancelAnnotation"
           @changeSelected="onChangeSelected"
         />
-      </div>
+      </Lazy>
     </div>
     <hr />
     <div class="flex justify-end">
@@ -32,50 +32,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { type Ref, ref } from "vue";
 import { type Line } from "@ghentcdh/vue-component-annotated-text";
-import type { AnnotationMap, RuleAnnotation } from "../types/Annotation";
-import AnnotationEdit from "@/components/AnnotationEdit.vue";
+import AnnotationEdit from "./AnnotationEdit.vue";
+import Lazy from "./LazyComponent.vue";
+import type { ModifiedAnnotation, RuleAnnotation } from "../types/Annotation";
+import type { ConfirmAnnotationType } from "../stores/annotation.store";
 
 interface AnnotationEditListProps {
-  getOriginalAnnotation: (id: string) => RuleAnnotation;
-  modifiedAnnotationsMap: AnnotationMap;
-
-  filteredModifiedAnnotations: RuleAnnotation[];
+  modifiedAnnotations: ModifiedAnnotation[];
   textLines: Line[];
 }
 
-type Selected = "original" | "edited" | null;
-const annotationSelected = ref(new Map<string, Selected>());
+const annotationSelected: Ref<Map<string, ConfirmAnnotationType>> = ref(new Map());
 
-const { modifiedAnnotationsMap, filteredModifiedAnnotations } = defineProps<AnnotationEditListProps>();
+const { modifiedAnnotations } = defineProps<AnnotationEditListProps>();
 
-// Button event handlers
-const confirmAnnotation = (annotation: RuleAnnotation) => {
-  console.log(`Annotatie met id ${annotation.id} is bevestigd.`);
-  modifiedAnnotationsMap.delete(annotation.id);
-};
-const cancelAnnotation = (annotation: RuleAnnotation) => {
-  console.log(`Annotatie met id ${annotation.id} is geannuleerd.`);
-  modifiedAnnotationsMap.delete(annotation.id);
-};
-
-const onChangeSelected = function (annotation: RuleAnnotation, selected: Selected) {
+const onChangeSelected = function (annotation: RuleAnnotation, selected: ConfirmAnnotationType) {
   if (!selected) annotationSelected.value.delete(annotation.id);
   else annotationSelected.value.set(annotation.id, selected);
 };
 
-const confirmSelectedAnnotations = () => {
-  console.log(annotationSelected);
-  for (const [id, selected] of annotationSelected.value.entries()) {
-    console.log(`Annotatie met id ${id} is ${selected}.`);
-    modifiedAnnotationsMap.delete(id);
-  }
-};
-
-const selectAll = (type: Selected) => {
-  filteredModifiedAnnotations.forEach((annotation) => {
-    onChangeSelected(annotation, type);
+const selectAll = (type: ConfirmAnnotationType) => {
+  modifiedAnnotations.forEach((annotation) => {
+    onChangeSelected(annotation.original, type);
   });
 };
+
+//#region Emit
+const emit = defineEmits(["confirmAnnotations", "confirmAnnotation"]);
+const confirmSelectedAnnotations = () => {
+  emit("confirmAnnotations", annotationSelected.value);
+};
+
+// Button event handlers
+const confirmAnnotation = (annotation: RuleAnnotation) => {
+  emit("confirmAnnotation", annotation.id, "modified");
+};
+const cancelAnnotation = (annotation: RuleAnnotation) => {
+  emit("confirmAnnotation", annotation.id, "original");
+};
+//#endregion
 </script>
