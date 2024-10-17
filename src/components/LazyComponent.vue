@@ -26,8 +26,8 @@ export default {
     const shouldRender = ref(false);
     const targetEl = ref();
     const fixedMinHeight = ref(0);
-    let unrenderTimer;
-    let renderTimer;
+    let unrenderTimer: number;
+    let renderTimer: number;
 
     const { stop } = useIntersectionObserver(
       targetEl,
