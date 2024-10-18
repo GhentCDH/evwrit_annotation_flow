@@ -11,7 +11,11 @@
           </div>
         </div>
         <div class="flex gap-2">
-          <button class="btn btn-circle btn-ghost text-red-900 btn-xs" @click="deleteAnnotation()">
+          <button
+            class="btn btn-circle btn-ghost text-red-900 btn-xs tooltip tooltip-left"
+            data-tip="Verwijder annotatie"
+            @click="deleteAnnotation()"
+          >
             <trash-icon />
           </button>
         </div>
@@ -34,7 +38,11 @@
                 :allow-edit="false"
               />
             </div>
-            <button class="btn btn-circle text-gray-500 btn-ghost" @click="confirmAnnotation('modified')">
+            <button
+              class="btn btn-circle btn-xs text-gray-500 btn-ghost tooltip tooltip-left z-[9999]"
+              data-tip="Bewaar gewijzigde annotatie"
+              @click="confirmAnnotation('modified')"
+            >
               <SaveIcon />
             </button>
           </label>
@@ -58,7 +66,8 @@
             </div>
             <button
               v-if="annotation"
-              class="btn btn-circle text-gray-500 btn-ghost"
+              class="btn btn-xs btn-circle text-gray-500 btn-ghost tooltip tooltip-left z-[9999]"
+              data-tip="Bewaar originele annotatie"
               @click="confirmAnnotation('original')"
             >
               <SaveIcon />
