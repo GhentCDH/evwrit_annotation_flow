@@ -1,13 +1,15 @@
 <template>
-  <div class="card border rounded-md w-full">
+  <div class="card border rounded-md w-full" :class="{ 'border-black': highlight, shadow: highlight }">
     <div class="card-body p-2">
       <div class="flex justify-between items-center">
         <div class="flex gap-2 justify-center">
           <div class="badge badge-outline badge-sm text-color-custom" :style="getColor()">{{ annotation.type }}</div>
-          <div v-if="hasDuplicates" class="badge badge-sm badge-warning">Duplicaat?</div>
+          <div v-if="duplicates.length > 1" class="badge badge-sm badge-warning cursor-pointer" @click="onHighlight()">
+            Duplicaat?
+          </div>
         </div>
         <div class="flex gap-2">
-          <button class="btn btn-circle btn-xs" @click="deleteAnnotation()">
+          <button class="btn btn-circle btn-ghost text-red-900 btn-xs" @click="deleteAnnotation()">
             <trash-icon />
           </button>
         </div>
@@ -30,12 +32,12 @@
                 :allow-edit="false"
               />
             </div>
-            <button class="btn btn-circle btn-xs btn-success btn-outline" @click="confirmAnnotation('original')">
-              <CheckIcon />
+            <button class="btn btn-circle text-gray-500 btn-ghost" @click="confirmAnnotation('modified')">
+              <SaveIcon />
             </button>
           </label>
           <hr />
-          <label class="label cursor-pointer">
+          <label class="label cursor-pointer gap-2">
             <input
               type="radio"
               :name="annotation.id"
@@ -51,8 +53,8 @@
                 :allow-edit="false"
               />
             </div>
-            <button class="btn btn-circle btn-xs btn-success btn-outline" @click="confirmAnnotation('original')">
-              <CheckIcon />
+            <button class="btn btn-circle text-gray-500 btn-ghost" @click="confirmAnnotation('original')">
+              <SaveIcon />
             </button>
           </label>
         </div>
@@ -62,9 +64,10 @@
 </template>
 
 <script setup lang="ts">
-import { CheckIcon, XMarkIcon, TrashIcon } from "@heroicons/vue/16/solid";
+import { CheckIcon, TrashIcon } from "@heroicons/vue/16/solid";
 import { AnnotatedText, type Line } from "@ghentcdh/vue-component-annotated-text";
 import { ref, watch } from "vue";
+import SaveIcon from "./SaveIcon.vue";
 import type { RuleAnnotation, AnnotationType } from "../types/Annotation";
 import { annotationHtmlColors } from "../styles/annotation-colors";
 import { getAnnotatedLines } from "../utils/annotation_utils";
@@ -77,12 +80,13 @@ interface AnnotationEditProps {
   originalAnnotation: RuleAnnotation;
   textLines: Line[];
   selected: ConfirmAnnotationType;
-  hasDuplicates: boolean;
+  duplicates: number[];
+  highlight: boolean;
 }
 
 const props = defineProps<AnnotationEditProps>();
 const { annotation } = props;
-const emit = defineEmits(["confirmAnnotation", "deleteAnnotation", "changeSelected"]);
+const emit = defineEmits(["confirmAnnotation", "deleteAnnotation", "changeSelected", "onHighlight"]);
 
 watch(
   () => props.selected,
@@ -91,8 +95,8 @@ watch(
   },
 );
 
-const confirmAnnotation = (changeSelected: ConfirmAnnotationType) => {
-  emit("confirmAnnotation", annotation);
+const confirmAnnotation = (type: ConfirmAnnotationType) => {
+  emit("confirmAnnotation", annotation, type);
 };
 
 const deleteAnnotation = () => {
@@ -104,7 +108,11 @@ const getColor = () => {
   return `--text-color-custom:${annotationHtmlColors[type]}`;
 };
 
-const changeSelected = (changeSelected: ConfirmAnnotationType) => {
-  selectedAnnotation.value = changeSelected === selectedAnnotation.value ? null : changeSelected;
+const changeSelected = (type: ConfirmAnnotationType) => {
+  selectedAnnotation.value = type === selectedAnnotation.value ? null : type;
+};
+
+const onHighlight = () => {
+  emit("onHighlight", props.duplicates);
 };
 </script>

@@ -12,16 +12,18 @@
       </div>
     </div>
     <div class="flex flex-col gap-2 overflow-auto">
-      <Lazy v-for="annotation in modifiedAnnotations" :key="annotation.original.id">
+      <Lazy v-for="annotation in modifiedAnnotations" :key="annotation.id">
         <AnnotationEdit
           :annotation="annotation.modified!"
           :originalAnnotation="annotation.original"
           :textLines="textLines"
-          :selected="annotationSelected.get(annotation.original.id)"
-          :has-duplicates="annotation.duplicates.length > 0"
+          :selected="annotationSelected.get(annotation.id)"
+          :duplicates="annotation.duplicates"
+          :highlight="highlightIds.includes(annotation.id)"
           @confirmAnnotation="confirmAnnotation"
           @deleteAnnotation="deleteAnnotation"
           @changeSelected="onChangeSelected"
+          @onHighlight="highlight"
         />
       </Lazy>
     </div>
@@ -39,6 +41,8 @@ import AnnotationEdit from "./AnnotationEdit.vue";
 import Lazy from "./LazyComponent.vue";
 import type { ModifiedAnnotation, RuleAnnotation } from "../types/Annotation";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
+
+const highlightIds: Ref<number> = ref([]);
 
 interface AnnotationEditListProps {
   modifiedAnnotations: ModifiedAnnotation[];
@@ -74,4 +78,8 @@ const deleteAnnotation = (annotation: RuleAnnotation) => {
   emit("deleteAnnotation", annotation.id);
 };
 //#endregion
+
+const highlight = (ids: number) => {
+  highlightIds.value = ids;
+};
 </script>

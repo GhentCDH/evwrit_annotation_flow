@@ -37,11 +37,17 @@ export class AnnotationStore {
   private readonly annotations = ref<Map<string, ModifiedAnnotation>>(new Map());
 
   private readonly showModified = ref(false);
+  private readonly showOnlyDuplicates = ref(false);
   public readonly selectedFilters = ref([] as AnnotationType[]);
 
   private readonly annotationValues = computed(() => Array.from(this.annotations.value.values()));
   private readonly filteredAnnotations = computed(() =>
-    filterAnnotations(this.selectedFilters.value, this.annotationValues.value, this.showModified.value),
+    filterAnnotations(
+      this.selectedFilters.value,
+      this.annotationValues.value,
+      this.showModified.value,
+      this.showOnlyDuplicates.value,
+    ),
   );
   public readonly originalAnnotations = computed(() =>
     this.filteredAnnotations.value.map((annotation) => annotation.original),
@@ -59,20 +65,27 @@ export class AnnotationStore {
     this.showModified.value = value;
   }
 
+  public changeShowOnlyDuplicates(value: boolean) {
+    this.showOnlyDuplicates.value = value;
+  }
+
   async getAnnotation(id: string) {
     this.reset();
     try {
       const result = await this.annotationRepository.fetchAnnotation(id);
       const { text } = result;
-      const annotations = [
-        result.annotations,
-        result.annotations.map((a) =>
-          cloneDeep({
-            ...a,
-            id: a.id + "__",
-          }),
-        ),
-      ].flat();
+      const annotations = result.annotations;
+
+      //
+      // [
+      // result.annotations,
+      //   result.annotations.slice(0, 10).map((a) =>
+      //     cloneDeep({
+      //       ...a,
+      //       id: a.id + "__"
+      //     })
+      //   )
+      // ].flat();
       this.createRulesSet(text);
       console.group("Load annotations for ", id);
       console.log("Totaal aantal annotaties", annotations.length, "textlengte", text.length);
@@ -155,7 +168,9 @@ export class AnnotationStore {
         break;
     }
     const processedAnnotion = resultAnnotation.rule_applied ? resultAnnotation.annotation : normalizedAnnotations;
-    processedAnnotion.color = annotationHighlightColors[processedAnnotion.type as AnnotationType];
+
+    if (resultAnnotation.rule_applied)
+      processedAnnotion.color = annotationHighlightColors[processedAnnotion.type as AnnotationType];
 
     const annotationObj = {
       id: normalizedAnnotations.id,
@@ -181,24 +196,28 @@ export class AnnotationStore {
     const { processed, modified } = ann;
 
     if (!modified) {
-      ann.modified = { ...processed, start, end };
-      return;
+      ann.modified = cloneDeep(processed);
     }
 
-    modified.end = end;
-    modified.start = start;
+    ann.modified.end = end;
+    ann.modified.start = start;
   }
 
   private confirmAnnotationLocal(id: string, confirm: ConfirmAnnotationType) {
     const ann = this.annotations.value.get(id)!;
-    console.log("confirm annotation", id, confirm);
+
     if (confirm === "modified") {
-      ann.processed = { ...ann.modified! };
+      ann.processed = cloneDeep(ann.modified!);
       ann.modified = null;
     } else if (confirm === "original") {
-      ann.processed = { ...ann.original };
+      ann.processed = cloneDeep(ann.original);
       ann.modified = null;
     }
+
+    const oldIds = this.duplicateRule.updateAnnotation(ann.processed);
+
+    oldIds.forEach((ann) => this.updateDuplicates(ann));
+    this.updateDuplicates(ann.processed);
   }
 
   public confirmAnnotation(id: string, confirm: ConfirmAnnotationType) {
@@ -206,10 +225,19 @@ export class AnnotationStore {
     //TODO create BACKEND request to confirm only one
   }
 
-  public confirmAnnotations(confirm: Map<string, ConfirmAnnotationType>) {
-    console.group("confirm annotations");
-    console.log(confirm);
+  public deleteAnnotation(id: string) {
+    const original = this.annotations.value.get(id)!;
+    this.annotations.value.delete(id);
 
+    const oldIds = this.duplicateRule.removeAnnotation(original.processed);
+    oldIds.forEach((ann) => this.updateDuplicates(ann));
+  }
+
+  private updateDuplicates(annotation: RuleAnnotation) {
+    this.annotations.value.get(annotation.id)!.duplicates = this.duplicateRule.hasDuplicate(annotation);
+  }
+
+  public confirmAnnotations(confirm: Map<string, ConfirmAnnotationType>) {
     confirm.forEach((value, key) => {
       this.confirmAnnotationLocal(key, value);
     });

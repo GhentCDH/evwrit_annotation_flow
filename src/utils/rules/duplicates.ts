@@ -74,7 +74,7 @@ export class DuplicateRule implements AnnotationRule {
    */
   constructor(
     private readonly text: string,
-    private readonly annotations: RuleAnnotation[],
+    readonly annotations: RuleAnnotation[],
   ) {
     this.mapAnnotations(annotations);
   }
@@ -82,7 +82,6 @@ export class DuplicateRule implements AnnotationRule {
   private addAnnotationToRules(annotation: RuleAnntotation) {
     const key = createDuplicateKey(annotation);
     const annotations = this.duplicateRuleSet.get(key) ?? [];
-
     annotations.push(annotation);
 
     this.duplicateRuleSet.set(key, annotations);
@@ -92,7 +91,10 @@ export class DuplicateRule implements AnnotationRule {
 
   private updateDuplicates(key: string, annotations: RuleAnnotation[]) {
     if (annotations.length < 2) {
-      annotations.forEach((annotation) => this.duplicateRuleSet.delete(annotation.id));
+      annotations.forEach((annotation) => {
+        this.duplicateRuleSet.delete(annotation.id);
+        this.duplicates.set(annotation.id, { duplicateKey: key, duplicates: [] });
+      });
       return;
     }
 
@@ -114,23 +116,41 @@ export class DuplicateRule implements AnnotationRule {
     }
   }
 
+  public removeAnnotation(annotation: RuleAnnotation): RuleAnnotation[] {
+    const oldKey = this.duplicates.get(annotation.id)?.duplicateKey;
+    const oldAnnotations = this.duplicateRuleSet.get(oldKey)?.filter((a) => a.id !== annotation.id);
+    this.duplicates.delete(annotation.id);
+
+    if (oldKey) {
+      this.duplicateRuleSet.set(oldKey, oldAnnotations);
+      this.updateDuplicates(oldKey, oldAnnotations);
+    }
+
+    return oldAnnotations;
+  }
+
   public updateAnnotation(annotation: RuleAnnotation) {
     const oldKey = this.duplicates.get(annotation.id)?.duplicateKey;
     const oldAnnotations = this.duplicateRuleSet.get(oldKey)?.filter((a) => a.id !== annotation.id);
+    this.duplicates.delete(annotation.id);
+
     if (oldKey) {
       this.duplicateRuleSet.set(oldKey, oldAnnotations);
-      this.updateDuplicates(updateDuplicates, oldAnnotations);
+      this.updateDuplicates(oldKey, oldAnnotations);
     }
 
     const { key: newKey, annotations: updatedAnnotations } = this.addAnnotationToRules(annotation);
+
     this.updateDuplicates(newKey, updatedAnnotations);
+
+    return oldAnnotations;
   }
 
-  hasDuplicate(annotation: RuleAnnotation): string[] {
+  public hasDuplicate(annotation: RuleAnnotation): string[] {
     return this.duplicates.get(annotation.id)?.duplicates ?? [];
   }
 
-  apply(annotation: RuleAnnotation): AnnotationRuleResult {
+  public apply(annotation: RuleAnnotation): AnnotationRuleResult {
     return { annotation, rule_applied: false };
   }
 }

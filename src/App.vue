@@ -19,11 +19,19 @@
   </div>
   <div :class="loadingClass()">
     <div class="w-2/3 p-4 border flex flex-col">
-      <div>
-        <label class="swap btn">
-          <input type="checkbox" @click="showRuleModifiedAnnotations" />
-          <div class="swap-on">Alle annotaties</div>
-          <div class="swap-off">Enkel Gewijzigde annotaties</div>
+      <div class="flex flex-row gap-4">
+        <label class="label cursor-pointer gap-2">
+          <input
+            type="checkbox"
+            class="toggle toggle-sm"
+            :checked="showModified"
+            @click="showRuleModifiedAnnotations"
+          />
+          <span class="label-text"> Enkel Gewijzigde annotaties</span>
+        </label>
+        <label class="label cursor-pointer gap-2">
+          <input type="checkbox" class="toggle toggle-sm" :checked="showOnlyDuplicates" @click="showDuplicates" />
+          <span class="label-text"> Enkel Duplicaten</span>
         </label>
       </div>
       <AnnotationTextCompare
@@ -67,10 +75,15 @@ const textId = ref<string | "">("72427");
 const { originalAnnotations, processedAnnotations, modifiedAnnotations, selectedFilters } = annotationStore;
 
 const showModified = ref<boolean>(false);
+const showOnlyDuplicates = ref<boolean>(false);
 
 const showRuleModifiedAnnotations = () => {
   showModified.value = !showModified.value;
   annotationStore.changeShowModified(showModified.value);
+};
+const showDuplicates = () => {
+  showOnlyDuplicates.value = !showOnlyDuplicates.value;
+  annotationStore.changeShowOnlyDuplicates(showOnlyDuplicates.value);
 };
 
 const textLines = computed(() => textToLines(text.value));
