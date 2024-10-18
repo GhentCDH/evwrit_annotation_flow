@@ -13,6 +13,7 @@ import {
 import { annotationHighlightColors } from "../styles/annotation-colors";
 import { filterAnnotations } from "../utils/filter.utils";
 import { DuplicateRule, DuplicateRuleOrig } from "../utils/rules/duplicates";
+import { AnnotationRuleSets } from "@/utils/rules/annotation.rule.sets";
 
 export type UpdateAnnotation = Pick<RuleAnnotation, "id" | "start" | "end">;
 
@@ -21,15 +22,9 @@ export type ConfirmAnnotationType = "original" | "modified" | null | undefined;
 export class AnnotationStore {
   private readonly annotationRepository = new AnnotationRepository();
 
-  //#region define ruleset
-  private languageRuleSet!: AnnotationRuleSet;
-  private typographyRuleSet!: AnnotationRuleSet;
-  private orthographyRuleSet!: AnnotationRuleSet;
-  private lexisRuleSet!: AnnotationRuleSet;
-  private morphoSyntacticalRuleSet!: AnnotationRuleSet;
-  private handshiftRuleSet!: AnnotationRuleSet;
-  private defaultRuleSet!: AnnotationRuleSet;
-  private duplicateRule!: DuplicateRule;
+  //#region ruleset
+  private annotationRuleSets: AnnotationRuleSets;
+  private duplicateRule!: DuplicateRuleOrig;
   //#endregion
 
   //#region define annotation computed
@@ -123,60 +118,13 @@ export class AnnotationStore {
 
   private createRulesSet(text: string) {
     this.text.value = text;
-    const tokenizeRule = new TokenizeRule(text, 3);
-    const textRule = new AnnotationTextRule(text, 3);
-    const sanitizeRule = new SanitizeAnnotationRule(text);
-
-    this.languageRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule], true, true);
-    this.typographyRuleSet = new AnnotationRuleSet([sanitizeRule, textRule], true, true);
-    this.orthographyRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule, textRule], true, true);
-    this.lexisRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule], true, true);
-    this.morphoSyntacticalRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule], true, false);
-    this.handshiftRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule], true, true);
-    this.defaultRuleSet = new AnnotationRuleSet([sanitizeRule], true, false);
+    this.annotationRuleSets = new AnnotationRuleSets(text);
   }
 
   private applyRules(annotation: RuleAnnotation, text: string) {
-    const normalizedAnnotations = normalizeAnnotation(annotation, text);
-    let resultAnnotation: AnnotationRuleResult = {
-      annotation: {} as RuleAnnotation,
-      rule_applied: false,
-    };
-    switch (normalizedAnnotations.type) {
-      case "typography":
-        resultAnnotation = this.typographyRuleSet.apply(normalizedAnnotations);
-        break;
-      case "orthography":
-        resultAnnotation = this.orthographyRuleSet.apply(normalizedAnnotations);
-        break;
-      case "lexis":
-        resultAnnotation = this.lexisRuleSet.apply(normalizedAnnotations);
-        break;
-      case "morpho_syntactical":
-        resultAnnotation = this.morphoSyntacticalRuleSet.apply(normalizedAnnotations);
-        break;
-      case "handshift":
-        resultAnnotation = this.handshiftRuleSet.apply(normalizedAnnotations);
-        break;
-      case "language":
-        resultAnnotation = this.languageRuleSet.apply(normalizedAnnotations);
-        break;
-      default:
-        //resultAnnotation = defaultRuleSet.apply(normalizedAnnotations);
-        break;
-    }
-    const processedAnnotion = resultAnnotation.rule_applied ? resultAnnotation.annotation : normalizedAnnotations;
+    const annotationObj = this.annotationRuleSets.applyRules(annotation);
 
-    if (resultAnnotation.rule_applied)
-      processedAnnotion.color = annotationHighlightColors[processedAnnotion.type as AnnotationType];
-
-    const annotationObj = {
-      id: normalizedAnnotations.id,
-      processed: processedAnnotion,
-      original: normalizedAnnotations,
-      modified: resultAnnotation.rule_applied ? resultAnnotation.annotation : null,
-    };
-    this.annotations.value.set(normalizedAnnotations.id, annotationObj);
+    this.annotations.value.set(annotation.id, annotationObj);
 
     return annotationObj;
   }
