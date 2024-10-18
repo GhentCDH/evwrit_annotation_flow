@@ -92,7 +92,7 @@ interface AnnotationEditProps {
 }
 
 const props = defineProps<AnnotationEditProps>();
-const { annotation, originalAnnotation } = props;
+const { originalAnnotation } = props;
 const emit = defineEmits(["confirmAnnotation", "deleteAnnotation", "changeSelected", "onHighlight"]);
 
 watch(
@@ -103,11 +103,11 @@ watch(
 );
 
 const confirmAnnotation = (type: ConfirmAnnotationType) => {
-  emit("confirmAnnotation", annotation, type);
+  emit("confirmAnnotation", originalAnnotation, type);
 };
 
 const deleteAnnotation = () => {
-  emit("deleteAnnotation", annotation);
+  emit("deleteAnnotation", originalAnnotation);
 };
 
 const getColor = () => {
