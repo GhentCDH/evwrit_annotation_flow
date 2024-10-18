@@ -1,18 +1,9 @@
 import { computed, ref } from "vue";
 import { cloneDeep } from "lodash-es";
 import { AnnotationRepository } from "../data-access/annotationRepository";
-import { normalizeAnnotation } from "../utils";
 import type { RuleAnnotation, AnnotationType, ModifiedAnnotation } from "../types/Annotation";
-import {
-  type AnnotationRuleResult,
-  AnnotationRuleSet,
-  AnnotationTextRule,
-  SanitizeAnnotationRule,
-  TokenizeRule,
-} from "../utils/annotation_utilities";
-import { annotationHighlightColors } from "../styles/annotation-colors";
 import { filterAnnotations } from "../utils/filter.utils";
-import { DuplicateRule, DuplicateRuleOrig } from "../utils/rules/duplicates";
+import { DuplicateRule } from "../utils/rules/duplicates";
 import { AnnotationRuleSets } from "@/utils/rules/annotation.rule.sets";
 
 export type UpdateAnnotation = Pick<RuleAnnotation, "id" | "start" | "end">;
@@ -23,8 +14,8 @@ export class AnnotationStore {
   private readonly annotationRepository = new AnnotationRepository();
 
   //#region ruleset
-  private annotationRuleSets: AnnotationRuleSets;
-  private duplicateRule!: DuplicateRuleOrig;
+  private annotationRuleSets!: AnnotationRuleSets;
+  private duplicateRule!: DuplicateRule;
   //#endregion
 
   //#region define annotation computed
@@ -86,7 +77,7 @@ export class AnnotationStore {
 
       // TODO combine annotations original and modified from the backend!
 
-      const annotationAppliedResults = annotations.map((annotation: any) => this.applyRules(annotation, text));
+      const annotationAppliedResults = annotations.map((annotation: any) => this.applyRules(annotation));
 
       this.checkForDuplicates(annotationAppliedResults);
 
@@ -121,7 +112,7 @@ export class AnnotationStore {
     this.annotationRuleSets = new AnnotationRuleSets(text);
   }
 
-  private applyRules(annotation: RuleAnnotation, text: string) {
+  private applyRules(annotation: RuleAnnotation) {
     const annotationObj = this.annotationRuleSets.applyRules(annotation);
 
     this.annotations.value.set(annotation.id, annotationObj);
@@ -145,8 +136,8 @@ export class AnnotationStore {
       ann.modified = cloneDeep(processed);
     }
 
-    ann.modified.end = end;
-    ann.modified.start = start;
+    ann.modified!.end = end;
+    ann.modified!.start = start;
   }
 
   private confirmAnnotationLocal(id: string, confirm: ConfirmAnnotationType) {

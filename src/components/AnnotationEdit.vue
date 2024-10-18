@@ -87,7 +87,7 @@ interface AnnotationEditProps {
   originalAnnotation: RuleAnnotation;
   textLines: Line[];
   selected: ConfirmAnnotationType;
-  duplicates: number[];
+  duplicates: string[];
   highlight: boolean;
 }
 

@@ -5,7 +5,7 @@ import {
   SanitizeAnnotationRule,
   TokenizeRule,
 } from "@/utils/annotation_utilities";
-import type { AnnotationType, RuleAnnotation } from "@/types/Annotation";
+import type { AnnotationType, ModifiedAnnotation, RuleAnnotation } from "@/types/Annotation";
 import { normalizeAnnotation } from "@/utils";
 import { annotationHighlightColors } from "@/styles/annotation-colors";
 
@@ -21,7 +21,7 @@ export class AnnotationRuleSets {
 
   //#endregion
 
-  constructor(text: string) {
+  constructor(private readonly text: string) {
     const tokenizeRule = new TokenizeRule(text, 3);
     const textRule = new AnnotationTextRule(text, 3);
     const sanitizeRule = new SanitizeAnnotationRule(text);
@@ -35,8 +35,8 @@ export class AnnotationRuleSets {
     this.defaultRuleSet = new AnnotationRuleSet([sanitizeRule], true, false);
   }
 
-  public applyRules(annotation: RuleAnnotation, text: string) {
-    const normalizedAnnotations = normalizeAnnotation(annotation, text);
+  public applyRules(annotation: RuleAnnotation): ModifiedAnnotation {
+    const normalizedAnnotations = normalizeAnnotation(annotation, this.text);
     let resultAnnotation: AnnotationRuleResult = {
       annotation: {} as RuleAnnotation,
       rule_applied: false,
@@ -74,6 +74,6 @@ export class AnnotationRuleSets {
       processed: processedAnnotion,
       original: normalizedAnnotations,
       modified: resultAnnotation.rule_applied ? resultAnnotation.annotation : null,
-    };
+    } as ModifiedAnnotation;
   }
 }

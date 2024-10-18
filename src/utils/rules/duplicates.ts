@@ -5,7 +5,7 @@ import type { AnnotationRule, AnnotationRuleResult } from "../annotation_utiliti
 /**
  * Find and reports duplicate annotations in a given text.
  */
-export class DuplicateRuleOrig implements AnnotationRule {
+class DuplicateRuleOrig implements AnnotationRule {
   name: string;
   annotation_map: Map<number, RuleAnnotation[]>;
   text: string;
@@ -61,11 +61,12 @@ const createDuplicateKey = (annotation: RuleAnnotation): string => {
   return `${annotation.type}-${annotation.start}-${annotation.end}`;
 };
 
-export class DuplicateRule implements AnnotationRule {
+export class DuplicateRule {
+  name: string = "Duplicate rule";
   // First value is a string of the value where a check is performed on
   private readonly duplicateRuleSet = new Map<string, RuleAnnotation[]>();
   // First value is id of the annotation with duplicates
-  private readonly duplicates = new Map<string, { duplicates: RuleAnnotation[]; duplicateKey: string }>();
+  private readonly duplicates = new Map<string, { duplicates: string[]; duplicateKey: string }>();
 
   /**
    *
@@ -73,13 +74,13 @@ export class DuplicateRule implements AnnotationRule {
    * @param annotations All current annotations to check for duplicates.
    */
   constructor(
-    private readonly text: string,
+    readonly text: string,
     readonly annotations: RuleAnnotation[],
   ) {
     this.mapAnnotations(annotations);
   }
 
-  private addAnnotationToRules(annotation: RuleAnntotation) {
+  private addAnnotationToRules(annotation: RuleAnnotation) {
     const key = createDuplicateKey(annotation);
     const annotations = this.duplicateRuleSet.get(key) ?? [];
     annotations.push(annotation);
@@ -117,8 +118,9 @@ export class DuplicateRule implements AnnotationRule {
   }
 
   public removeAnnotation(annotation: RuleAnnotation): RuleAnnotation[] {
-    const oldKey = this.duplicates.get(annotation.id)?.duplicateKey;
-    const oldAnnotations = this.duplicateRuleSet.get(oldKey)?.filter((a) => a.id !== annotation.id);
+    const oldKey = this.duplicates.get(annotation.id)?.duplicateKey as string;
+    const oldAnnotations = this.duplicateRuleSet.get(oldKey)?.filter((a) => a.id !== annotation.id) ?? [];
+
     this.duplicates.delete(annotation.id);
 
     if (oldKey) {
@@ -130,8 +132,9 @@ export class DuplicateRule implements AnnotationRule {
   }
 
   public updateAnnotation(annotation: RuleAnnotation) {
-    const oldKey = this.duplicates.get(annotation.id)?.duplicateKey;
-    const oldAnnotations = this.duplicateRuleSet.get(oldKey)?.filter((a) => a.id !== annotation.id);
+    const oldKey = this.duplicates.get(annotation.id)?.duplicateKey as string;
+    const oldAnnotations = this.duplicateRuleSet.get(oldKey)?.filter((a) => a.id !== annotation.id) ?? [];
+
     this.duplicates.delete(annotation.id);
 
     if (oldKey) {
@@ -147,10 +150,6 @@ export class DuplicateRule implements AnnotationRule {
   }
 
   public hasDuplicate(annotation: RuleAnnotation): string[] {
-    return this.duplicates.get(annotation.id)?.duplicates ?? [];
-  }
-
-  public apply(annotation: RuleAnnotation): AnnotationRuleResult {
-    return { annotation, rule_applied: false };
+    return this.duplicates.get(annotation.id)?.duplicates ?? ([] as string[]);
   }
 }

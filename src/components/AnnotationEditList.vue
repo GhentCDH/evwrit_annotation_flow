@@ -42,7 +42,7 @@ import Lazy from "./LazyComponent.vue";
 import type { ModifiedAnnotation, RuleAnnotation } from "../types/Annotation";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
 
-const highlightIds: Ref<number> = ref([]);
+const highlightIds: Ref<string[]> = ref([]);
 
 interface AnnotationEditListProps {
   modifiedAnnotations: ModifiedAnnotation[];
@@ -79,7 +79,7 @@ const deleteAnnotation = (annotation: RuleAnnotation) => {
 };
 //#endregion
 
-const highlight = (ids: number) => {
+const highlight = (ids: string[]) => {
   highlightIds.value = ids;
 };
 </script>

@@ -1,5 +1,5 @@
-import type { RuleAnnotation } from "@/types/Annotation";
-import { DuplicateRule, DuplicateRuleOrig } from "@/utils/rules/duplicates";
+import type { RuleAnnotation } from "../../../types/Annotation";
+import { DuplicateRule } from "../duplicates";
 
 const annotation1 = {
   id: "1",
@@ -72,8 +72,11 @@ describe("DuplicateRule", () => {
     ${annotation5}        | ${[annotation5.id, annotation5_dup.id]}
     ${annotation5_dup}    | ${[annotation5.id, annotation5_dup.id]}
     ${annotation5_n0_dup} | ${[]}
-  `("rule.hasDuplicate($annotation) -> $duplicates", ({ annotation, duplicates }) => {
-    const rule = new DuplicateRule("text", annotations);
-    expect(rule.hasDuplicate(annotation)).toEqual(duplicates);
-  });
+  `(
+    "rule.hasDuplicate($annotation) -> $duplicates",
+    ({ annotation, duplicates }: { annotation: RuleAnnotation; duplicates: string[] }) => {
+      const rule = new DuplicateRule("text", annotations);
+      expect(rule.hasDuplicate(annotation)).toEqual(duplicates);
+    },
+  );
 });
