@@ -3,9 +3,11 @@
     <div class="card-body p-2">
       <div class="flex justify-between items-center">
         <div class="flex gap-2 justify-center">
-          <div class="badge badge-outline badge-sm text-color-custom" :style="getColor()">{{ annotation.type }}</div>
+          <div class="badge badge-outline badge-sm text-color-custom" :style="getColor()">
+            {{ originalAnnotation.type }}
+          </div>
           <div v-if="duplicates.length > 1" class="badge badge-sm badge-warning cursor-pointer" @click="onHighlight()">
-            Duplicaat?
+            Duplicaat? ({{ originalAnnotation.id }})
           </div>
         </div>
         <div class="flex gap-2">
@@ -16,10 +18,10 @@
       </div>
       <div>
         <div class="annotation-body">
-          <label class="label cursor-pointer">
+          <label class="label cursor-pointer" v-if="annotation">
             <input
               type="radio"
-              :name="annotation.id"
+              :name="originalAnnotation.id"
               class="radio radio-success"
               :checked="selectedAnnotation === 'modified'"
               @click="changeSelected('modified')"
@@ -39,8 +41,9 @@
           <hr />
           <label class="label cursor-pointer gap-2">
             <input
+              v-if="annotation"
               type="radio"
-              :name="annotation.id"
+              :name="originalAnnotation.id"
               class="radio radio-success"
               :checked="selectedAnnotation === 'original'"
               @click="changeSelected('original')"
@@ -53,7 +56,11 @@
                 :allow-edit="false"
               />
             </div>
-            <button class="btn btn-circle text-gray-500 btn-ghost" @click="confirmAnnotation('original')">
+            <button
+              v-if="annotation"
+              class="btn btn-circle text-gray-500 btn-ghost"
+              @click="confirmAnnotation('original')"
+            >
               <SaveIcon />
             </button>
           </label>
@@ -76,7 +83,7 @@ import type { ConfirmAnnotationType } from "../stores/annotation.store";
 const selectedAnnotation = ref<ConfirmAnnotationType>();
 
 interface AnnotationEditProps {
-  annotation: RuleAnnotation;
+  annotation?: RuleAnnotation;
   originalAnnotation: RuleAnnotation;
   textLines: Line[];
   selected: ConfirmAnnotationType;
@@ -85,7 +92,7 @@ interface AnnotationEditProps {
 }
 
 const props = defineProps<AnnotationEditProps>();
-const { annotation } = props;
+const { annotation, originalAnnotation } = props;
 const emit = defineEmits(["confirmAnnotation", "deleteAnnotation", "changeSelected", "onHighlight"]);
 
 watch(
@@ -104,7 +111,7 @@ const deleteAnnotation = () => {
 };
 
 const getColor = () => {
-  const type = annotation.type as AnnotationType;
+  const type = originalAnnotation.type as AnnotationType;
   return `--text-color-custom:${annotationHtmlColors[type]}`;
 };
 
