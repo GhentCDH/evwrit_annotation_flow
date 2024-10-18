@@ -4,19 +4,28 @@ const isAnnotationTypeFiltered = (
   selectedFilters: AnnotationType[],
   annotation: ModifiedAnnotation,
   showModified: boolean,
+  showOnlyDuplicates: boolean,
 ) => {
-  if (showModified && !!annotation.modified) return false;
+  if (showOnlyDuplicates && annotation.duplicates.length < 1) return false;
+  if (showModified && !annotation.modified) return false;
 
   const type = (annotation?.original?.type ?? "") as AnnotationType;
   return selectedFilters.length === 0 || selectedFilters.includes(type);
 };
 
+export const sortAnnotations = (a: ModifiedAnnotation, b: ModifiedAnnotation) =>
+  a.processed.start < b.processed.start ? -1 : 1;
+
 export const filterAnnotations = (
   selectedFilters: AnnotationType[],
   annotations: ModifiedAnnotation[],
-  showModified: boolean,
+  showOnlyModified: boolean,
+  showOnlyDuplicates: boolean,
 ) => {
-  if (selectedFilters.length === 0 && !showModified) return annotations;
+  if (selectedFilters.length === 0 && !showOnlyModified && !showOnlyDuplicates)
+    return annotations.sort(sortAnnotations);
 
-  return annotations.filter((annotation) => isAnnotationTypeFiltered(selectedFilters, annotation, showModified));
+  return annotations
+    .filter((annotation) => isAnnotationTypeFiltered(selectedFilters, annotation, showOnlyModified, showOnlyDuplicates))
+    .sort(sortAnnotations);
 };

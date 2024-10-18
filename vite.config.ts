@@ -4,6 +4,10 @@ import { fileURLToPath } from "node:url";
 
 const isLocalDev = process.env.DEV === "local";
 
+if (isLocalDev) {
+  console.warn("Running in local dev mode");
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],

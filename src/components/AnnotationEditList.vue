@@ -12,15 +12,18 @@
       </div>
     </div>
     <div class="flex flex-col gap-2 overflow-auto">
-      <Lazy v-for="annotation in modifiedAnnotations" :key="annotation.original.id">
+      <Lazy v-for="annotation in modifiedAnnotations" :key="annotation.id">
         <AnnotationEdit
           :annotation="annotation.modified!"
           :originalAnnotation="annotation.original"
           :textLines="textLines"
-          :selected="annotationSelected.get(annotation.original.id)"
+          :selected="annotationSelected.get(annotation.id)"
+          :duplicates="annotation.duplicates"
+          :highlight="highlightIds.includes(annotation.id)"
           @confirmAnnotation="confirmAnnotation"
-          @cancelAnnotation="cancelAnnotation"
+          @deleteAnnotation="deleteAnnotation"
           @changeSelected="onChangeSelected"
+          @onHighlight="highlight"
         />
       </Lazy>
     </div>
@@ -38,6 +41,8 @@ import AnnotationEdit from "./AnnotationEdit.vue";
 import Lazy from "./LazyComponent.vue";
 import type { ModifiedAnnotation, RuleAnnotation } from "../types/Annotation";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
+
+const highlightIds: Ref<string[]> = ref([]);
 
 interface AnnotationEditListProps {
   modifiedAnnotations: ModifiedAnnotation[];
@@ -60,17 +65,21 @@ const selectAll = (type: ConfirmAnnotationType) => {
 };
 
 //#region Emit
-const emit = defineEmits(["confirmAnnotations", "confirmAnnotation"]);
+const emit = defineEmits(["confirmAnnotations", "confirmAnnotation", "deleteAnnotation"]);
 const confirmSelectedAnnotations = () => {
   emit("confirmAnnotations", annotationSelected.value);
 };
 
 // Button event handlers
-const confirmAnnotation = (annotation: RuleAnnotation) => {
-  emit("confirmAnnotation", annotation.id, "modified");
+const confirmAnnotation = (annotation: RuleAnnotation, type: ConfirmAnnotationType) => {
+  emit("confirmAnnotation", annotation.id, type);
 };
-const cancelAnnotation = (annotation: RuleAnnotation) => {
-  emit("confirmAnnotation", annotation.id, "original");
+const deleteAnnotation = (annotation: RuleAnnotation) => {
+  emit("deleteAnnotation", annotation.id);
 };
 //#endregion
+
+const highlight = (ids: string[]) => {
+  highlightIds.value = ids;
+};
 </script>

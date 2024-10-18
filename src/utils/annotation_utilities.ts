@@ -191,62 +191,6 @@ export class AnnotationTextRule implements AnnotationRule {
 /// These last two 'rules' do not modify annotations but flag and report annotations which look unreliable
 /// these are used in an batch processing script
 
-/**
- * Find and reports duplicate annotations in a given text.
- */
-export class DuplicateRule implements AnnotationRule {
-  name: string;
-  annotation_map: Map<number, RuleAnnotation[]>;
-  text: string;
-  textId: number;
-
-  /**
-   *
-   * @param text The full text to tokenize.
-   * @param annotations Aal current annotations to check for duplicates.
-   */
-  constructor(textId: number, text: string, annotations: RuleAnnotation[]) {
-    this.name = "duplicate_rule";
-    this.text = text;
-    this.textId = textId;
-
-    this.annotation_map = new Map();
-    annotations.forEach((a) => {
-      if (!this.annotation_map.has(a.start)) {
-        this.annotation_map.set(a.start, []);
-      }
-      this.annotation_map.get(a.start)?.push(a);
-    });
-  }
-
-  apply(annotation: RuleAnnotation): AnnotationRuleResult {
-    const fixedAnnotation: RuleAnnotation = annotation as RuleAnnotation;
-    let duplicate = false;
-    if (this.annotation_map.has(fixedAnnotation.start)) {
-      const otherAnnotations = this.annotation_map.get(fixedAnnotation.start);
-      const thisMetaData = fixedAnnotation.metadata as AnnotationMetaData;
-      otherAnnotations?.forEach((a) => {
-        const otherMetaData = a.metadata as AnnotationMetaData;
-        //meta data needs to be available
-        if (thisMetaData && otherMetaData) {
-          //no self-match allowed
-          if (thisMetaData.id != otherMetaData.id) {
-            //a duplicate if ends match
-            //we already know starts mats
-            //we do not know which one is the 'real' one
-            duplicate = a.end == annotation.end;
-            console.log(this.textId, JSON.stringify([a, annotation]));
-          }
-        }
-      });
-    }
-    return {
-      annotation: fixedAnnotation,
-      rule_applied: duplicate,
-    };
-  }
-}
-
 // /**
 //  * Find and reports annotations for which the text between the character index start and end is
 //  * not the same as the associated 'annotation text' from filemaker.

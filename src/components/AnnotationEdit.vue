@@ -1,25 +1,31 @@
 <template>
-  <div class="card border rounded-md w-full">
+  <div class="card border rounded-md w-full" :class="{ 'border-black': highlight, shadow: highlight }">
     <div class="card-body p-2">
       <div class="flex justify-between items-center">
         <div class="flex gap-2 justify-center">
-          <div class="badge badge-outline badge-sm text-color-custom" :style="getColor()">{{ annotation.type }}</div>
+          <div class="badge badge-outline badge-sm text-color-custom" :style="getColor()">
+            {{ originalAnnotation.type }}
+          </div>
+          <div v-if="duplicates.length > 1" class="badge badge-sm badge-warning cursor-pointer" @click="onHighlight()">
+            Duplicaat? ({{ originalAnnotation.id }})
+          </div>
         </div>
         <div class="flex gap-2">
-          <button class="btn btn-circle btn-xs btn-success btn-outline" @click="confirmAnnotation()">
-            <CheckIcon />
-          </button>
-          <button class="btn btn-circle btn-xs btn-error btn-outline" @click="cancelAnnotation()">
-            <XMarkIcon />
+          <button
+            class="btn btn-circle btn-ghost text-red-900 btn-xs tooltip tooltip-left"
+            data-tip="Verwijder annotatie"
+            @click="deleteAnnotation()"
+          >
+            <trash-icon />
           </button>
         </div>
       </div>
       <div>
         <div class="annotation-body">
-          <label class="label cursor-pointer">
+          <label class="label cursor-pointer" v-if="annotation">
             <input
               type="radio"
-              :name="annotation.id"
+              :name="originalAnnotation.id"
               class="radio radio-success"
               :checked="selectedAnnotation === 'modified'"
               @click="changeSelected('modified')"
@@ -32,12 +38,20 @@
                 :allow-edit="false"
               />
             </div>
+            <button
+              class="btn btn-circle btn-xs text-gray-500 btn-ghost tooltip tooltip-left z-[9999]"
+              data-tip="Bewaar gewijzigde annotatie"
+              @click="confirmAnnotation('modified')"
+            >
+              <SaveIcon />
+            </button>
           </label>
           <hr />
-          <label class="label cursor-pointer">
+          <label class="label cursor-pointer gap-2">
             <input
+              v-if="annotation"
               type="radio"
-              :name="annotation.id"
+              :name="originalAnnotation.id"
               class="radio radio-success"
               :checked="selectedAnnotation === 'original'"
               @click="changeSelected('original')"
@@ -50,6 +64,14 @@
                 :allow-edit="false"
               />
             </div>
+            <button
+              v-if="annotation"
+              class="btn btn-xs btn-circle text-gray-500 btn-ghost tooltip tooltip-left z-[9999]"
+              data-tip="Bewaar originele annotatie"
+              @click="confirmAnnotation('original')"
+            >
+              <SaveIcon />
+            </button>
           </label>
         </div>
       </div>
@@ -58,9 +80,10 @@
 </template>
 
 <script setup lang="ts">
-import { CheckIcon, XMarkIcon } from "@heroicons/vue/16/solid";
+import { TrashIcon } from "@heroicons/vue/16/solid";
 import { AnnotatedText, type Line } from "@ghentcdh/vue-component-annotated-text";
 import { ref, watch } from "vue";
+import SaveIcon from "./SaveIcon.vue";
 import type { RuleAnnotation, AnnotationType } from "../types/Annotation";
 import { annotationHtmlColors } from "../styles/annotation-colors";
 import { getAnnotatedLines } from "../utils/annotation_utils";
@@ -69,15 +92,17 @@ import type { ConfirmAnnotationType } from "../stores/annotation.store";
 const selectedAnnotation = ref<ConfirmAnnotationType>();
 
 interface AnnotationEditProps {
-  annotation: RuleAnnotation;
+  annotation?: RuleAnnotation;
   originalAnnotation: RuleAnnotation;
   textLines: Line[];
   selected: ConfirmAnnotationType;
+  duplicates: string[];
+  highlight: boolean;
 }
 
 const props = defineProps<AnnotationEditProps>();
-const { annotation } = props;
-const emit = defineEmits(["confirmAnnotation", "cancelAnnotation", "changeSelected"]);
+const { originalAnnotation } = props;
+const emit = defineEmits(["confirmAnnotation", "deleteAnnotation", "changeSelected", "onHighlight"]);
 
 watch(
   () => props.selected,
@@ -86,20 +111,24 @@ watch(
   },
 );
 
-const confirmAnnotation = () => {
-  emit("confirmAnnotation", annotation);
+const confirmAnnotation = (type: ConfirmAnnotationType) => {
+  emit("confirmAnnotation", originalAnnotation, type);
 };
 
-const cancelAnnotation = () => {
-  emit("cancelAnnotation", annotation);
+const deleteAnnotation = () => {
+  emit("deleteAnnotation", originalAnnotation);
 };
 
 const getColor = () => {
-  const type = annotation.type as AnnotationType;
+  const type = originalAnnotation.type as AnnotationType;
   return `--text-color-custom:${annotationHtmlColors[type]}`;
 };
 
-const changeSelected = (changeSelected: ConfirmAnnotationType) => {
-  selectedAnnotation.value = changeSelected === selectedAnnotation.value ? null : changeSelected;
+const changeSelected = (type: ConfirmAnnotationType) => {
+  selectedAnnotation.value = type === selectedAnnotation.value ? null : type;
+};
+
+const onHighlight = () => {
+  emit("onHighlight", props.duplicates);
 };
 </script>
