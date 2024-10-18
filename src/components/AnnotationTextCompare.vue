@@ -1,6 +1,6 @@
 <template>
   <div class="grid grid-cols-2 gap-2 overflow-auto h-full">
-    <div class="border border-x-0 border-y-0 border-l-0 border-r-2 border-dashed mr-2">
+    <div class="border border-x-0 border-y-0 border-l-0 border-r-2 border-dashed">
       <div class="text-lg font-bold">Originele Tekst</div>
       <AnnotatedText :annotations="originalAnnotations" :lines="textLines" />
     </div>
