@@ -18,8 +18,9 @@
           :originalAnnotation="annotation.original"
           :textLines="textLines"
           :selected="annotationSelected.get(annotation.original.id)"
+          :has-duplicates="annotation.duplicates.length > 0"
           @confirmAnnotation="confirmAnnotation"
-          @cancelAnnotation="cancelAnnotation"
+          @deleteAnnotation="deleteAnnotation"
           @changeSelected="onChangeSelected"
         />
       </Lazy>
@@ -60,17 +61,17 @@ const selectAll = (type: ConfirmAnnotationType) => {
 };
 
 //#region Emit
-const emit = defineEmits(["confirmAnnotations", "confirmAnnotation"]);
+const emit = defineEmits(["confirmAnnotations", "confirmAnnotation", "deleteAnnotation"]);
 const confirmSelectedAnnotations = () => {
   emit("confirmAnnotations", annotationSelected.value);
 };
 
 // Button event handlers
-const confirmAnnotation = (annotation: RuleAnnotation) => {
-  emit("confirmAnnotation", annotation.id, "modified");
+const confirmAnnotation = (annotation: RuleAnnotation, type: ConfirmAnnotationType) => {
+  emit("confirmAnnotation", annotation.id, type);
 };
-const cancelAnnotation = (annotation: RuleAnnotation) => {
-  emit("confirmAnnotation", annotation.id, "original");
+const deleteAnnotation = (annotation: RuleAnnotation) => {
+  emit("deleteAnnotation", annotation.id);
 };
 //#endregion
 </script>

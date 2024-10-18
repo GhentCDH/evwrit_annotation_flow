@@ -4,13 +4,11 @@
       <div class="flex justify-between items-center">
         <div class="flex gap-2 justify-center">
           <div class="badge badge-outline badge-sm text-color-custom" :style="getColor()">{{ annotation.type }}</div>
+          <div v-if="hasDuplicates" class="badge badge-sm badge-warning">Duplicaat?</div>
         </div>
         <div class="flex gap-2">
-          <button class="btn btn-circle btn-xs btn-success btn-outline" @click="confirmAnnotation()">
-            <CheckIcon />
-          </button>
-          <button class="btn btn-circle btn-xs btn-error btn-outline" @click="cancelAnnotation()">
-            <XMarkIcon />
+          <button class="btn btn-circle btn-xs" @click="deleteAnnotation()">
+            <trash-icon />
           </button>
         </div>
       </div>
@@ -32,6 +30,9 @@
                 :allow-edit="false"
               />
             </div>
+            <button class="btn btn-circle btn-xs btn-success btn-outline" @click="confirmAnnotation('original')">
+              <CheckIcon />
+            </button>
           </label>
           <hr />
           <label class="label cursor-pointer">
@@ -50,6 +51,9 @@
                 :allow-edit="false"
               />
             </div>
+            <button class="btn btn-circle btn-xs btn-success btn-outline" @click="confirmAnnotation('original')">
+              <CheckIcon />
+            </button>
           </label>
         </div>
       </div>
@@ -58,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { CheckIcon, XMarkIcon } from "@heroicons/vue/16/solid";
+import { CheckIcon, XMarkIcon, TrashIcon } from "@heroicons/vue/16/solid";
 import { AnnotatedText, type Line } from "@ghentcdh/vue-component-annotated-text";
 import { ref, watch } from "vue";
 import type { RuleAnnotation, AnnotationType } from "../types/Annotation";
@@ -73,11 +77,12 @@ interface AnnotationEditProps {
   originalAnnotation: RuleAnnotation;
   textLines: Line[];
   selected: ConfirmAnnotationType;
+  hasDuplicates: boolean;
 }
 
 const props = defineProps<AnnotationEditProps>();
 const { annotation } = props;
-const emit = defineEmits(["confirmAnnotation", "cancelAnnotation", "changeSelected"]);
+const emit = defineEmits(["confirmAnnotation", "deleteAnnotation", "changeSelected"]);
 
 watch(
   () => props.selected,
@@ -86,12 +91,12 @@ watch(
   },
 );
 
-const confirmAnnotation = () => {
+const confirmAnnotation = (changeSelected: ConfirmAnnotationType) => {
   emit("confirmAnnotation", annotation);
 };
 
-const cancelAnnotation = () => {
-  emit("cancelAnnotation", annotation);
+const deleteAnnotation = () => {
+  emit("deleteAnnotation", annotation);
 };
 
 const getColor = () => {

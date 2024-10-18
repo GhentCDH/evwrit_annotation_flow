@@ -11,12 +11,17 @@ const isAnnotationTypeFiltered = (
   return selectedFilters.length === 0 || selectedFilters.includes(type);
 };
 
+export const sortAnnotations = (a: ModifiedAnnotation, b: ModifiedAnnotation) =>
+  a.processed.start < b.processed.start ? -1 : 1;
+
 export const filterAnnotations = (
   selectedFilters: AnnotationType[],
   annotations: ModifiedAnnotation[],
   showModified: boolean,
 ) => {
-  if (selectedFilters.length === 0 && !showModified) return annotations;
+  if (selectedFilters.length === 0 && !showModified) return annotations.sort(sortAnnotations);
 
-  return annotations.filter((annotation) => isAnnotationTypeFiltered(selectedFilters, annotation, showModified));
+  return annotations
+    .filter((annotation) => isAnnotationTypeFiltered(selectedFilters, annotation, showModified))
+    .sort(sortAnnotations);
 };

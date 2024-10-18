@@ -1,4 +1,5 @@
 import { computed, ref } from "vue";
+import { cloneDeep } from "lodash-es";
 import { AnnotationRepository } from "../data-access/annotationRepository";
 import { normalizeAnnotation } from "../utils";
 import type { RuleAnnotation, AnnotationType, ModifiedAnnotation } from "../types/Annotation";
@@ -11,6 +12,7 @@ import {
 } from "../utils/annotation_utilities";
 import { annotationHighlightColors } from "../styles/annotation-colors";
 import { filterAnnotations } from "../utils/filter.utils";
+import { DuplicateRule, DuplicateRuleOrig } from "../utils/rules/duplicates";
 
 export type UpdateAnnotation = Pick<RuleAnnotation, "id" | "start" | "end">;
 
@@ -27,6 +29,7 @@ export class AnnotationStore {
   private morphoSyntacticalRuleSet!: AnnotationRuleSet;
   private handshiftRuleSet!: AnnotationRuleSet;
   private defaultRuleSet!: AnnotationRuleSet;
+  private duplicateRule!: DuplicateRule;
   //#endregion
 
   //#region define annotation computed
@@ -59,7 +62,17 @@ export class AnnotationStore {
   async getAnnotation(id: string) {
     this.reset();
     try {
-      const { text, annotations } = await this.annotationRepository.fetchAnnotation(id);
+      const result = await this.annotationRepository.fetchAnnotation(id);
+      const { text } = result;
+      const annotations = [
+        result.annotations,
+        result.annotations.map((a) =>
+          cloneDeep({
+            ...a,
+            id: a.id + "__",
+          }),
+        ),
+      ].flat();
       this.createRulesSet(text);
       console.group("Load annotations for ", id);
       console.log("Totaal aantal annotaties", annotations.length, "textlengte", text.length);
@@ -67,9 +80,9 @@ export class AnnotationStore {
 
       // TODO combine annotations original and modified from the backend!
 
-      annotations.forEach((annotation: any) => {
-        this.applyRules(annotation, text);
-      });
+      const annotationAppliedResults = annotations.map((annotation: any) => this.applyRules(annotation, text));
+
+      this.checkForDuplicates(annotationAppliedResults);
 
       console.timeEnd(`process_${id}`);
       console.log("Total processed annotations", this.processedAnnotations.value.length);
@@ -86,6 +99,15 @@ export class AnnotationStore {
   private reset() {
     this.text.value = "";
     this.annotations.value.clear();
+  }
+
+  private checkForDuplicates(modifiedAnnotations: ModifiedAnnotation[]) {
+    const annotations = modifiedAnnotations.map((a) => a.processed);
+    this.duplicateRule = new DuplicateRule(this.text.value, annotations);
+
+    modifiedAnnotations.forEach((modifiedAnnotation) => {
+      modifiedAnnotation.duplicates = this.duplicateRule.hasDuplicate(modifiedAnnotation.processed);
+    });
   }
 
   private createRulesSet(text: string) {
@@ -135,11 +157,15 @@ export class AnnotationStore {
     const processedAnnotion = resultAnnotation.rule_applied ? resultAnnotation.annotation : normalizedAnnotations;
     processedAnnotion.color = annotationHighlightColors[processedAnnotion.type as AnnotationType];
 
-    this.annotations.value.set(normalizedAnnotations.id, {
+    const annotationObj = {
+      id: normalizedAnnotations.id,
       processed: processedAnnotion,
       original: normalizedAnnotations,
       modified: resultAnnotation.rule_applied ? resultAnnotation.annotation : null,
-    });
+    };
+    this.annotations.value.set(normalizedAnnotations.id, annotationObj);
+
+    return annotationObj;
   }
 
   public processAnnotation({ end, start, id }: UpdateAnnotation) {

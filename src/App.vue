@@ -40,6 +40,7 @@
         :modifiedAnnotations="modifiedAnnotations"
         :text-lines="textLines"
         @confirm-annotation="confirmAnnotation"
+        @delete-annotation="deleteAnnotation"
         @confirm-annotations="confirmAnnotations"
       />
     </div>
@@ -111,6 +112,7 @@ const loadingClass = () => {
 const processAnnotation = (annotation: UpdateAnnotation) => {
   annotationStore.processAnnotation(annotation);
 };
+
 const modifyAnnotation = (annotation: UpdateAnnotation) => {
   annotationStore.modifyAnnotation(annotation);
 };
@@ -118,6 +120,11 @@ const modifyAnnotation = (annotation: UpdateAnnotation) => {
 const confirmAnnotation = (id: string, confirm: ConfirmAnnotationType) => {
   annotationStore.confirmAnnotation(id, confirm);
 };
+
+const deleteAnnotation = (id: string) => {
+  annotationStore.deleteAnnotation(id);
+};
+
 const confirmAnnotations = (annotation: Map<string, ConfirmAnnotationType>) => {
   annotationStore.confirmAnnotations(annotation);
 };

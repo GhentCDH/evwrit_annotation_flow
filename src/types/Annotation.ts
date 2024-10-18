@@ -37,7 +37,9 @@ export type AnnotationMetaData = {
 };
 
 export type ModifiedAnnotation = {
+  id: string;
   original: RuleAnnotation;
   processed: RuleAnnotation;
   modified: RuleAnnotation | null;
+  duplicates: string[];
 };
