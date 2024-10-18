@@ -71,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { CheckIcon, TrashIcon } from "@heroicons/vue/16/solid";
+import { TrashIcon } from "@heroicons/vue/16/solid";
 import { AnnotatedText, type Line } from "@ghentcdh/vue-component-annotated-text";
 import { ref, watch } from "vue";
 import SaveIcon from "./SaveIcon.vue";

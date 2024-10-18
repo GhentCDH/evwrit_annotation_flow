@@ -74,16 +74,16 @@ export class AnnotationStore {
     try {
       const result = await this.annotationRepository.fetchAnnotation(id);
       const { text } = result;
-      const annotations = //
-        [
-          result.annotations,
-          result.annotations.slice(0, 10).map((a) =>
-            cloneDeep({
-              ...a,
-              id: a.id + "__",
-            }),
-          ),
-        ].flat();
+      const annotations = result.annotations;
+      // [
+      //   result.annotations,
+      //   result.annotations.slice(0, 10).map((a) =>
+      //     cloneDeep({
+      //       ...a,
+      //       id: a.id + "__"
+      //     })
+      //   )
+      // ].flat();
       this.createRulesSet(text);
       console.group("Load annotations for ", id);
       console.log("Totaal aantal annotaties", annotations.length, "textlengte", text.length);
