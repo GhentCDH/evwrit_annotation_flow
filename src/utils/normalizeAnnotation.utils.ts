@@ -15,6 +15,7 @@ export const normalizeAnnotation = (annotation: any, text: string): RuleAnnotati
     id: annotation.id,
     start: annotation.text_selection.selection_start,
     end: annotation.text_selection.selection_end,
+    text: annotation.text_selection.text,
     class: `annotation-${type}`,
     label: type,
     target: annotationTarget,

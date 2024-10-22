@@ -74,6 +74,11 @@
             </button>
           </label>
         </div>
+        <div>
+          <ul>
+            <li class="badge badge-xs" v-for="rule in appliedRules" :key="rule">{{ rule }}</li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -84,7 +89,7 @@ import { TrashIcon } from "@heroicons/vue/16/solid";
 import { AnnotatedText, type Line } from "@ghentcdh/vue-component-annotated-text";
 import { ref, watch } from "vue";
 import SaveIcon from "./SaveIcon.vue";
-import type { RuleAnnotation, AnnotationType } from "../types/Annotation";
+import type { AnnotationType, RuleAnnotation } from "../types/Annotation";
 import { annotationHtmlColors } from "../styles/annotation-colors";
 import { getAnnotatedLines } from "../utils/annotation_utils";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
@@ -94,6 +99,7 @@ const selectedAnnotation = ref<ConfirmAnnotationType>();
 interface AnnotationEditProps {
   annotation?: RuleAnnotation;
   originalAnnotation: RuleAnnotation;
+  appliedRules: string[];
   textLines: Line[];
   selected: ConfirmAnnotationType;
   duplicates: string[];

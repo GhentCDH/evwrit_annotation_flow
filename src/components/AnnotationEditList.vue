@@ -26,6 +26,7 @@
             :selected="annotationSelected.get(annotation.id)"
             :duplicates="annotation.duplicates"
             :highlight="highlightIds.includes(annotation.id)"
+            :appliedRules="annotation.appliedRules"
             @confirmAnnotation="confirmAnnotation"
             @deleteAnnotation="deleteAnnotation"
             @changeSelected="onChangeSelected"

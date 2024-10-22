@@ -26,12 +26,12 @@ export function tokenize(text: string) {
   //token
   /* eslint-disable */
   lexer.rule(/[^\s,\.]+/, (ctx: { accept: (arg0: string) => void }) => {
-    ctx.accept('token')
-  })
+    ctx.accept("token");
+  });
 
   //parse the text
-  lexer.input(text)
-  return lexer.tokens()
+  lexer.input(text);
+  return lexer.tokens();
 }
 
 /**
@@ -46,29 +46,27 @@ export function findAllIndexesOf(text: string, search: string): number[] {
   if (
     !text ||
     !search ||
-    typeof text !== 'string' ||
-    typeof search !== 'string' ||
+    typeof text !== "string" ||
+    typeof search !== "string" ||
     text.length == 0 ||
     search.length == 0
   ) {
-    return []
+    return [];
   }
-  let indexes = []
-  let index = text.indexOf(search, 0)
+  let indexes = [];
+  let index = text.indexOf(search, 0);
   while (index != -1) {
-    indexes.push(index)
-    index = text.indexOf(search, index + 1)
+    indexes.push(index);
+    index = text.indexOf(search, index + 1);
   }
-  return indexes
+  return indexes;
 }
 
 export interface AnnotationFix {
-  start: number
-  end: number
-  modified: boolean
+  start: number;
+  end: number;
+  modified: boolean;
 }
-
-
 
 /**
  * Tries to match the text associated with an annotation to the full text and modifies te char start and stop indexes.
@@ -86,29 +84,27 @@ export function shiftToAnnotationMetaDataText(
   annotationText: string,
   annotationStartCharIndex: number,
   annotationStopCharIndex: number,
-  maxShift: number
+  maxShift: number,
 ): AnnotationFix {
-  const annotationLength = annotationStopCharIndex - annotationStartCharIndex
+  const annotationLength = annotationStopCharIndex - annotationStartCharIndex;
   if (annotationLength != annotationText.length) {
     console.log(
-      'Warning: annotation text length',
+      "Warning: annotation text length",
       annotationText.length,
-      ': ',
+      ": ",
       annotationText,
-      ' and annotation length do not match',
-      annotationLength
-    )
+      " and annotation length do not match",
+      annotationLength,
+    );
   }
 
   //strict matching, no fuzzy search
   //let indexes = [...text.matchAll(new RegExp(annotationText, 'g'))].map(a => a.index);
   //finds only first
-  let indexes = findAllIndexesOf(text, annotationText)
+  let indexes = findAllIndexesOf(text, annotationText);
 
   //only keep indexes close to start
-  let filteredIndexes = indexes.filter(
-    (startIndex) => Math.abs(startIndex - annotationStartCharIndex) <= maxShift
-  )
+  let filteredIndexes = indexes.filter((startIndex) => Math.abs(startIndex - annotationStartCharIndex) <= maxShift);
   //console.log("Indexes",indexes,filteredIndexes);
   if (filteredIndexes.length == 1) {
     //use the annotation text to determine end char index
@@ -116,12 +112,12 @@ export function shiftToAnnotationMetaDataText(
     return {
       start: filteredIndexes[0],
       end: filteredIndexes[0] + annotationText.length - 1,
-      modified: true
-    }
+      modified: true,
+    };
   }
 
   //no single clear acceptable result
-  return { start: annotationStartCharIndex, end: annotationStopCharIndex, modified: false }
+  return { start: annotationStartCharIndex, end: annotationStopCharIndex, modified: false };
 }
 
 /**
@@ -137,7 +133,7 @@ export function shiftToWordBoundary(
   text: string,
   annotationStartCharIndex: number,
   annotationStopCharIndex: number,
-  max_shift: number
+  max_shift: number,
 ): AnnotationFix {
   //max shift dependent on annotation length (with a min of two characters)
   //shift goes in two directions -2 to +2 characters
@@ -146,42 +142,30 @@ export function shiftToWordBoundary(
   // Create two maps:
   // one with the character index of each starting word
   // one with the character index of the end of each word
-  const mapStartCharIndexToToken: { [index: number]: number } = {}
-  const mapStopCharIndexToToken: { [index: number]: number } = {}
+  const mapStartCharIndexToToken: { [index: number]: number } = {};
+  const mapStopCharIndexToToken: { [index: number]: number } = {};
 
   tokenize(text).forEach((token: any) => {
-    mapStartCharIndexToToken[token['pos']] = token
-    mapStopCharIndexToToken[token['pos'] + token['value'].length - 1] = token
-  })
+    mapStartCharIndexToToken[token["pos"]] = token;
+    mapStopCharIndexToToken[token["pos"] + token["value"].length - 1] = token;
+  });
 
-  let newAnnotationStartCharIndex = -1
-  let newAnnotationStopCharIndex = -1
+  let newAnnotationStartCharIndex = -1;
+  let newAnnotationStopCharIndex = -1;
 
   //search for closest token start or stop index by shifting the start and stop indexes and
   //doing a lookup in the maps.
   for (let shift = 0; shift < maxAnnotationIndexShift; shift++) {
-    if (
-      newAnnotationStartCharIndex == -1 &&
-      mapStartCharIndexToToken[annotationStartCharIndex + shift]
-    )
-      newAnnotationStartCharIndex = annotationStartCharIndex + shift
+    if (newAnnotationStartCharIndex == -1 && mapStartCharIndexToToken[annotationStartCharIndex + shift])
+      newAnnotationStartCharIndex = annotationStartCharIndex + shift;
 
-    if (
-      newAnnotationStartCharIndex == -1 &&
-      mapStartCharIndexToToken[annotationStartCharIndex - shift]
-    )
-      newAnnotationStartCharIndex = annotationStartCharIndex - shift
+    if (newAnnotationStartCharIndex == -1 && mapStartCharIndexToToken[annotationStartCharIndex - shift])
+      newAnnotationStartCharIndex = annotationStartCharIndex - shift;
 
-    if (
-      newAnnotationStopCharIndex == -1 &&
-      mapStopCharIndexToToken[annotationStopCharIndex + shift]
-    )
-      newAnnotationStopCharIndex = annotationStopCharIndex + shift
-    if (
-      newAnnotationStopCharIndex == -1 &&
-      mapStopCharIndexToToken[annotationStopCharIndex - shift]
-    )
-      newAnnotationStopCharIndex = annotationStopCharIndex - shift
+    if (newAnnotationStopCharIndex == -1 && mapStopCharIndexToToken[annotationStopCharIndex + shift])
+      newAnnotationStopCharIndex = annotationStopCharIndex + shift;
+    if (newAnnotationStopCharIndex == -1 && mapStopCharIndexToToken[annotationStopCharIndex - shift])
+      newAnnotationStopCharIndex = annotationStopCharIndex - shift;
   }
 
   //return if the start or stop have been modified
@@ -191,20 +175,19 @@ export function shiftToWordBoundary(
 
   //no word boundry found in range at start
   if (newAnnotationStartCharIndex == -1) {
-    newAnnotationStartCharIndex = annotationStartCharIndex
+    newAnnotationStartCharIndex = annotationStartCharIndex;
     fixedStart = false;
   }
 
   //no word boundry found in range at stop
   if (newAnnotationStopCharIndex == -1) {
-    newAnnotationStopCharIndex = annotationStopCharIndex
+    newAnnotationStopCharIndex = annotationStopCharIndex;
     fixedStop = false;
   }
-  fixed = fixedStart || fixedStop
+  fixed = fixedStart || fixedStop;
 
-  return { start: newAnnotationStartCharIndex, end: newAnnotationStopCharIndex, modified: fixed }
+  return { start: newAnnotationStartCharIndex, end: newAnnotationStopCharIndex, modified: fixed };
 }
-
 
 export const textToLines = (text: string): Line[] => {
   text = text.replace(/\r\n/g, "\n").replace(/\u000b/g, "\n");
@@ -216,15 +199,15 @@ export const textToLines = (text: string): Line[] => {
   // split text into lines
   const lines = text.split("\n");
   const lineObjects = [] as Line[];
-  
+
   // split lines into line number, text, start and end
   for (let i = 0; i < lines.length; i++) {
     lineEnd = lineStart + (lines[i].length - 1);
     let matchArray = lines[i].match(regLineNumber);
-    
-    if(matchArray){
+
+    if (matchArray) {
       gutter = matchArray[0];
-    }else{
+    } else {
       gutter = "";
     }
 
@@ -247,18 +230,18 @@ export function shiftUpdateToWordBoundary(
   newStart: number,
   newEnd: number,
   mapStartCharIndexToToken: { [index: number]: number },
-  mapStopCharIndexToToken: { [index: number]: number }
+  mapStopCharIndexToToken: { [index: number]: number },
 ): AnnotationFix {
   const newAnnotationStartCharIndex = mapStartCharIndexToToken[newStart] ?? newStart;
   const newAnnotationStopCharIndex = mapStopCharIndexToToken[newEnd] ?? newEnd;
-  console.log('New Start:', newStart, 'Mapped Start:', newAnnotationStartCharIndex);
-  console.log('New End:', newEnd, 'Mapped End:', newAnnotationStopCharIndex);
+  console.log("New Start:", newStart, "Mapped Start:", newAnnotationStartCharIndex);
+  console.log("New End:", newEnd, "Mapped End:", newAnnotationStopCharIndex);
 
   const closestStart = mapStartCharIndexToToken[newStart] || mapStartCharIndexToToken[newEnd];
   const closestEnd = mapStopCharIndexToToken[newEnd] || mapStopCharIndexToToken[newStart];
-  const modified = (closestStart !== newStart || closestEnd !== newEnd);
-  console.log('Closest Start:', closestStart);
-  console.log('Closest End:', closestEnd);
+  const modified = closestStart !== newStart || closestEnd !== newEnd;
+  console.log("Closest Start:", closestStart);
+  console.log("Closest End:", closestEnd);
 
   return {
     start: newAnnotationStartCharIndex,
@@ -267,7 +250,10 @@ export function shiftUpdateToWordBoundary(
   };
 }
 
-export function createWordBoundaryMaps(text: string) : { mapStartCharIndexToToken: { [index: number]: number }, mapStopCharIndexToToken: { [index: number]: number }} {
+export function createWordBoundaryMaps(text: string): {
+  mapStartCharIndexToToken: { [index: number]: number };
+  mapStopCharIndexToToken: { [index: number]: number };
+} {
   const mapStartCharIndexToToken: { [index: number]: number } = {};
   const mapStopCharIndexToToken: { [index: number]: number } = {};
   tokenize(text).forEach((token: any) => {

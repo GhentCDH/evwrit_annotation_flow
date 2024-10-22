@@ -42,4 +42,5 @@ export type ModifiedAnnotation = {
   processed: RuleAnnotation;
   modified: RuleAnnotation | null;
   duplicates: string[];
+  appliedRules: string[];
 };
