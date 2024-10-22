@@ -11,22 +11,29 @@
         </button>
       </div>
     </div>
-    <div class="flex flex-col gap-2 overflow-auto">
-      <Lazy v-for="annotation in modifiedAnnotations" :key="annotation.id">
-        <AnnotationEdit
-          :annotation="annotation.modified!"
-          :originalAnnotation="annotation.original"
-          :textLines="textLines"
-          :selected="annotationSelected.get(annotation.id)"
-          :duplicates="annotation.duplicates"
-          :highlight="highlightIds.includes(annotation.id)"
-          @confirmAnnotation="confirmAnnotation"
-          @deleteAnnotation="deleteAnnotation"
-          @changeSelected="onChangeSelected"
-          @onHighlight="highlight"
-        />
-      </Lazy>
-    </div>
+    <ul class="flex flex-col gap-2 overflow-auto">
+      <li
+        v-for="annotation in modifiedAnnotations"
+        :key="annotation.id"
+        :data-annotation="annotation.id"
+        :ref="`annotation-${annotation.id}`"
+      >
+        <Lazy>
+          <AnnotationEdit
+            :annotation="annotation.modified!"
+            :originalAnnotation="annotation.original"
+            :textLines="textLines"
+            :selected="annotationSelected.get(annotation.id)"
+            :duplicates="annotation.duplicates"
+            :highlight="highlightIds.includes(annotation.id)"
+            @confirmAnnotation="confirmAnnotation"
+            @deleteAnnotation="deleteAnnotation"
+            @changeSelected="onChangeSelected"
+            @onHighlight="highlight"
+          />
+        </Lazy>
+      </li>
+    </ul>
     <hr />
     <div class="flex justify-end">
       <button class="btn" @click="confirmSelectedAnnotations">Bevestig Selectie</button>
@@ -35,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import { type Ref, ref } from "vue";
+import { type Ref, ref, watch } from "vue";
 import { type Line } from "@ghentcdh/vue-component-annotated-text";
 import AnnotationEdit from "./AnnotationEdit.vue";
 import Lazy from "./LazyComponent.vue";
@@ -47,11 +54,19 @@ const highlightIds: Ref<string[]> = ref([]);
 interface AnnotationEditListProps {
   modifiedAnnotations: ModifiedAnnotation[];
   textLines: Line[];
+  highlightAnnotationIds: string[];
 }
 
 const annotationSelected: Ref<Map<string, ConfirmAnnotationType>> = ref(new Map());
 
-const { modifiedAnnotations } = defineProps<AnnotationEditListProps>();
+const { modifiedAnnotations, highlightAnnotationIds } = defineProps<AnnotationEditListProps>();
+
+watch(
+  () => highlightAnnotationIds,
+  (newVal) => {
+    highlight(newVal);
+  },
+);
 
 const onChangeSelected = function (annotation: RuleAnnotation, selected: ConfirmAnnotationType) {
   if (!selected) annotationSelected.value.delete(annotation.id);
@@ -77,9 +92,9 @@ const confirmAnnotation = (annotation: RuleAnnotation, type: ConfirmAnnotationTy
 const deleteAnnotation = (annotation: RuleAnnotation) => {
   emit("deleteAnnotation", annotation.id);
 };
-//#endregion
 
 const highlight = (ids: string[]) => {
   highlightIds.value = ids;
 };
+//#endregion
 </script>

@@ -1,4 +1,4 @@
-import { type AnnotationTarget, type AnnotationType, type RuleAnnotation } from "../types/Annotation"; // Importeer je types
+import { type AnnotationType, type RuleAnnotation } from "../types/Annotation"; // Importeer je types
 import { annotationColors } from "../styles/annotation-colors";
 
 export const normalizeAnnotation = (annotation: any, text: string): RuleAnnotation => {

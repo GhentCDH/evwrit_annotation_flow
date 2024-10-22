@@ -41,12 +41,14 @@
         :snapper="snapper"
         @modify-annotations="modifyAnnotation"
         @processes-annotation="processAnnotation"
+        @show-annotation="showAnnotation"
       />
     </div>
     <div class="w-1/3 border p-4">
       <annotation-edit-list
         :modifiedAnnotations="modifiedAnnotations"
         :text-lines="textLines"
+        :highlightAnnotationIds="highlightAnnotationIds"
         @confirm-annotation="confirmAnnotation"
         @delete-annotation="deleteAnnotation"
         @confirm-annotations="confirmAnnotations"
@@ -57,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, watch, type Ref } from "vue";
 import { textToLines } from "./text_utilities";
 import { WordSnapper } from "./lib/snapper/WordSnapper";
 
@@ -65,6 +67,7 @@ import AnnotationEditList from "./components/AnnotationEditList.vue";
 import AnnotationTextCompare from "./components/AnnotationTextCompare.vue";
 import TypeFilter from "./components/TypeFilter.vue";
 import { AnnotationStore, type ConfirmAnnotationType, type UpdateAnnotation } from "./stores/annotation.store";
+import type { RuleAnnotation } from "@/types/Annotation";
 
 let snapper: WordSnapper;
 const annotationStore = new AnnotationStore();
@@ -76,6 +79,7 @@ const { originalAnnotations, processedAnnotations, modifiedAnnotations, selected
 
 const showModified = ref<boolean>(false);
 const showOnlyDuplicates = ref<boolean>(false);
+const highlightAnnotationIds: Ref<string[]> = ref([]);
 
 const showRuleModifiedAnnotations = () => {
   showModified.value = !showModified.value;
@@ -140,5 +144,14 @@ const deleteAnnotation = (id: string) => {
 
 const confirmAnnotations = (annotation: Map<string, ConfirmAnnotationType>) => {
   annotationStore.confirmAnnotations(annotation);
+};
+
+const showAnnotation = (annotation: RuleAnnotation) => {
+  highlightAnnotationIds.value = [];
+  // document.get.target.scrollIntoView();
+  if (!annotation) return;
+
+  document.querySelector(`[data-annotation="${annotation.id}"]`)?.scrollIntoView();
+  highlightAnnotationIds.value = [annotation.id];
 };
 </script>
