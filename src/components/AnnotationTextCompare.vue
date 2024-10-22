@@ -15,6 +15,7 @@
         @annotation-update-begin="onAnnotationUpdateBegin"
         @annotation-updating="onAnnotationUpdating"
         @annotation-update-end="onAnnotationUpdateEnd"
+        @annotation-double-click="onAnnotationDoubleClick"
       />
     </div>
   </div>
@@ -39,7 +40,7 @@ const { processedAnnotations, snapper, originalAnnotations, textLines } = define
 import { pick } from "lodash-es";
 
 //#region Emit
-const emit = defineEmits(["modifyAnnotations", "processesAnnotation"]);
+const emit = defineEmits(["modifyAnnotations", "processesAnnotation", "showAnnotation"]);
 
 // AnnotatedText event handlers
 const fixOffset = function (updateState: UpdateAnnotationState) {
@@ -64,6 +65,10 @@ const onAnnotationUpdating = function (updateState: UpdateAnnotationState) {
 };
 const onAnnotationUpdateEnd = function (updateState: UpdateAnnotationState) {
   emit("processesAnnotation", pick(updateState.annotation, ["id", "start", "end"]));
+};
+
+const onAnnotationDoubleClick = function (updateState: UpdateAnnotationState) {
+  emit("showAnnotation", updateState.annotation);
 };
 // #endregion
 </script>
