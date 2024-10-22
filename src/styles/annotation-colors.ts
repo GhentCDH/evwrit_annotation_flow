@@ -29,4 +29,6 @@ export const createHighlightColors = (): Record<string, AnnotationColor> => {
   return colorSet;
 };
 
+console.table(annotationColors);
+
 export const annotationHighlightColors = createHighlightColors();

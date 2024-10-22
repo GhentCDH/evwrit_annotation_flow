@@ -3,7 +3,7 @@ import { annotationColors } from "../styles/annotation-colors";
 
 export const normalizeAnnotation = (annotation: any, text: string): RuleAnnotation => {
   const textLength = annotation.text_selection.selection_end - annotation.text_selection.selection_start;
-  const annotationTarget = annotation.type === "handshift" ? "guter" : "text"; // (textLength > 130 ? "gutter" : "text") as AnnotationTarget;
+  const annotationTarget = annotation.type === "handshift" ? "gutter" : "text"; // (textLength > 130 ? "gutter" : "text") as AnnotationTarget;
   const startIndex = annotation.text_selection.selection_start - 1; // 0-gebaseerde index
   const endIndex = annotation.text_selection.selection_end - 1;
 
