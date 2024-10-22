@@ -1,35 +1,8 @@
 import { cloneDeep } from "lodash-es";
-import { type RuleAnnotation, type AnnotationMetaData } from "../types/Annotation";
+import type { AnnotationRule, AnnotationRuleResult } from "./rules/annotation.rule";
+import { type RuleAnnotation } from "../types/Annotation";
 
-import { shiftToAnnotationMetaDataText, shiftToWordBoundary } from "../text_utilities";
-
-export interface AnnotationRuleResult {
-  annotation: RuleAnnotation;
-  rule_applied: boolean;
-}
-
-/**
- * An annotation rule is a rule which can be applied to
- * a single annotation to fix the
- * annotation start and end character indexes.
- */
-export interface AnnotationRule {
-  /**
-   * The name of the rule
-   */
-  name: string;
-
-  /**
-   * The full! text which contains the annotation.
-   */
-  text: string;
-
-  /**
-   * Apply the rule to a single annotation.
-   * @param annotation The annotation to align.
-   */
-  apply(annotation: RuleAnnotation): AnnotationRuleResult;
-}
+import { shiftToWordBoundary } from "../text_utilities";
 
 /**
  * Makes sure the indexes are valid:  0 >= index < text.length
@@ -81,32 +54,35 @@ export class AnnotationRuleSet implements AnnotationRule {
 
   apply(annotation: RuleAnnotation): AnnotationRuleResult {
     let applied_rule = false;
+    const appliedRules = [];
     if (this.alwaysApplyFirstRule) {
       const firstRuleResult = this.rules[0].apply(annotation);
       if (firstRuleResult.rule_applied) {
+        appliedRules.push(this.rules[0].name);
         //console.log('rule applied', this.rules[0].name);
         annotation = firstRuleResult.annotation;
         applied_rule = firstRuleResult.rule_applied;
         //console.log('rule applied', this.rules[0].name);
         if (this.stopWhenRuleApplied) {
-          return { annotation: annotation, rule_applied: applied_rule };
+          return { annotation: annotation, rule_applied: applied_rule, appliedRules };
         }
       }
     }
     for (let i = this.alwaysApplyFirstRule ? 1 : 0; i < this.rules.length; i++) {
       const ruleResult = this.rules[i].apply(annotation);
       if (ruleResult.rule_applied) {
+        appliedRules.push(this.rules[i].name);
         //console.log('rule applied', this.rules[i].name);
         annotation = ruleResult.annotation;
         applied_rule = ruleResult.rule_applied;
 
         // Stop als stopWhenRuleApplied true is
         if (this.stopWhenRuleApplied) {
-          return { annotation: annotation, rule_applied: applied_rule };
+          return { annotation: annotation, rule_applied: applied_rule, appliedRules };
         }
       }
     }
-    return { annotation: annotation, rule_applied: applied_rule };
+    return { annotation: annotation, rule_applied: applied_rule, appliedRules };
   }
 }
 
@@ -146,45 +122,6 @@ export class TokenizeRule implements AnnotationRule {
       annotation: fixedAnnotation,
       rule_applied: result.modified,
     };
-  }
-}
-
-export class AnnotationTextRule implements AnnotationRule {
-  name: string;
-  text: string;
-  maxShift: number;
-
-  constructor(text: string, maxShift: number) {
-    this.name = "annotation_text_rule";
-    this.text = text;
-    this.maxShift = maxShift;
-  }
-
-  apply(annotation: RuleAnnotation) {
-    let fixedAnnotation = annotation;
-    let applied_rule = false;
-
-    if (annotation.text) {
-      //removes whitespace from text!
-      const annotationText = annotation.text.trim();
-      const result = shiftToAnnotationMetaDataText(
-        this.text,
-        annotationText,
-        annotation.start,
-        annotation.end,
-        this.maxShift,
-      );
-      if (result.modified) {
-        applied_rule = true;
-        fixedAnnotation = cloneDeep(annotation) as RuleAnnotation;
-        fixedAnnotation.start = result.start;
-        fixedAnnotation.end = result.end;
-      }
-    }
-    return {
-      annotation: fixedAnnotation,
-      rule_applied: applied_rule,
-    } as AnnotationRuleResult;
   }
 }
 

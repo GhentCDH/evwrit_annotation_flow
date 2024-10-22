@@ -1,7 +1,5 @@
-import { forEach } from "lodash-es";
+import type { AnnotationRule, AnnotationRuleResult } from "./annotation.rule";
 import type { AnnotationMetaData, RuleAnnotation } from "../../types/Annotation";
-import type { AnnotationRule, AnnotationRuleResult } from "../annotation_utilities";
-
 /**
  * Find and reports duplicate annotations in a given text.
  */

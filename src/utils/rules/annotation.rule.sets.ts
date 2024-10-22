@@ -1,13 +1,9 @@
-import {
-  type AnnotationRuleResult,
-  AnnotationRuleSet,
-  AnnotationTextRule,
-  SanitizeAnnotationRule,
-  TokenizeRule,
-} from "@/utils/annotation_utilities";
-import type { AnnotationType, ModifiedAnnotation, RuleAnnotation } from "@/types/Annotation";
-import { normalizeAnnotation } from "@/utils";
-import { annotationHighlightColors } from "@/styles/annotation-colors";
+import type { AnnotationRuleResult } from "./annotation.rule";
+import { AnnotationRuleSet, SanitizeAnnotationRule, TokenizeRule } from "../annotation_utilities";
+import type { AnnotationType, ModifiedAnnotation, RuleAnnotation } from "../../types/Annotation";
+import { normalizeAnnotation } from "../normalizeAnnotation.utils";
+import { annotationHighlightColors } from "../../styles/annotation-colors";
+import { AnnotationTextRule } from "../rules/annotation-text.rule";
 
 export class AnnotationRuleSets {
   //#region define ruleset
@@ -30,7 +26,7 @@ export class AnnotationRuleSets {
     this.typographyRuleSet = new AnnotationRuleSet([sanitizeRule, textRule], true, true);
     this.orthographyRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule, textRule], true, true);
     this.lexisRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule], true, true);
-    this.morphoSyntacticalRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule], true, false);
+    this.morphoSyntacticalRuleSet = new AnnotationRuleSet([sanitizeRule, textRule, tokenizeRule], true, false);
     this.handshiftRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule], true, true);
     this.defaultRuleSet = new AnnotationRuleSet([sanitizeRule], true, false);
   }
@@ -40,6 +36,7 @@ export class AnnotationRuleSets {
     let resultAnnotation: AnnotationRuleResult = {
       annotation: {} as RuleAnnotation,
       rule_applied: false,
+      appliedRules: [],
     };
     switch (normalizedAnnotations.type) {
       case "typography":
@@ -74,6 +71,7 @@ export class AnnotationRuleSets {
       processed: processedAnnotion,
       original: normalizedAnnotations,
       modified: resultAnnotation.rule_applied ? resultAnnotation.annotation : null,
+      appliedRules: resultAnnotation.appliedRules,
     } as ModifiedAnnotation;
   }
 }

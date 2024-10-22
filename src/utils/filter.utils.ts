@@ -25,7 +25,8 @@ export const filterAnnotations = (
   if (selectedFilters.length === 0 && !showOnlyModified && !showOnlyDuplicates)
     return annotations.sort(sortAnnotations);
 
-  return annotations
+  const result = annotations
     .filter((annotation) => isAnnotationTypeFiltered(selectedFilters, annotation, showOnlyModified, showOnlyDuplicates))
     .sort(sortAnnotations);
+  return result;
 };
