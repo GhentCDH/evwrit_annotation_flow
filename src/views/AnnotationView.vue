@@ -1,6 +1,6 @@
 <template>
   <div class="navbar bg-base-100">
-    <SearchPaginator :active-id="activeId" />
+    <SearchPaginator :active-id="activeId" :paginatedIds="paginatedIds" />
 
     <div class="flex-none">
       <TypeFilter v-model="selectedFilters" />
@@ -50,6 +50,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, type Ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { computedAsync } from "@vueuse/core";
 import { textToLines } from "../text_utilities";
 import { WordSnapper } from "../lib/snapper/WordSnapper";
 
@@ -59,12 +60,12 @@ import TypeFilter from "../components/TypeFilter.vue";
 import { AnnotationStore, type ConfirmAnnotationType, type UpdateAnnotation } from "../stores/annotation.store";
 import type { RuleAnnotation } from "@/types/Annotation";
 import SearchPaginator from "@/components/SearchPaginator.vue";
+import { DEFAULT_LIMIT } from "@/data-access/annotationRepository";
 
 let snapper: WordSnapper;
 const annotationStore = new AnnotationStore();
 const loading = ref(true);
 const text = ref<string>("");
-const textId = ref<string | "">("72427");
 
 const { originalAnnotations, processedAnnotations, modifiedAnnotations, selectedFilters } = annotationStore;
 
@@ -82,11 +83,6 @@ const showDuplicates = () => {
 };
 
 const textLines = computed(() => textToLines(text.value));
-
-const handleChangedId = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  textId.value = target.value;
-};
 
 const router = useRouter();
 const route = useRoute();
@@ -127,6 +123,17 @@ const handleFetchedData = async (id: string) => {
 };
 
 // #region pagination
+
+const paginatedIds = computedAsync(async () => {
+  const filter = {}; //TODO get from query filterValues.value;
+  const p = route.query.page ?? 1;
+  const pageSize = route.query.pageSize ?? DEFAULT_LIMIT;
+  console.log("page");
+
+  const result = await annotationRepository.paginate(filter, p, pageSize);
+  console.log(result);
+  return result;
+});
 
 // #endregion
 

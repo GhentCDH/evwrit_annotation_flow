@@ -43,7 +43,6 @@ interface SearchPaginatorProps {
 }
 const searchProps = defineProps<SearchPaginatorProps>();
 
-const emits = defineEmits("search");
 const router = useRouter();
 
 const firstId = searchProps.firstIds?.[0];

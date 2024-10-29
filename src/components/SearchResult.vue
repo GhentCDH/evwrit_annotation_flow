@@ -38,6 +38,9 @@
       </button>
     </div>
   </div>
+  {{ pageSize }}
+  {{ activePage }}
+  {{ values.values?.count }}
 </template>
 
 <script setup lang="ts">
@@ -60,13 +63,15 @@ const pageObj = (idx: number, disabled = false) => {
 };
 
 const calculatePages = (value: SearchResultProps) => {
-  const t = value?.values?.count / value.pageSize ?? 0;
+  const t = value?.values?.count ?? 0 / value.pageSize;
   const totalPages = Math.ceil(t);
   console.group("calculatePages");
+  console.log(t, value.activePage, value.pageSize, value);
 
   const maxPages = 14;
   const totalInc = totalPages < maxPages ? totalPages : maxPages;
   const startIndex = totalPages < maxPages ? 1 : value.activePage;
+  console.log("idx", startIndex);
 
   let filteredPages = Array.from({ length: totalInc }).map((_, idx) => pageObj(idx + startIndex));
   if (filteredPages[0]?.page !== 1) filteredPages = [pageObj(1), pageObj("...", true), ...filteredPages];
@@ -78,12 +83,14 @@ const calculatePages = (value: SearchResultProps) => {
   console.groupEnd();
 };
 onMounted(() => {
+  console.log(searchProps.values, searchProps.pageSize, searchProps.activePage);
   calculatePages(searchProps);
 });
 
 watch(
-  () => ({ value: searchProps.values, pageSize: searchProps.pageSize, activePage: searchProps.activePage }),
+  () => searchProps,
   (newVal, oldVal) => {
+    console.log("------watch");
     calculatePages(newVal);
   },
 );
