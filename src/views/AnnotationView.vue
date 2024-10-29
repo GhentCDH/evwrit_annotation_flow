@@ -1,20 +1,7 @@
 <template>
   <div class="navbar bg-base-100">
-    <div class="flex-1">
-      {{ activeId }}
-      <SearchPaginator />
-      <label class="flex items-center gap-2 whitespace-nowrap" for="textId"
-        >Text ID
-        <input
-          class="input input-bordered w-full max-w-xs input-sm"
-          type="number"
-          @change="handleChangedId"
-          :value="textId"
-          id="textId"
-          placeholder="Tekst-ID"
-        />
-      </label>
-    </div>
+    <SearchPaginator :active-id="activeId" />
+
     <div class="flex-none">
       <TypeFilter v-model="selectedFilters" />
     </div>
@@ -138,6 +125,10 @@ const handleFetchedData = async (id: string) => {
     loading.value = false;
   }
 };
+
+// #region pagination
+
+// #endregion
 
 const loadingClass = () => {
   return [`flex p-1 gap-1 viewer`, loading?.value ? "opacity-30" : ""];

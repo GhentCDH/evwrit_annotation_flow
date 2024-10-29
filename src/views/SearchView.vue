@@ -12,12 +12,12 @@ import { computedAsync } from "@vueuse/core";
 import { useRoute, useRouter } from "vue-router";
 import SearchResult from "../components/SearchResult.vue";
 import SearchFilter from "../components/SearchFilter.vue";
-import { AnnotationRepository } from "../data-access/annotationRepository";
+import { AnnotationRepository, DEFAULT_LIMIT } from "../data-access/annotationRepository";
 import type { SearchDto } from "@/types/Search";
 
 const pageSize = computed({
   get() {
-    const pageSize = route.query.pageSize ?? 25;
+    const pageSize = route.query.pageSize ?? DEFAULT_LIMIT;
 
     return +pageSize;
   },

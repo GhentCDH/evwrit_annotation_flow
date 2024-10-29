@@ -42,7 +42,6 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
-import { filter } from "lodash-es";
 import { useRoute, useRouter } from "vue-router";
 import type { SearchAnnotation } from "@/types/Search";
 
@@ -56,10 +55,6 @@ const searchProps = defineProps<SearchResultProps>();
 const pages = ref([]);
 
 const pageObj = (idx: number, disabled = false) => {
-  // if(maxPagesHalf===idx) return {page: startIndex+idx, label:'...'}
-  //   const page =  idx<maxPagesHalf? idx+startIndex: totalPages-maxPagesHalf+idx
-  //
-  // console.log(idx, startIndex, maxPagesHalf, totalPages)
   const page = idx;
   return { page, label: page, disabled };
 };
