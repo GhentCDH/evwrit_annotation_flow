@@ -8,7 +8,6 @@
       :pageSize="search.pageSize"
       @change-page="search.changePage"
     />
-    {{ search.page }}{{ search.pageSize }}
   </div>
 </template>
 
@@ -24,12 +23,12 @@ const annotationRepository = new AnnotationRepository();
 const search = useSearchStore();
 
 const values = computedAsync(async () => {
-  const filter = search.filterValues.value;
-  const p = search.page.value;
+  const filter = search.filterValues;
+  const p = search.page;
 
   if (!p) return { count: 0, results: [] };
 
-  const result = await annotationRepository.listTexts(filter, p, search.pageSize.value);
+  const result = await annotationRepository.listTexts(filter, p, search.pageSize);
 
   return result;
 });

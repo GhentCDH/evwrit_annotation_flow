@@ -38,15 +38,13 @@
       </button>
     </div>
   </div>
-  {{ pageSize }}
-  {{ activePage }}
-  {{ values.values?.count }}
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import { onBeforeUpdate, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { SearchAnnotation } from "@/types/Search";
+import { calculateTotalPages } from "@/utils/page.utils";
 
 interface SearchResultProps {
   values: any;
@@ -63,37 +61,26 @@ const pageObj = (idx: number, disabled = false) => {
 };
 
 const calculatePages = (value: SearchResultProps) => {
-  const t = value?.values?.count ?? 0 / value.pageSize;
-  const totalPages = Math.ceil(t);
-  console.group("calculatePages");
-  console.log(t, value.activePage, value.pageSize, value);
+  const totalPages = calculateTotalPages(value.values?.count, value.pageSize);
 
   const maxPages = 14;
   const totalInc = totalPages < maxPages ? totalPages : maxPages;
   const startIndex = totalPages < maxPages ? 1 : value.activePage;
-  console.log("idx", startIndex);
-
   let filteredPages = Array.from({ length: totalInc }).map((_, idx) => pageObj(idx + startIndex));
   if (filteredPages[0]?.page !== 1) filteredPages = [pageObj(1), pageObj("...", true), ...filteredPages];
-  console.log(filteredPages[filteredPages.length - 1], totalPages);
+
   if (filteredPages[filteredPages.length - 1]?.page < totalPages)
     filteredPages = [filteredPages, pageObj("...", true), pageObj(totalPages)];
 
   pages.value = filteredPages.flat();
-  console.groupEnd();
 };
 onMounted(() => {
-  console.log(searchProps.values, searchProps.pageSize, searchProps.activePage);
   calculatePages(searchProps);
 });
 
-watch(
-  () => searchProps,
-  (newVal, oldVal) => {
-    console.log("------watch");
-    calculatePages(newVal);
-  },
-);
+onBeforeUpdate(() => {
+  calculatePages(searchProps);
+});
 
 const emits = defineEmits(["changePage"]);
 

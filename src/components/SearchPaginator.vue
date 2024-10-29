@@ -1,25 +1,26 @@
 <template>
   <div class="flex flex-col gap-2 align-items">
     <div class="flex gap-1 items-center">
-      <router-link class="btn btn-ghost btn-icon btn-xs" :to="{ params: { id: firstId } }">
+      <button class="btn btn-ghost btn-icon btn-xs" @click="paginationStore.toFirst">
         <chevron-double-left-icon class="h-3" />
-      </router-link>
+      </button>
 
-      <router-link class="btn btn-ghost btn-icon btn-xs" :to="{ params: { id: previousId } }">
+      <button class="btn btn-ghost btn-icon btn-xs" @click="paginationStore.previous">
         <chevron-left-icon class="h-3" />
-      </router-link>
+      </button>
       <div class="text-sm">
         {{ activeId }}
       </div>
-      <router-link class="btn btn-ghost btn-icon btn-xs" :to="{ params: { id: nextId } }">
-        <chevron-right-icon class="h-3" />
-      </router-link>
 
-      <router-link class="btn btn-ghost btn-icon btn-xs" :to="{ params: { id: lastId } }">
+      <button class="btn btn-ghost btn-icon btn-xs" @click="paginationStore.next">
+        <chevron-right-icon class="h-3" />
+      </button>
+
+      <button class="btn btn-ghost btn-icon btn-xs" @click="paginationStore.toLast">
         <chevron-double-right-icon class="h-3" />
-      </router-link>
+      </button>
     </div>
-    <router-link class="link btn-ghost btn-icon" :to="{ name: 'search', query: router.query }">
+    <router-link class="link btn-ghost btn-icon" :to="{ name: 'search', query: route.query }">
       Terug naar zoeken
     </router-link>
   </div>
@@ -33,20 +34,18 @@ import {
   ChevronDoubleRightIcon,
 } from "@heroicons/vue/16/solid";
 
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import { usePaginationStore } from "@/stores/pagination.state";
+import { useSearchStore } from "@/stores/search.state";
 
 interface SearchPaginatorProps {
-  activeId: number;
-  paginatedIds: number[];
-  firstIds: number[];
-  lastIds: number[];
+  activeId: string;
 }
 const searchProps = defineProps<SearchPaginatorProps>();
 
-const router = useRouter();
+// #region pagination
+const paginationStore = usePaginationStore();
+const route = useRoute();
 
-const firstId = searchProps.firstIds?.[0];
-const nextId = searchProps.firstIds?.[0];
-const previousId = searchProps.firstIds?.[0];
-const lastId = searchProps.firstIds?.[0];
+// #endregion
 </script>
