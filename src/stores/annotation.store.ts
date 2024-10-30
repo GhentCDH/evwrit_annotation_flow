@@ -4,7 +4,7 @@ import { AnnotationRepository } from "../data-access/annotationRepository";
 import type { RuleAnnotation, AnnotationType, ModifiedAnnotation } from "../types/Annotation";
 import { filterAnnotations } from "../utils/filter.utils";
 import { DuplicateRule } from "../utils/rules/duplicates";
-import { AnnotationRuleSets } from "@/utils/rules/annotation.rule.sets";
+import { AnnotationRuleSets } from "../utils/rules/annotation.rule.sets";
 
 export type UpdateAnnotation = Pick<RuleAnnotation, "id" | "start" | "end">;
 

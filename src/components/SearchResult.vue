@@ -27,9 +27,9 @@
     <div class="join">
       <button
         v-for="page in pages"
-        :key="page.page"
+        :key="page.key"
         :class="[
-          'join-item btn btn-xs btn-outline',
+          'join-item btn btn-xs btn-outline w-8',
           { 'btn-active': page.page === activePage, 'btn-disabled': page.disabled },
         ]"
         @click="changePage(page.page)"
@@ -43,21 +43,22 @@
 <script setup lang="ts">
 import { onBeforeUpdate, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { calculateTotalPages } from "../utils/page.utils";
 import type { SearchAnnotation } from "@/types/Search";
-import { calculateTotalPages } from "@/utils/page.utils";
 
 interface SearchResultProps {
   values: any;
   pageSize: number;
   activePage: number;
 }
+
 const searchProps = defineProps<SearchResultProps>();
 
 const pages = ref([]);
 
-const pageObj = (idx: number, disabled = false) => {
+const pageObj = (idx: number, disabled = false, key?: number) => {
   const page = idx;
-  return { page, label: page, disabled };
+  return { page, label: page, disabled, key: key ?? page };
 };
 
 const calculatePages = (value: SearchResultProps) => {
@@ -65,12 +66,26 @@ const calculatePages = (value: SearchResultProps) => {
 
   const maxPages = 14;
   const totalInc = totalPages < maxPages ? totalPages : maxPages;
-  const startIndex = totalPages < maxPages ? 1 : value.activePage;
-  let filteredPages = Array.from({ length: totalInc }).map((_, idx) => pageObj(idx + startIndex));
-  if (filteredPages[0]?.page !== 1) filteredPages = [pageObj(1), pageObj("...", true), ...filteredPages];
+  let startIndex = 1;
+  if (totalPages > maxPages) {
+    startIndex = value.activePage - maxPages / 2;
 
-  if (filteredPages[filteredPages.length - 1]?.page < totalPages)
-    filteredPages = [filteredPages, pageObj("...", true), pageObj(totalPages)];
+    if (startIndex < 1) startIndex = 1;
+    else if (startIndex + maxPages > totalPages) {
+      startIndex = totalPages - maxPages + 1;
+    }
+  }
+
+  const createDummy = (index: number) => {
+    return pageObj("...", true, index);
+  };
+
+  const filteredPages = Array.from({ length: totalInc }).map((_, idx) => pageObj(idx + startIndex));
+  if (filteredPages[0]?.page > 2) filteredPages.unshift(createDummy(-1));
+  if (filteredPages[0]?.page !== 1) filteredPages.unshift(pageObj(1));
+
+  if (filteredPages[filteredPages.length - 1]?.page < totalPages - 1) filteredPages.push(createDummy(-2));
+  if (filteredPages[filteredPages.length - 1]?.page !== totalPages) filteredPages.push(pageObj(totalPages));
 
   pages.value = filteredPages.flat();
 };

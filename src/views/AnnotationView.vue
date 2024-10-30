@@ -57,8 +57,8 @@ import AnnotationTextCompare from "../components/AnnotationTextCompare.vue";
 import TypeFilter from "../components/TypeFilter.vue";
 import { AnnotationStore, type ConfirmAnnotationType, type UpdateAnnotation } from "../stores/annotation.store";
 import { useAnnotationStore } from "../stores/annotation.state";
+import SearchPaginator from "../components/SearchPaginator.vue";
 import type { RuleAnnotation } from "@/types/Annotation";
-import SearchPaginator from "@/components/SearchPaginator.vue";
 
 let snapper: WordSnapper;
 const annotationStore = new AnnotationStore();

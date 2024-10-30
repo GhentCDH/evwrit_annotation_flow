@@ -16,7 +16,7 @@ import { computedAsync } from "@vueuse/core";
 import SearchResult from "../components/SearchResult.vue";
 import SearchFilter from "../components/SearchFilter.vue";
 import { AnnotationRepository } from "../data-access/annotationRepository";
-import { useSearchStore } from "@/stores/search.state";
+import { useSearchStore } from "../stores/search.state";
 
 const annotationRepository = new AnnotationRepository();
 

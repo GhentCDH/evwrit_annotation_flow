@@ -1,4 +1,4 @@
-import type { Search, SearchDto } from "@/types/Search";
+import type { Search, SearchDto } from "../types/Search";
 
 export const DEFAULT_LIMIT = 25;
 

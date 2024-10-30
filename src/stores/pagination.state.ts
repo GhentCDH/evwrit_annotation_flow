@@ -1,34 +1,90 @@
 import { defineStore } from "pinia";
+import { computedAsync } from "@vueuse/core";
+import { computed, ref, watch } from "vue";
 import { useSearchStore } from "./search.state";
 import { useAnnotationStore } from "./annotation.state";
 import { AnnotationRepository } from "../data-access/annotationRepository";
-import { calculateTotalPages } from "@/utils/page.utils";
+import { calculateTotalPages } from "../utils/page.utils";
 
 export const usePaginationStore = defineStore("paginationStore", () => {
   const searchStore = useSearchStore();
   const annotationStore = useAnnotationStore();
-  console.log(searchStore);
 
   const repository = new AnnotationRepository();
 
-  const toFirst = async () => {
-    const ids = await repository.paginate(searchStore.filterValues, 1, 1);
+  const paginated = ref<number[]>([]);
 
-    annotationStore.changeId(ids[0]);
-    searchStore.changePage(1);
+  const updatePaginated = async () => {
+    const values = await repository.paginate(searchStore.filterValues, searchStore.page, searchStore.pageSize);
+    paginated.value = values;
+    return values;
+  };
+
+  const firstId = computedAsync(async () => {
+    const ids = await repository.paginate(searchStore.filterValues, 1, 1);
+    return ids[0];
+  });
+
+  const totalRecords = computedAsync(async () => {
+    const lastRecord = await repository.listTexts(searchStore.filterValues, 1, 0);
+    return lastRecord.count;
+  });
+
+  const lastId = computedAsync(async () => {
+    const ids = await repository.paginate(searchStore.filterValues, totalRecords.value, 1);
+    return ids[0];
+  });
+
+  // Update the paginated list when the page changes
+  computedAsync(() => {
+    return updatePaginated();
+  });
+
+  const findIndex = computed(() => {
+    return paginated.value.findIndex((i) => i === annotationStore.id);
+  });
+
+  const toFirst = async () => {
+    await annotationStore.changeId(firstId.value);
+    await searchStore.changePage(1);
   };
 
   const toLast = async () => {
-    const lastRecord = await repository.listTexts(searchStore.filterValues, 1, 0);
-    const ids = await repository.paginate(searchStore.filterValues, lastRecord.count, 1);
-    const totalPages = calculateTotalPages(lastRecord.count, searchStore.pageSize);
-
-    annotationStore.changeId(ids[0]);
-    searchStore.changePage(totalPages);
+    const totalPages = calculateTotalPages(totalRecords.value, searchStore.pageSize);
+    await annotationStore.changeId(lastId.value);
+    await searchStore.changePage(totalPages);
   };
 
-  const previous = () => {};
-  const next = () => {};
+  const previous = async () => {
+    const index = findIndex.value;
+    const maxIndex = paginated.value.length;
+    let nextId = index < 0 ? undefined : paginated.value[index - 1];
 
-  return { next, previous, toFirst, toLast };
+    if (nextId) {
+      await annotationStore.changeId(nextId);
+    } else {
+      await searchStore.changePage(searchStore.page - 1);
+      await updatePaginated();
+      nextId = paginated.value[maxIndex];
+
+      if (nextId) await annotationStore.changeId(nextId);
+    }
+  };
+
+  const next = async () => {
+    const index = findIndex.value;
+    let nextId = index < 0 ? undefined : paginated.value[index + 1];
+
+    if (nextId) {
+      await annotationStore.changeId(nextId);
+    } else {
+      await searchStore.changePage(searchStore.page + 1);
+      await updatePaginated();
+      nextId = paginated.value[0];
+
+      if (nextId) await annotationStore.changeId(nextId);
+    }
+  };
+
+  return { firstId, lastId, next, previous, toFirst, toLast };
 });
