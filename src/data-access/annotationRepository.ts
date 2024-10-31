@@ -23,16 +23,22 @@ export class AnnotationRepository {
     }
   }
 
-  async listTexts(filter: SearchDto, page: number, pageSize: number): Promise<Search> {
-    try {
-      const params = new URLSearchParams();
-      params.append("limit", pageSize);
-      params.append("ascending", 25);
-      params.append("page", page);
-      params.append("orderBy", "title");
-      params.append("filters[data_search_type]", "title");
-      params.append("filters[project][0]", 3);
+  private buildSearchParams(filter: SearchDto, page: number, pageSize: number): URLSearchParams {
+    const params = new URLSearchParams();
+    params.append("limit", `${pageSize}`);
+    params.append("ascending", `${25}`);
+    params.append("page", `${page}`);
+    params.append("orderBy", "title");
+    params.append("filters[data_search_type]", "title");
+    params.append("filters[project][0]", `${3}`);
 
+    return params;
+  }
+
+  async listTexts(filter: SearchDto, page: number, pageSize: number): Promise<Search> {
+    const params = this.buildSearchParams(filter, page, pageSize);
+
+    try {
       const response = await fetch(`/text/search_api?${params.toString()}`, {
         method: "GET",
         headers: {
@@ -43,7 +49,7 @@ export class AnnotationRepository {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return await response.json();
+      return (await response.json()) as Search;
     } catch (error) {
       console.error(error);
     }
@@ -51,13 +57,7 @@ export class AnnotationRepository {
 
   async paginate(filter: SearchDto, page: number, pageSize: number): Promise<number[]> {
     try {
-      const params = new URLSearchParams();
-      params.append("limit", pageSize);
-      params.append("ascending", 25);
-      params.append("page", page);
-      params.append("orderBy", "title");
-      params.append("filters[data_search_type]", "title");
-      params.append("filters[project][0]", 3);
+      const params = this.buildSearchParams(filter, page, pageSize);
 
       const response = await fetch(`/text/paginate?${params.toString()}`, {
         method: "GET",
@@ -69,7 +69,7 @@ export class AnnotationRepository {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return await response.json();
+      return (await response.json()) as number[];
     } catch (error) {
       console.error(error);
     }

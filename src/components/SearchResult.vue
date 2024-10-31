@@ -54,11 +54,13 @@ interface SearchResultProps {
 
 const searchProps = defineProps<SearchResultProps>();
 
-const pages = ref([]);
+type PageObj = { page: number; key: number; label: string | number; disabled: boolean };
 
-const pageObj = (idx: number, disabled = false, key?: number) => {
+const pages = ref<PageObj[]>([]);
+
+const pageObj = (idx: number, disabled = false): PageObj => {
   const page = idx;
-  return { page, label: page, disabled, key: key ?? page };
+  return { page, label: page, disabled, key: idx };
 };
 
 const calculatePages = (value: SearchResultProps) => {
@@ -76,8 +78,8 @@ const calculatePages = (value: SearchResultProps) => {
     }
   }
 
-  const createDummy = (index: number) => {
-    return pageObj("...", true, index);
+  const createDummy = (index: number): PageObj => {
+    return { page: 0, label: "...", disabled: true, key: index };
   };
 
   const filteredPages = Array.from({ length: totalInc }).map((_, idx) => pageObj(idx + startIndex));

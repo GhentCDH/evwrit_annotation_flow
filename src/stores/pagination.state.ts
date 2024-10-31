@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { computedAsync } from "@vueuse/core";
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { useSearchStore } from "./search.state";
 import { useAnnotationStore } from "./annotation.state";
 import { AnnotationRepository } from "../data-access/annotationRepository";
