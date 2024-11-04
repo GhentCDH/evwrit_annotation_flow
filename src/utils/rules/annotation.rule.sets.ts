@@ -31,13 +31,16 @@ export class AnnotationRuleSets {
     this.defaultRuleSet = new AnnotationRuleSet([sanitizeRule], true, false);
   }
 
-  public applyRules(annotation: RuleAnnotation): ModifiedAnnotation {
-    const normalizedAnnotations = normalizeAnnotation(annotation, this.text);
+  private _applyRules(normalizedAnnotations: RuleAnnotation) {
     let resultAnnotation: AnnotationRuleResult = {
       annotation: {} as RuleAnnotation,
       rule_applied: false,
       appliedRules: [],
     };
+    if (normalizedAnnotations.hasOverride) {
+      return resultAnnotation;
+    }
+
     switch (normalizedAnnotations.type) {
       case "typography":
         resultAnnotation = this.typographyRuleSet.apply(normalizedAnnotations);
@@ -61,6 +64,18 @@ export class AnnotationRuleSets {
         //resultAnnotation = defaultRuleSet.apply(normalizedAnnotations);
         break;
     }
+
+    return resultAnnotation;
+  }
+
+  public applyRules(annotation: RuleAnnotation): ModifiedAnnotation {
+    const normalizedAnnotations = normalizeAnnotation(annotation, this.text);
+    if (annotation.id === 2022318) {
+      console.log(annotation);
+      console.log(normalizedAnnotations);
+    }
+    const resultAnnotation = this._applyRules(normalizedAnnotations);
+
     const processedAnnotion = resultAnnotation.rule_applied ? resultAnnotation.annotation : normalizedAnnotations;
 
     if (resultAnnotation.rule_applied)

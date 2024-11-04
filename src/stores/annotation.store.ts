@@ -137,20 +137,21 @@ export class AnnotationStore {
 
     if (confirm === "modified") {
       ann.processed = cloneDeep(ann.modified!);
-      ann.modified = null;
     } else if (confirm === "original") {
       ann.processed = cloneDeep(ann.original);
-      ann.modified = null;
     }
 
+    ann.modified = null;
+    ann.hasOverride = true;
     const oldIds = this.duplicateRule.updateAnnotation(ann.processed);
 
     oldIds.forEach((ann) => this.updateDuplicates(ann));
     this.updateDuplicates(ann.processed);
+    return this.updateAnnotation(ann.processed);
   }
 
   public confirmAnnotation(id: string, confirm: ConfirmAnnotationType) {
-    this.confirmAnnotationLocal(id, confirm);
+    return this.confirmAnnotationLocal(id, confirm);
     //TODO create BACKEND request to confirm only one
   }
 
@@ -160,6 +161,18 @@ export class AnnotationStore {
 
     const oldIds = this.duplicateRule.removeAnnotation(original.processed);
     oldIds.forEach((ann) => this.updateDuplicates(ann));
+
+    return this.updateAnnotation(original.processed, true);
+  }
+
+  private updateAnnotation(annotation: RuleAnnotation, is_deleted = false) {
+    const { start, end, type, id } = annotation;
+    return this.annotationRepository.patchAnnotation(id, type, {
+      selection_start: start,
+      selection_end: end,
+      selection_length: end - start,
+      is_deleted,
+    });
   }
 
   private updateDuplicates(annotation: RuleAnnotation) {

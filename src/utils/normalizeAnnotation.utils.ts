@@ -26,5 +26,6 @@ export const normalizeAnnotation = (annotation: any, text: string): RuleAnnotati
       index: annotation.index,
     },
     color: annotationColors[type],
+    hasOverride: annotation.hasOverride,
   } as RuleAnnotation;
 };
