@@ -27,7 +27,8 @@
     "lodash-es": "^4.17.21",
     "pinia": "^2.2.2",
     "tokenizr": "^1.7.0",
-    "vue": "^3.5.6"
+    "vue": "^3.5.6",
+    "vue-router": "4"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.10.4",
