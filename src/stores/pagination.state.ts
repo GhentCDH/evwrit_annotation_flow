@@ -31,7 +31,7 @@ export const usePaginationStore = defineStore("paginationStore", () => {
   });
 
   const lastId = computedAsync(async () => {
-    const ids = await repository.paginate(searchStore.filterValues, totalRecords.value, 1);
+    const ids = await repository.paginate(searchStore.filterValues, totalRecords.value!, 1);
     return ids[0];
   });
 
@@ -45,13 +45,13 @@ export const usePaginationStore = defineStore("paginationStore", () => {
   });
 
   const toFirst = async () => {
-    await annotationStore.changeId(firstId.value);
+    await annotationStore.changeId(firstId.value!);
     await searchStore.changePage(1);
   };
 
   const toLast = async () => {
     const totalPages = calculateTotalPages(totalRecords.value, searchStore.pageSize);
-    await annotationStore.changeId(lastId.value);
+    await annotationStore.changeId(lastId.value!);
     await searchStore.changePage(totalPages);
   };
 

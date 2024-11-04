@@ -5,7 +5,7 @@ export const DEFAULT_LIMIT = 25;
 export class AnnotationRepository {
   constructor() {}
 
-  async fetchAnnotation(annotationId: string) {
+  async fetchAnnotation(annotationId: string | number) {
     try {
       const response = await fetch(`/text/${annotationId}/annotations`, {
         method: "GET",
@@ -20,6 +20,7 @@ export class AnnotationRepository {
       return await response.json();
     } catch (error) {
       console.error(error);
+      throw new Error(error as any);
     }
   }
 
@@ -52,6 +53,7 @@ export class AnnotationRepository {
       return (await response.json()) as Search;
     } catch (error) {
       console.error(error);
+      throw new Error(error as any);
     }
   }
 
@@ -72,6 +74,7 @@ export class AnnotationRepository {
       return (await response.json()) as number[];
     } catch (error) {
       console.error(error);
+      throw new Error(error as any);
     }
   }
 }

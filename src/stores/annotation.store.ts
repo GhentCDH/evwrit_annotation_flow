@@ -1,7 +1,7 @@
 import { computed, ref } from "vue";
 import { cloneDeep } from "lodash-es";
 import { AnnotationRepository } from "../data-access/annotationRepository";
-import type { RuleAnnotation, AnnotationType, ModifiedAnnotation } from "../types/Annotation";
+import type { AnnotationType, ModifiedAnnotation, RuleAnnotation } from "../types/Annotation";
 import { filterAnnotations } from "../utils/filter.utils";
 import { DuplicateRule } from "../utils/rules/duplicates";
 import { AnnotationRuleSets } from "../utils/rules/annotation.rule.sets";
@@ -55,7 +55,7 @@ export class AnnotationStore {
     this.showOnlyDuplicates.value = value;
   }
 
-  async getAnnotation(id: string) {
+  async getAnnotation(id: string | number) {
     this.reset();
     try {
       const result = await this.annotationRepository.fetchAnnotation(id);

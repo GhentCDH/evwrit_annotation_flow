@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, type Ref, watch } from "vue";
+import { ref, computed, type Ref, watch, onMounted } from "vue";
 import { WordSnapper } from "../lib/snapper/WordSnapper";
 
 import { textToLines } from "../text_utilities";
@@ -84,7 +84,7 @@ const textLines = computed(() => textToLines(text.value));
 
 const annotationStore_ = useAnnotationStore();
 
-const handleFetchedData = async (id: string) => {
+const handleFetchedData = async (id: string | number) => {
   loading.value = true;
   text.value = "";
   try {
@@ -100,13 +100,21 @@ const handleFetchedData = async (id: string) => {
   }
 };
 
-watch(() => {
-  console.log("id changed", annotationStore_.id);
-  const newId = annotationStore_.id;
-  if (newId !== null) {
-    handleFetchedData(newId);
+onMounted(() => {
+  if (annotationStore_.id !== null) {
+    handleFetchedData(annotationStore_.id);
   }
 });
+
+watch(
+  () => annotationStore_.id,
+  () => {
+    const newId = annotationStore_.id;
+    if (newId !== null) {
+      handleFetchedData(newId);
+    }
+  },
+);
 
 const loadingClass = () => {
   return [`flex p-1 gap-1 viewer`, loading?.value ? "opacity-30" : ""];
