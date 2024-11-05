@@ -72,6 +72,10 @@ export class AnnotationRuleSets {
   public applyRules(annotation: AnnotationItem): ModifiedAnnotation {
     const normalizedAnnotations = normalizeAnnotation(annotation, this.text);
 
+    if (!normalizedAnnotations) {
+      return null;
+    }
+
     const resultAnnotation = this._applyRules(normalizedAnnotations);
 
     const processedAnnotion = resultAnnotation.rule_applied ? resultAnnotation.annotation : normalizedAnnotations;

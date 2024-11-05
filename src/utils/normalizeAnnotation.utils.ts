@@ -4,6 +4,12 @@ import type { AnnotationItem } from "../types/annotation-response";
 
 export const normalizeAnnotation = (annotation: AnnotationItem, text: string): RuleAnnotation => {
   // const textLength = annotation.text_selection.selection_end - annotation.text_selection.selection_start;
+
+  if (!annotation.text_selection) {
+    console.error("Annotation error wrong format", annotation);
+    return null;
+  }
+
   const annotationTarget = annotation.type === "handshift" ? "gutter" : "text"; // (textLength > 130 ? "gutter" : "text") as AnnotationTarget;
   const startIndex = annotation.text_selection.selection_start - 1; // 0-gebaseerde index
   const endIndex = annotation.text_selection.selection_end - 1;

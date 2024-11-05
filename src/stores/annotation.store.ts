@@ -70,7 +70,9 @@ export class AnnotationStore {
 
       // TODO combine annotations original and modified from the backend!
 
-      const annotationAppliedResults = annotations.map((annotation: any) => this.applyRules(annotation));
+      const annotationAppliedResults = annotations
+        .map((annotation: any) => this.applyRules(annotation))
+        .filter((a) => !!a);
 
       this.checkForDuplicates(annotationAppliedResults);
 
@@ -107,6 +109,8 @@ export class AnnotationStore {
 
   private applyRules(annotation: AnnotationItem) {
     const annotationObj = this.annotationRuleSets.applyRules(annotation);
+
+    if (!annotationObj) return null;
 
     this.annotations.value.set(annotation.id as unknown as string, annotationObj);
 
