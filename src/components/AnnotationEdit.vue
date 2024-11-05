@@ -1,6 +1,10 @@
 <template>
-  <div class="card border rounded-md w-full" :class="{ 'border-black': highlight, shadow: highlight }">
+  <div
+    class="card border rounded-md w-full"
+    :class="{ 'border-black': highlight, shadow: highlight, 'opacity-20': disabled }"
+  >
     <div class="card-body p-2">
+      <div role="alert" class="alert alert-error" v-if="error">Annotatie niet bewaard, probeer opnieuw.</div>
       <div class="flex justify-between items-center">
         <div class="flex gap-2 justify-center">
           <div class="badge badge-outline badge-sm text-color-custom" :style="getColor()">
@@ -12,6 +16,7 @@
         </div>
         <div class="flex gap-2">
           <button
+            :disabled="disabled"
             class="btn btn-circle btn-ghost text-red-900 btn-xs tooltip tooltip-left"
             data-tip="Verwijder annotatie"
             @click="deleteAnnotation()"
@@ -22,57 +27,26 @@
       </div>
       <div>
         <div class="annotation-body">
-          <label class="label cursor-pointer" v-if="annotation">
-            <input
-              type="radio"
-              :name="originalAnnotation.id"
-              class="radio radio-success"
-              :checked="selectedAnnotation === 'modified'"
-              @click="changeSelected('modified')"
-            />
-            <!-- Gewijzigde annotatie -->
-            <div class="w-full">
-              <AnnotatedText
-                :annotations="[annotation]"
-                :lines="getAnnotatedLines(textLines, annotation.start, annotation.end).lines"
-                :allow-edit="false"
-              />
-            </div>
-            <button
-              class="btn btn-circle btn-xs text-gray-500 btn-ghost tooltip tooltip-left z-[9999]"
-              data-tip="Bewaar gewijzigde annotatie"
-              @click="confirmAnnotation('modified')"
-            >
-              <SaveIcon />
-            </button>
-          </label>
+          <AnnotationEditItem
+            v-if="annotation"
+            :annotation="annotation"
+            tip="Bewaar gewijzigde annotatie"
+            :selected-annotation="selectedAnnotation === 'modified'"
+            :disabled="disabled"
+            :text-lines="textLines"
+            @change-selected="changeSelected('modified')"
+            @confirm-annotation="confirmAnnotation('modified')"
+          />
           <hr />
-          <label class="label cursor-pointer gap-2">
-            <input
-              v-if="annotation"
-              type="radio"
-              :name="originalAnnotation.id"
-              class="radio radio-success"
-              :checked="selectedAnnotation === 'original'"
-              @click="changeSelected('original')"
-            />
-            <div class="w-full">
-              <!-- Originele annotatie -->
-              <AnnotatedText
-                :annotations="[originalAnnotation]"
-                :lines="getAnnotatedLines(textLines, originalAnnotation.start, originalAnnotation.end).lines"
-                :allow-edit="false"
-              />
-            </div>
-            <button
-              v-if="annotation"
-              class="btn btn-xs btn-circle text-gray-500 btn-ghost tooltip tooltip-left z-[9999]"
-              data-tip="Bewaar originele annotatie"
-              @click="confirmAnnotation('original')"
-            >
-              <SaveIcon />
-            </button>
-          </label>
+          <AnnotationEditItem
+            :annotation="originalAnnotation"
+            tip="Bewaar originele annotatie"
+            :selected-annotation="selectedAnnotation === 'original'"
+            :disabled="disabled"
+            :text-lines="textLines"
+            @change-selected="changeSelected('original')"
+            @confirm-annotation="confirmAnnotation('original')"
+          />
         </div>
         <div>
           <ul>
@@ -86,12 +60,11 @@
 
 <script setup lang="ts">
 import { TrashIcon } from "@heroicons/vue/16/solid";
-import { AnnotatedText, type Line } from "@ghentcdh/vue-component-annotated-text";
+import { type Line } from "@ghentcdh/vue-component-annotated-text";
 import { ref, watch } from "vue";
-import SaveIcon from "./SaveIcon.vue";
+import AnnotationEditItem from "./AnnotationEditItem.vue";
 import type { AnnotationType, RuleAnnotation } from "../types/Annotation";
 import { annotationHtmlColors } from "../styles/annotation-colors";
-import { getAnnotatedLines } from "../utils/annotation_utils";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
 
 const selectedAnnotation = ref<ConfirmAnnotationType>();
@@ -104,6 +77,8 @@ interface AnnotationEditProps {
   selected: ConfirmAnnotationType;
   duplicates: string[];
   highlight: boolean;
+  disabled: boolean;
+  error: boolean;
 }
 
 const props = defineProps<AnnotationEditProps>();
@@ -132,6 +107,7 @@ const getColor = () => {
 
 const changeSelected = (type: ConfirmAnnotationType) => {
   selectedAnnotation.value = type === selectedAnnotation.value ? null : type;
+  emit("changeSelected", originalAnnotation, type);
 };
 
 const onHighlight = () => {

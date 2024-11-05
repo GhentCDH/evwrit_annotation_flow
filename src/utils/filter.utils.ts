@@ -7,7 +7,7 @@ const isAnnotationTypeFiltered = (
   showOnlyDuplicates: boolean,
 ) => {
   if (showOnlyDuplicates && annotation.duplicates.length < 1) return false;
-  if (showModified && !annotation.modified) return false;
+  if (showModified && (!annotation.modified || annotation.hasOverride)) return false;
 
   const type = (annotation?.original?.type ?? "") as AnnotationType;
   return selectedFilters.length === 0 || selectedFilters.includes(type);

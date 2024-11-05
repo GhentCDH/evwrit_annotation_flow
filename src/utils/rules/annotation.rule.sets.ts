@@ -4,6 +4,7 @@ import type { AnnotationType, ModifiedAnnotation, RuleAnnotation } from "../../t
 import { normalizeAnnotation } from "../normalizeAnnotation.utils";
 import { annotationHighlightColors } from "../../styles/annotation-colors";
 import { AnnotationTextRule } from "../rules/annotation-text.rule";
+import type { AnnotationItem } from "@/types/annotation-response";
 
 export class AnnotationRuleSets {
   //#region define ruleset
@@ -31,13 +32,16 @@ export class AnnotationRuleSets {
     this.defaultRuleSet = new AnnotationRuleSet([sanitizeRule], true, false);
   }
 
-  public applyRules(annotation: RuleAnnotation): ModifiedAnnotation {
-    const normalizedAnnotations = normalizeAnnotation(annotation, this.text);
+  private _applyRules(normalizedAnnotations: RuleAnnotation) {
     let resultAnnotation: AnnotationRuleResult = {
       annotation: {} as RuleAnnotation,
       rule_applied: false,
       appliedRules: [],
     };
+    if (normalizedAnnotations.hasOverride) {
+      return resultAnnotation;
+    }
+
     switch (normalizedAnnotations.type) {
       case "typography":
         resultAnnotation = this.typographyRuleSet.apply(normalizedAnnotations);
@@ -61,6 +65,19 @@ export class AnnotationRuleSets {
         //resultAnnotation = defaultRuleSet.apply(normalizedAnnotations);
         break;
     }
+
+    return resultAnnotation;
+  }
+
+  public applyRules(annotation: AnnotationItem): ModifiedAnnotation | null {
+    const normalizedAnnotations = normalizeAnnotation(annotation, this.text);
+
+    if (!normalizedAnnotations) {
+      return null;
+    }
+
+    const resultAnnotation = this._applyRules(normalizedAnnotations);
+
     const processedAnnotion = resultAnnotation.rule_applied ? resultAnnotation.annotation : normalizedAnnotations;
 
     if (resultAnnotation.rule_applied)
@@ -72,6 +89,8 @@ export class AnnotationRuleSets {
       original: normalizedAnnotations,
       modified: resultAnnotation.rule_applied ? resultAnnotation.annotation : null,
       appliedRules: resultAnnotation.appliedRules,
+      saving: false,
+      error: false,
     } as ModifiedAnnotation;
   }
 }

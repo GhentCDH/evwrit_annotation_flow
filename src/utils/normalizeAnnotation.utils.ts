@@ -1,8 +1,15 @@
-import { type AnnotationType, type RuleAnnotation } from "../types/Annotation"; // Importeer je types
+import { type AnnotationType, type RuleAnnotation } from "../types/Annotation";
 import { annotationColors } from "../styles/annotation-colors";
+import type { AnnotationItem } from "../types/annotation-response";
 
-export const normalizeAnnotation = (annotation: any, text: string): RuleAnnotation => {
-  const textLength = annotation.text_selection.selection_end - annotation.text_selection.selection_start;
+export const normalizeAnnotation = (annotation: AnnotationItem, text: string): RuleAnnotation | null => {
+  // const textLength = annotation.text_selection.selection_end - annotation.text_selection.selection_start;
+
+  if (!annotation.text_selection) {
+    console.error("Annotation error wrong format", annotation);
+    return null;
+  }
+
   const annotationTarget = annotation.type === "handshift" ? "gutter" : "text"; // (textLength > 130 ? "gutter" : "text") as AnnotationTarget;
   const startIndex = annotation.text_selection.selection_start - 1; // 0-gebaseerde index
   const endIndex = annotation.text_selection.selection_end - 1;
@@ -23,8 +30,9 @@ export const normalizeAnnotation = (annotation: any, text: string): RuleAnnotati
     metadata: {
       text: selectedText,
       id: annotation.id,
-      index: annotation.index,
+      index: annotation.id,
     },
     color: annotationColors[type],
-  } as RuleAnnotation;
+    hasOverride: annotation.hasOverride,
+  } as unknown as RuleAnnotation;
 };

@@ -27,6 +27,8 @@
             :duplicates="annotation.duplicates"
             :highlight="highlightIds.includes(annotation.id)"
             :appliedRules="annotation.appliedRules"
+            :disabled="annotation.saving"
+            :error="annotation.error"
             @confirmAnnotation="confirmAnnotation"
             @deleteAnnotation="deleteAnnotation"
             @changeSelected="onChangeSelected"
@@ -82,6 +84,7 @@ const selectAll = (type: ConfirmAnnotationType) => {
 
 //#region Emit
 const emit = defineEmits(["confirmAnnotations", "confirmAnnotation", "deleteAnnotation"]);
+
 const confirmSelectedAnnotations = () => {
   emit("confirmAnnotations", annotationSelected.value);
 };

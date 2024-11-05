@@ -14,4 +14,6 @@ export interface Search {
   aggregation: any;
 }
 
+export type AnnotationList = any;
+
 export type SearchDto = unknown;
