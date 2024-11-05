@@ -1,4 +1,5 @@
 import type { Search, SearchDto } from "../types/Search";
+import type { AnnotationList } from "../types/annotation-response";
 import type { AnnotationPatch, AnnotationType } from "@/types/Annotation";
 
 export const DEFAULT_LIMIT = 25;
@@ -7,7 +8,7 @@ export class AnnotationRepository {
   constructor() {}
 
   async fetchAnnotation(annotationId: string | number) {
-    return this.sendJsonRequest({ url: `/text/${annotationId}/annotations`, method: "GET" });
+    return this.sendJsonRequest<AnnotationList>({ url: `/text/${annotationId}/annotations`, method: "GET" });
   }
 
   async listTexts(filter: SearchDto, page: number, pageSize: number): Promise<Search> {

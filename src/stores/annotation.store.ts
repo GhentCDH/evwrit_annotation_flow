@@ -5,6 +5,7 @@ import type { AnnotationType, ModifiedAnnotation, RuleAnnotation } from "../type
 import { filterAnnotations } from "../utils/filter.utils";
 import { DuplicateRule } from "../utils/rules/duplicates";
 import { AnnotationRuleSets } from "../utils/rules/annotation.rule.sets";
+import type { AnnotationItem } from "@/types/annotation-response";
 
 export type UpdateAnnotation = Pick<RuleAnnotation, "id" | "start" | "end">;
 
@@ -104,10 +105,10 @@ export class AnnotationStore {
     this.annotationRuleSets = new AnnotationRuleSets(text);
   }
 
-  private applyRules(annotation: RuleAnnotation) {
+  private applyRules(annotation: AnnotationItem) {
     const annotationObj = this.annotationRuleSets.applyRules(annotation);
 
-    this.annotations.value.set(annotation.id, annotationObj);
+    this.annotations.value.set(annotation.id as unknown as string, annotationObj);
 
     return annotationObj;
   }
@@ -167,7 +168,7 @@ export class AnnotationStore {
 
   private updateAnnotation(annotation: RuleAnnotation, is_deleted = false) {
     const { start, end, type, id } = annotation;
-    return this.annotationRepository.patchAnnotation(id, type, {
+    return this.annotationRepository.patchAnnotation(id, type!, {
       selection_start: start,
       selection_end: end,
       selection_length: end - start,

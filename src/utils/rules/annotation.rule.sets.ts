@@ -4,6 +4,7 @@ import type { AnnotationType, ModifiedAnnotation, RuleAnnotation } from "../../t
 import { normalizeAnnotation } from "../normalizeAnnotation.utils";
 import { annotationHighlightColors } from "../../styles/annotation-colors";
 import { AnnotationTextRule } from "../rules/annotation-text.rule";
+import type { AnnotationItem } from "@/types/annotation-response";
 
 export class AnnotationRuleSets {
   //#region define ruleset
@@ -68,12 +69,9 @@ export class AnnotationRuleSets {
     return resultAnnotation;
   }
 
-  public applyRules(annotation: RuleAnnotation): ModifiedAnnotation {
+  public applyRules(annotation: AnnotationItem): ModifiedAnnotation {
     const normalizedAnnotations = normalizeAnnotation(annotation, this.text);
-    if (annotation.id === 2022318) {
-      console.log(annotation);
-      console.log(normalizedAnnotations);
-    }
+
     const resultAnnotation = this._applyRules(normalizedAnnotations);
 
     const processedAnnotion = resultAnnotation.rule_applied ? resultAnnotation.annotation : normalizedAnnotations;
