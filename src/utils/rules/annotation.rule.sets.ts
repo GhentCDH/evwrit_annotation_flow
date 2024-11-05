@@ -85,6 +85,8 @@ export class AnnotationRuleSets {
       original: normalizedAnnotations,
       modified: resultAnnotation.rule_applied ? resultAnnotation.annotation : null,
       appliedRules: resultAnnotation.appliedRules,
+      saving: false,
+      error: false,
     } as ModifiedAnnotation;
   }
 }

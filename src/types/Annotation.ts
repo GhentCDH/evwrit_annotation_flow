@@ -45,6 +45,8 @@ export type ModifiedAnnotation = {
   hasOverride: boolean;
   duplicates: string[];
   appliedRules: string[];
+  saving: boolean;
+  error: boolean;
 };
 
 export type AnnotationPatch = {

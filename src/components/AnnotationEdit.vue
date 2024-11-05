@@ -1,6 +1,10 @@
 <template>
-  <div class="card border rounded-md w-full" :class="{ 'border-black': highlight, shadow: highlight }">
+  <div
+    class="card border rounded-md w-full"
+    :class="{ 'border-black': highlight, shadow: highlight, 'opacity-20': disabled }"
+  >
     <div class="card-body p-2">
+      <div role="alert" class="alert alert-error" v-if="error">Annotatie niet bewaard, probeer opnieuw.</div>
       <div class="flex justify-between items-center">
         <div class="flex gap-2 justify-center">
           <div class="badge badge-outline badge-sm text-color-custom" :style="getColor()">
@@ -12,6 +16,7 @@
         </div>
         <div class="flex gap-2">
           <button
+            :disabled="disabled"
             class="btn btn-circle btn-ghost text-red-900 btn-xs tooltip tooltip-left"
             data-tip="Verwijder annotatie"
             @click="deleteAnnotation()"
@@ -28,6 +33,7 @@
               :name="originalAnnotation.id"
               class="radio radio-success"
               :checked="selectedAnnotation === 'modified'"
+              :disabled="disabled"
               @click="changeSelected('modified')"
             />
             <!-- Gewijzigde annotatie -->
@@ -41,6 +47,7 @@
             <button
               class="btn btn-circle btn-xs text-gray-500 btn-ghost tooltip tooltip-left z-[9999]"
               data-tip="Bewaar gewijzigde annotatie"
+              :disabled="disabled"
               @click="confirmAnnotation('modified')"
             >
               <SaveIcon />
@@ -53,6 +60,7 @@
               type="radio"
               :name="originalAnnotation.id"
               class="radio radio-success"
+              :disabled="disabled"
               :checked="selectedAnnotation === 'original'"
               @click="changeSelected('original')"
             />
@@ -66,6 +74,7 @@
             </div>
             <button
               v-if="annotation"
+              :disabled="disabled"
               class="btn btn-xs btn-circle text-gray-500 btn-ghost tooltip tooltip-left z-[9999]"
               data-tip="Bewaar originele annotatie"
               @click="confirmAnnotation('original')"
@@ -104,6 +113,8 @@ interface AnnotationEditProps {
   selected: ConfirmAnnotationType;
   duplicates: string[];
   highlight: boolean;
+  disabled: boolean;
+  error: boolean;
 }
 
 const props = defineProps<AnnotationEditProps>();
@@ -132,6 +143,7 @@ const getColor = () => {
 
 const changeSelected = (type: ConfirmAnnotationType) => {
   selectedAnnotation.value = type === selectedAnnotation.value ? null : type;
+  emit("changeSelected", originalAnnotation, type);
 };
 
 const onHighlight = () => {
