@@ -27,61 +27,26 @@
       </div>
       <div>
         <div class="annotation-body">
-          <label class="label cursor-pointer" v-if="annotation">
-            <input
-              type="radio"
-              :name="originalAnnotation.id"
-              class="radio radio-success"
-              :checked="selectedAnnotation === 'modified'"
-              :disabled="disabled"
-              @click="changeSelected('modified')"
-            />
-            <!-- Gewijzigde annotatie -->
-            <div class="w-full">
-              <AnnotatedText
-                :annotations="[annotation]"
-                :lines="getAnnotatedLines(textLines, annotation.start, annotation.end).lines"
-                :allow-edit="false"
-              />
-            </div>
-            <button
-              class="btn btn-circle btn-xs text-gray-500 btn-ghost tooltip tooltip-left z-[9999]"
-              data-tip="Bewaar gewijzigde annotatie"
-              :disabled="disabled"
-              @click="confirmAnnotation('modified')"
-            >
-              <SaveIcon />
-            </button>
-          </label>
+          <AnnotationEditItem
+            v-if="annotation"
+            :annotation="annotation"
+            tip="Bewaar gewijzigde annotatie"
+            :selected-annotation="selectedAnnotation === 'modified'"
+            :disabled="disabled"
+            :text-lines="textLines"
+            @change-selected="changeSelected('modified')"
+            @confirm-annotation="confirmAnnotation('modified')"
+          />
           <hr />
-          <label class="label cursor-pointer gap-2">
-            <input
-              v-if="annotation"
-              type="radio"
-              :name="originalAnnotation.id"
-              class="radio radio-success"
-              :disabled="disabled"
-              :checked="selectedAnnotation === 'original'"
-              @click="changeSelected('original')"
-            />
-            <div class="w-full">
-              <!-- Originele annotatie -->
-              <AnnotatedText
-                :annotations="[originalAnnotation]"
-                :lines="getAnnotatedLines(textLines, originalAnnotation.start, originalAnnotation.end).lines"
-                :allow-edit="false"
-              />
-            </div>
-            <button
-              v-if="annotation"
-              :disabled="disabled"
-              class="btn btn-xs btn-circle text-gray-500 btn-ghost tooltip tooltip-left z-[9999]"
-              data-tip="Bewaar originele annotatie"
-              @click="confirmAnnotation('original')"
-            >
-              <SaveIcon />
-            </button>
-          </label>
+          <AnnotationEditItem
+            :annotation="originalAnnotation"
+            tip="Bewaar originele annotatie"
+            :selected-annotation="selectedAnnotation === 'original'"
+            :disabled="disabled"
+            :text-lines="textLines"
+            @change-selected="changeSelected('original')"
+            @confirm-annotation="confirmAnnotation('original')"
+          />
         </div>
         <div>
           <ul>
@@ -95,12 +60,11 @@
 
 <script setup lang="ts">
 import { TrashIcon } from "@heroicons/vue/16/solid";
-import { AnnotatedText, type Line } from "@ghentcdh/vue-component-annotated-text";
+import { type Line } from "@ghentcdh/vue-component-annotated-text";
 import { ref, watch } from "vue";
-import SaveIcon from "./SaveIcon.vue";
+import AnnotationEditItem from "./AnnotationEditItem.vue";
 import type { AnnotationType, RuleAnnotation } from "../types/Annotation";
 import { annotationHtmlColors } from "../styles/annotation-colors";
-import { getAnnotatedLines } from "../utils/annotation_utils";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
 
 const selectedAnnotation = ref<ConfirmAnnotationType>();
