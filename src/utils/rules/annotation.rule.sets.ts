@@ -69,7 +69,7 @@ export class AnnotationRuleSets {
     return resultAnnotation;
   }
 
-  public applyRules(annotation: AnnotationItem): ModifiedAnnotation {
+  public applyRules(annotation: AnnotationItem): ModifiedAnnotation | null {
     const normalizedAnnotations = normalizeAnnotation(annotation, this.text);
 
     if (!normalizedAnnotations) {

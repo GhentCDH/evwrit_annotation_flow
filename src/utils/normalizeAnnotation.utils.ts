@@ -1,8 +1,8 @@
-import { type AnnotationType, type RuleAnnotation } from "../types/Annotation"; // Importeer je types
+import { type AnnotationType, type RuleAnnotation } from "../types/Annotation";
 import { annotationColors } from "../styles/annotation-colors";
 import type { AnnotationItem } from "../types/annotation-response";
 
-export const normalizeAnnotation = (annotation: AnnotationItem, text: string): RuleAnnotation => {
+export const normalizeAnnotation = (annotation: AnnotationItem, text: string): RuleAnnotation | null => {
   // const textLength = annotation.text_selection.selection_end - annotation.text_selection.selection_start;
 
   if (!annotation.text_selection) {

@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { AnnotatedText } from "@ghentcdh/vue-component-annotated-text";
+import { AnnotatedText, type Line } from "@ghentcdh/vue-component-annotated-text";
 import SaveIcon from "./SaveIcon.vue";
 import type { RuleAnnotation } from "../types/Annotation";
 import { getAnnotatedLines } from "../utils/annotation_utils";

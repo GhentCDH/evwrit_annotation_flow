@@ -72,7 +72,7 @@ export class AnnotationStore {
 
       const annotationAppliedResults = annotations
         .map((annotation: any) => this.applyRules(annotation))
-        .filter((a) => !!a);
+        .filter((a) => !!a) as ModifiedAnnotation[];
 
       this.checkForDuplicates(annotationAppliedResults);
 
@@ -199,12 +199,12 @@ export class AnnotationStore {
   }
 
   private updateDuplicates(annotation: RuleAnnotation) {
-    if (this.annotations.value.has(annotation.id))
-      this.annotations.value.get(annotation.id).duplicates = this.duplicateRule.hasDuplicate(annotation);
+    const original = this.annotations.value.get(annotation.id);
+    if (original) original.duplicates = this.duplicateRule.hasDuplicate(annotation);
   }
 
   public async confirmAnnotations(confirm: Map<string, ConfirmAnnotationType>) {
-    const promises = [] as Promise<any>;
+    const promises: Array<Promise<ModifiedAnnotation>> = [];
 
     confirm.forEach((value, key) => promises.push(this.confirmAnnotationLocal(key, value)));
 
