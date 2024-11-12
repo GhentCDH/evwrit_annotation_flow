@@ -40,7 +40,6 @@ export class AnnotationRepository {
     method: string;
     body?: BODY;
   }): Promise<RESPONSE> {
-    console.log(url, method, body);
     try {
       const response = await fetch(url, {
         method,
