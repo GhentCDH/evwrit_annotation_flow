@@ -13,7 +13,7 @@
 
     <tbody>
       <!-- row 1 -->
-      <tr v-for="row in values?.data" :key="row.id" class="hover hover:cursor-pointer" v-on:click="open(row)">
+      <tr v-for="row in data" :key="row.id" class="hover hover:cursor-pointer" v-on:click="open(row)">
         <th>{{ row.id }}</th>
         <th>{{ row.tm_id }}</th>
         <td>{{ row.title }}</td>
@@ -47,7 +47,8 @@ import { calculateTotalPages } from "../utils/page.utils";
 import type { SearchAnnotation } from "@/types/Search";
 
 interface SearchResultProps {
-  values: any;
+  count: number;
+  data: SearchAnnotation[];
   pageSize: number;
   activePage: number;
 }
@@ -64,7 +65,9 @@ const pageObj = (idx: number, disabled = false): PageObj => {
 };
 
 const calculatePages = (value: SearchResultProps) => {
-  const totalPages = calculateTotalPages(value.values?.count, value.pageSize);
+  const totalPages = calculateTotalPages(value.count, value.pageSize);
+
+  if (totalPages < 1) return [];
 
   const maxPages = 14;
   const totalInc = totalPages < maxPages ? totalPages : maxPages;
@@ -91,6 +94,7 @@ const calculatePages = (value: SearchResultProps) => {
 
   pages.value = filteredPages.flat();
 };
+
 onMounted(() => {
   calculatePages(searchProps);
 });
