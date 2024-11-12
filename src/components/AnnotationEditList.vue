@@ -29,6 +29,7 @@
             :appliedRules="annotation.appliedRules"
             :disabled="annotation.saving"
             :error="annotation.error"
+            :showMetadata="showMetadata"
             @confirmAnnotation="confirmAnnotation"
             @deleteAnnotation="deleteAnnotation"
             @changeSelected="onChangeSelected"
@@ -58,6 +59,7 @@ interface AnnotationEditListProps {
   modifiedAnnotations: ModifiedAnnotation[];
   textLines: Line[];
   highlightAnnotationIds: string[];
+  showMetadata: boolean;
 }
 
 const annotationSelected: Ref<Map<string, ConfirmAnnotationType>> = ref(new Map());

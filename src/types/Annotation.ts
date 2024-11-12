@@ -15,6 +15,13 @@ export const annotationTypes = [
 
 export type AnnotationType = (typeof annotationTypes)[number];
 
+export interface RuleAnnotationProperty {
+  id: number;
+  id_name: string;
+  label: string;
+  name: string;
+}
+
 export interface RuleAnnotation extends Annotation {
   id: string;
   start: number;
@@ -27,6 +34,7 @@ export interface RuleAnnotation extends Annotation {
   text?: string;
   metadata?: AnnotationMetaData;
   hasOverride: boolean;
+  properties: RuleAnnotationProperty[];
 }
 
 export type AnnotationTarget = "gutter" | "text";
