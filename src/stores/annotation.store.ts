@@ -1,8 +1,7 @@
 import { computed, ref } from "vue";
 import { cloneDeep } from "lodash-es";
 import { AnnotationRepository } from "../data-access/annotationRepository";
-import type { AnnotationType, ModifiedAnnotation, RuleAnnotation } from "../types/Annotation";
-import { filterAnnotations } from "../utils/filter.utils";
+import type { ModifiedAnnotation, RuleAnnotation } from "../types/Annotation";
 import { DuplicateRule } from "../utils/rules/duplicates";
 import { AnnotationRuleSets } from "../utils/rules/annotation.rule.sets";
 import type { AnnotationItem } from "@/types/annotation-response";
@@ -22,39 +21,9 @@ export class AnnotationStore {
   //#region define annotation computed
   public readonly text = ref<string>("");
   private readonly annotations = ref<Map<string, ModifiedAnnotation>>(new Map());
-
-  private readonly showModified = ref(false);
-  private readonly showOnlyDuplicates = ref(false);
-  public readonly selectedFilters = ref([] as AnnotationType[]);
-
-  private readonly annotationValues = computed(() => Array.from(this.annotations.value.values()));
-  private readonly filteredAnnotations = computed(() =>
-    filterAnnotations(
-      this.selectedFilters.value,
-      this.annotationValues.value,
-      this.showModified.value,
-      this.showOnlyDuplicates.value,
-    ),
-  );
-  public readonly originalAnnotations = computed(() =>
-    this.filteredAnnotations.value.map((annotation) => annotation.original),
-  );
-  public readonly processedAnnotations = computed(() =>
-    this.filteredAnnotations.value.map((annotation) => annotation.processed),
-  );
-  public readonly modifiedAnnotations = computed(() =>
-    this.filteredAnnotations.value.filter((annotation) => !!annotation.modified || annotation.duplicates.length > 1),
-  );
+  public readonly annotationValues = computed(() => Array.from(this.annotations.value.values()));
 
   //#endregion
-
-  public changeShowModified(value: boolean) {
-    this.showModified.value = value;
-  }
-
-  public changeShowOnlyDuplicates(value: boolean) {
-    this.showOnlyDuplicates.value = value;
-  }
 
   async getAnnotation(id: string | number) {
     this.reset();
@@ -70,18 +39,15 @@ export class AnnotationStore {
 
       // TODO combine annotations original and modified from the backend!
 
-      const annotationAppliedResults = annotations
-        .map((annotation: any) => this.applyRules(annotation))
-        .filter((a) => !!a) as ModifiedAnnotation[];
+      const annotationAppliedResults = (
+        await Promise.all(annotations.map((annotation: any) => this.applyRules(annotation)))
+      ).filter((a) => !!a) as ModifiedAnnotation[];
 
       this.checkForDuplicates(annotationAppliedResults);
 
       console.timeEnd(`process_${id}`);
-      console.log("Total processed annotations", this.processedAnnotations.value.length);
-      console.log("Total modified annotations", this.modifiedAnnotations.value.length);
-      console.log("Total original annotations", this.originalAnnotations.value.length);
       console.groupEnd();
-      return { text };
+      return { text, id };
     } catch (err) {
       console.error(err);
       throw new Error(err as unknown as string);
@@ -107,8 +73,8 @@ export class AnnotationStore {
     this.annotationRuleSets = new AnnotationRuleSets(text);
   }
 
-  private applyRules(annotation: AnnotationItem) {
-    const annotationObj = this.annotationRuleSets.applyRules(annotation);
+  private async applyRules(annotation: AnnotationItem) {
+    const annotationObj = await this.annotationRuleSets.applyRules(annotation);
 
     if (!annotationObj) return null;
 

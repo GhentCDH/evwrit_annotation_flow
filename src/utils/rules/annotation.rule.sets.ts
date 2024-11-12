@@ -69,28 +69,33 @@ export class AnnotationRuleSets {
     return resultAnnotation;
   }
 
-  public applyRules(annotation: AnnotationItem): ModifiedAnnotation | null {
-    const normalizedAnnotations = normalizeAnnotation(annotation, this.text);
+  public applyRules(annotation: AnnotationItem): Promise<ModifiedAnnotation | null> {
+    return new Promise((resolve) => {
+      const normalizedAnnotations = normalizeAnnotation(annotation, this.text);
 
-    if (!normalizedAnnotations) {
-      return null;
-    }
+      if (!normalizedAnnotations) {
+        resolve(null);
+        return;
+      }
 
-    const resultAnnotation = this._applyRules(normalizedAnnotations);
+      const resultAnnotation = this._applyRules(normalizedAnnotations);
 
-    const processedAnnotion = resultAnnotation.rule_applied ? resultAnnotation.annotation : normalizedAnnotations;
+      const processedAnnotion = resultAnnotation.rule_applied ? resultAnnotation.annotation : normalizedAnnotations;
 
-    if (resultAnnotation.rule_applied)
-      processedAnnotion.color = annotationHighlightColors[processedAnnotion.type as AnnotationType];
+      if (resultAnnotation.rule_applied)
+        processedAnnotion.color = annotationHighlightColors[processedAnnotion.type as AnnotationType];
 
-    return {
-      id: normalizedAnnotations.id,
-      processed: processedAnnotion,
-      original: normalizedAnnotations,
-      modified: resultAnnotation.rule_applied ? resultAnnotation.annotation : null,
-      appliedRules: resultAnnotation.appliedRules,
-      saving: false,
-      error: false,
-    } as ModifiedAnnotation;
+      resolve({
+        id: normalizedAnnotations.id,
+        processed: processedAnnotion,
+        original: normalizedAnnotations,
+        modified: resultAnnotation.rule_applied ? resultAnnotation.annotation : null,
+        appliedRules: resultAnnotation.appliedRules,
+        saving: false,
+        error: false,
+      } as ModifiedAnnotation);
+
+      return;
+    });
   }
 }
