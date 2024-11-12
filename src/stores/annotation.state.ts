@@ -37,7 +37,6 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
 
   const text = computed(() => fetchNewValue.value?.text || "");
   const annotationStore = computed(() => {
-    console.log(fetchNewValue.value);
     return fetchNewValue.value?.annotationStore || null;
   });
 

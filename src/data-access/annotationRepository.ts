@@ -66,7 +66,12 @@ export class AnnotationRepository {
     params.append("page", `${page}`);
     params.append("orderBy", "title");
     params.append("filters[data_search_type]", "title");
-    params.append("filters[project][0]", `${3}`);
+
+    Object.entries(filter).forEach(([key, values]) => {
+      values.forEach((value, index) => {
+        params.append(`filters[${key}][${index}]`, `${value}`);
+      });
+    });
 
     return params;
   }

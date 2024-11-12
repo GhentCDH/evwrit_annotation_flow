@@ -6,14 +6,16 @@ export interface SearchAnnotation {
   id: number;
 }
 
+export type SearchAggregation = { id: number; name: string; count: number; active: boolean };
+
+export type SearchAggregations = Record<string, SearchAggregation[]>;
+
 export interface Search {
   count: number;
   data: SearchAnnotation[];
   search: SearchAnnotation;
   filters: any;
-  aggregation: any;
+  aggregation: SearchAggregation;
 }
 
-export type AnnotationList = any;
-
-export type SearchDto = unknown;
+export type SearchDto = Record<string, number[]>;
