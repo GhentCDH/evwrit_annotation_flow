@@ -24,10 +24,6 @@
           <input type="checkbox" class="toggle toggle-sm" :checked="showOnlyDuplicates" @click="showDuplicates" />
           <span class="label-text"> Enkel Duplicaten ({{ annotationStore.duplicates.length }})</span>
         </label>
-        <div>
-          Verwerkte annotaties:
-          {{ annotationStore.totalProcessedAnnotation }}/{{ annotationStore.originalAnnotations.length }}
-        </div>
       </div>
       <AnnotationTextCompare
         :originalAnnotations="annotationStore.originalAnnotations"
@@ -40,6 +36,10 @@
       />
     </div>
     <div class="w-1/3 border p-4">
+      <div>
+        Verwerkte annotaties:
+        {{ annotationStore.totalProcessedAnnotation }}/{{ annotationStore.originalAnnotations.length }}
+      </div>
       <annotation-edit-list
         :modifiedAnnotations="annotationStore.modifiedAnnotations"
         :text-lines="annotationStore.textLines"
