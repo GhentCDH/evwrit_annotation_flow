@@ -4,7 +4,7 @@ import { defineStore } from "pinia";
 import { computedAsync } from "@vueuse/core";
 import { cloneDeep } from "lodash-es";
 import { AnnotationRepository } from "../data-access/annotationRepository";
-import type { Search } from "@/types/Search";
+import type { Search, SearchAggregations } from "@/types/Search";
 
 const toNumber = (value: any) => {
   const newValue = Number(value);
@@ -39,7 +39,7 @@ export const useSearchStore = defineStore("searchStore", () => {
 
   const data = computed(() => searchResult.value?.data ?? []);
   const count = computed(() => searchResult.value?.count ?? 0);
-  const aggregations = computed(() => searchResult.value?.aggregation ?? {});
+  const aggregations = computed(() => searchResult.value?.aggregation ?? ({} as SearchAggregations));
 
   const onSearch = (filter: any) => {
     filterValues.value = cloneDeep(filter);

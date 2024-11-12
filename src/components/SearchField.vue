@@ -29,6 +29,6 @@ const model = defineModel<number[]>();
 
 const selected = computed(() => {
   const aggregations = props.aggregations ?? [];
-  return model.value?.map?.((v) => aggregations.find((a) => a.id === v));
+  return model.value?.map?.((v) => aggregations.find((a) => a.id === v) as SearchAggregation);
 });
 </script>

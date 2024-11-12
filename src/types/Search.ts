@@ -15,7 +15,7 @@ export interface Search {
   data: SearchAnnotation[];
   search: SearchAnnotation;
   filters: any;
-  aggregation: SearchAggregation;
+  aggregation: SearchAggregations;
 }
 
 export type SearchDto = Record<string, number[]>;
