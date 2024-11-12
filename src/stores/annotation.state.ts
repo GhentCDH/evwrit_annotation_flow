@@ -56,6 +56,10 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
     filteredAnnotations.value.filter((annotation) => !!annotation.modified || annotation.duplicates.length > 1),
   );
 
+  const duplicates = computed(() => filteredAnnotations.value.filter((annotation) => annotation.duplicates.length > 1));
+
+  const totalProcessedAnnotation = computed(() => originalAnnotations.value.length - modifiedAnnotations.value.length);
+
   const textLines = computed(() => textToLines(text.value));
   const snapper = computed(() => new WordSnapper(text.value));
 
@@ -92,6 +96,8 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
     processedAnnotations,
     modifiedAnnotations,
     selectedFilters,
+    duplicates,
+    totalProcessedAnnotation,
     changeShowModified,
     changeShowOnlyDuplicates,
     processAnnotation: (annotation: UpdateAnnotation) => annotationStore.value?.processAnnotation(annotation),

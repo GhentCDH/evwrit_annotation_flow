@@ -8,7 +8,7 @@
   </div>
   <div :class="[`flex p-1 gap-1 viewer`, { 'opacity-30': annotationStore.loading }]">
     <div class="w-2/3 p-4 border flex flex-col">
-      <div class="flex flex-row gap-4">
+      <div class="flex flex-row gap-4 items-center">
         <label class="label cursor-pointer gap-2">
           <input
             type="checkbox"
@@ -16,12 +16,18 @@
             :checked="showModified"
             @click="showRuleModifiedAnnotations"
           />
-          <span class="label-text"> Enkel Gewijzigde annotaties</span>
+          <span class="label-text">
+            Enkel Gewijzigde annotaties ({{ annotationStore.modifiedAnnotations.length }})</span
+          >
         </label>
         <label class="label cursor-pointer gap-2">
           <input type="checkbox" class="toggle toggle-sm" :checked="showOnlyDuplicates" @click="showDuplicates" />
-          <span class="label-text"> Enkel Duplicaten</span>
+          <span class="label-text"> Enkel Duplicaten ({{ annotationStore.duplicates.length }})</span>
         </label>
+        <div>
+          Verwerkte annotaties:
+          {{ annotationStore.totalProcessedAnnotation }}/{{ annotationStore.originalAnnotations.length }}
+        </div>
       </div>
       <AnnotationTextCompare
         :originalAnnotations="annotationStore.originalAnnotations"
