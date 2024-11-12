@@ -72,7 +72,8 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
   watch(
     () => route.params.id,
     (newId, oldId) => {
-      if (newId && id.value !== newId) changeId(Number(newId));
+      const newIdInt = Number(newId);
+      if (newIdInt && id.value !== newIdInt) changeId(newIdInt);
     },
   );
 
