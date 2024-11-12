@@ -1,59 +1,73 @@
 <template>
-  <div
-    class="card border rounded-md w-full"
-    :class="{ 'border-black': highlight, shadow: highlight, 'opacity-20': disabled }"
-  >
-    <div class="card-body p-2">
-      <div role="alert" class="alert alert-error" v-if="error">Annotatie niet bewaard, probeer opnieuw.</div>
-      <div class="flex justify-between items-center">
-        <div class="flex gap-2 justify-center">
-          <div class="badge badge-outline badge-sm text-color-custom" :style="getColor()">
-            {{ originalAnnotation.type }}
+  <div :class="[`grid gap-2 `, { 'grid-cols-1': !showMetadata, 'grid-cols-2': showMetadata }]">
+    <div
+      class="card border rounded-md w-full"
+      :class="{ 'border-black': highlight, shadow: highlight, 'opacity-20': disabled }"
+    >
+      <div class="card-body p-2">
+        <div role="alert" class="alert alert-error" v-if="error">Annotatie niet bewaard, probeer opnieuw.</div>
+        <div class="flex justify-between items-center">
+          <div class="flex gap-2 justify-center">
+            <div class="badge badge-outline badge-sm text-color-custom" :style="getColor()">
+              {{ originalAnnotation.type }}
+            </div>
+            <div
+              v-if="duplicates.length > 1"
+              class="badge badge-sm badge-warning cursor-pointer"
+              @click="onHighlight()"
+            >
+              Duplicaat? ({{ originalAnnotation.id }})
+            </div>
           </div>
-          <div v-if="duplicates.length > 1" class="badge badge-sm badge-warning cursor-pointer" @click="onHighlight()">
-            Duplicaat? ({{ originalAnnotation.id }})
+          <div class="flex gap-2">
+            <button
+              :disabled="disabled"
+              class="btn btn-circle btn-ghost text-red-900 btn-xs tooltip tooltip-left"
+              data-tip="Verwijder annotatie"
+              @click="deleteAnnotation()"
+            >
+              <trash-icon />
+            </button>
           </div>
-        </div>
-        <div class="flex gap-2">
-          <button
-            :disabled="disabled"
-            class="btn btn-circle btn-ghost text-red-900 btn-xs tooltip tooltip-left"
-            data-tip="Verwijder annotatie"
-            @click="deleteAnnotation()"
-          >
-            <trash-icon />
-          </button>
-        </div>
-      </div>
-      <div>
-        <div class="annotation-body">
-          <AnnotationEditItem
-            v-if="annotation"
-            :annotation="annotation"
-            tip="Bewaar gewijzigde annotatie"
-            :selected-annotation="selectedAnnotation === 'modified'"
-            :disabled="disabled"
-            :text-lines="textLines"
-            @change-selected="changeSelected('modified')"
-            @confirm-annotation="confirmAnnotation('modified')"
-          />
-          <hr />
-          <AnnotationEditItem
-            :annotation="originalAnnotation"
-            tip="Bewaar originele annotatie"
-            :selected-annotation="selectedAnnotation === 'original'"
-            :disabled="disabled"
-            :text-lines="textLines"
-            @change-selected="changeSelected('original')"
-            @confirm-annotation="confirmAnnotation('original')"
-          />
         </div>
         <div>
-          <ul>
-            <li class="badge badge-xs" v-for="rule in appliedRules" :key="rule">{{ rule }}</li>
-          </ul>
+          <div class="annotation-body">
+            <AnnotationEditItem
+              v-if="annotation"
+              :annotation="annotation"
+              tip="Bewaar gewijzigde annotatie"
+              :selected-annotation="selectedAnnotation === 'modified'"
+              :disabled="disabled"
+              :text-lines="textLines"
+              @change-selected="changeSelected('modified')"
+              @confirm-annotation="confirmAnnotation('modified')"
+            />
+            <hr />
+            <AnnotationEditItem
+              :annotation="originalAnnotation"
+              tip="Bewaar originele annotatie"
+              :selected-annotation="selectedAnnotation === 'original'"
+              :disabled="disabled"
+              :text-lines="textLines"
+              @change-selected="changeSelected('original')"
+              @confirm-annotation="confirmAnnotation('original')"
+            />
+          </div>
+          <div>
+            <ul>
+              <li class="badge badge-xs" v-for="rule in appliedRules" :key="rule">{{ rule }}</li>
+            </ul>
+          </div>
         </div>
       </div>
+    </div>
+    <div v-if="showMetadata">
+      <strong class="underline">Metadata</strong>
+      <ul class="text-sm text-content">
+        <li v-for="property of originalAnnotation.properties" :key="property.id_name">
+          <strong> {{ property.label }}:</strong> {{ property.name }}
+        </li>
+      </ul>
     </div>
   </div>
 </template>
@@ -79,6 +93,7 @@ interface AnnotationEditProps {
   highlight: boolean;
   disabled: boolean;
   error: boolean;
+  showMetadata: boolean;
 }
 
 const props = defineProps<AnnotationEditProps>();

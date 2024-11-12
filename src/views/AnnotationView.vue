@@ -7,7 +7,7 @@
     </div>
   </div>
   <div :class="[`flex p-1 gap-1 viewer`, { 'opacity-30': annotationStore.loading }]">
-    <div class="w-2/3 p-4 border flex flex-col">
+    <div :class="[`w-2/3 p-4 border flex flex-col`, { 'w-1/2': showMetadata }]">
       <div class="flex flex-row gap-4 items-center">
         <label class="label cursor-pointer gap-2">
           <input
@@ -24,6 +24,10 @@
           <input type="checkbox" class="toggle toggle-sm" :checked="showOnlyDuplicates" @click="showDuplicates" />
           <span class="label-text"> Enkel Duplicaten ({{ annotationStore.duplicates.length }})</span>
         </label>
+        <label class="label cursor-pointer gap-2">
+          <input type="checkbox" class="toggle toggle-sm" v-model="showMetadata" />
+          <span class="label-text">Toon metadata</span>
+        </label>
       </div>
       <AnnotationTextCompare
         :originalAnnotations="annotationStore.originalAnnotations"
@@ -35,7 +39,7 @@
         @show-annotation="showAnnotation"
       />
     </div>
-    <div class="w-1/3 border p-4">
+    <div :class="[`w-1/3 border p-4`, { 'w-1/2': showMetadata }]">
       <div>
         Verwerkte annotaties:
         {{ annotationStore.totalProcessedAnnotation }}/{{ annotationStore.originalAnnotations.length }}
@@ -44,6 +48,7 @@
         :modifiedAnnotations="annotationStore.modifiedAnnotations"
         :text-lines="annotationStore.textLines"
         :highlightAnnotationIds="highlightAnnotationIds"
+        :show-metadata="showMetadata"
         @confirm-annotation="confirmAnnotation"
         @delete-annotation="deleteAnnotation"
         @confirm-annotations="confirmAnnotations"
@@ -65,6 +70,7 @@ import type { RuleAnnotation } from "@/types/Annotation";
 
 const showModified = ref<boolean>(false);
 const showOnlyDuplicates = ref<boolean>(false);
+const showMetadata = ref<boolean>(false);
 const highlightAnnotationIds: Ref<string[]> = ref([]);
 
 const showRuleModifiedAnnotations = () => {

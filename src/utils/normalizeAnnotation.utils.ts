@@ -1,6 +1,38 @@
-import { type AnnotationType, type RuleAnnotation } from "../types/Annotation";
+import { type AnnotationType, type RuleAnnotation, type RuleAnnotationProperty } from "../types/Annotation";
 import { annotationColors } from "../styles/annotation-colors";
-import type { AnnotationItem } from "../types/annotation-response";
+import type { AnnotationItem, Properties, Property } from "../types/annotation-response";
+
+export const normalizeProperty = (
+  type: AnnotationType,
+  propertyName: string,
+  property: Property,
+): RuleAnnotationProperty | null => {
+  if (!property || !property.id) {
+    console.warn("No property object", propertyName, property);
+    return null;
+  }
+
+  const label = propertyName
+    .substring(type.length + 1)
+    .split(/(?=[A-Z])/)
+    .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
+    .join(" ");
+
+  console.log(label);
+
+  return {
+    id: property.id,
+    id_name: property.id_name,
+    label,
+    name: property.name,
+  };
+};
+
+export const normalizeProperties = (type: AnnotationType, properties: Properties): RuleAnnotationProperty[] => {
+  return Object.keys(properties)
+    .map((key) => normalizeProperty(type, key, properties[key]))
+    .filter((p) => !!p) as RuleAnnotationProperty[];
+};
 
 export const normalizeAnnotation = (annotation: AnnotationItem, text: string): RuleAnnotation | null => {
   // const textLength = annotation.text_selection.selection_end - annotation.text_selection.selection_start;
@@ -34,5 +66,6 @@ export const normalizeAnnotation = (annotation: AnnotationItem, text: string): R
     },
     color: annotationColors[type],
     hasOverride: annotation.hasOverride,
+    properties: normalizeProperties(type, annotation.properties),
   } as unknown as RuleAnnotation;
 };
