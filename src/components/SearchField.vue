@@ -1,6 +1,6 @@
 <template>
-  <div class="dropdown border w-full rounded px-2 py-1 text-sm">
-    <div tabindex="0" role="button" class="h-full">
+  <div class="dropdown dropdown-bottom border w-full rounded px-2 py-1 text-sm min-h-12 flex items-center">
+    <div tabindex="0" role="button" class="h-full w-full">
       {{ title }}:
       <span class="badge badge-ghost m-1" v-for="select of selected" :key="select.id">{{ select.name }}</span>
     </div>
