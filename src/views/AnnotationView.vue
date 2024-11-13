@@ -7,7 +7,7 @@
     </div>
   </div>
   <div :class="[`flex p-1 gap-1 viewer`, { 'opacity-30': annotationStore.loading }]">
-    <div :class="[`w-2/3 p-4 border flex flex-col`, { 'w-1/2': showMetadata }]">
+    <div :class="[`p-4 border flex flex-col`, { 'w-1/2': showMetadata, 'w-2/3': !showMetadata }]">
       <div class="flex flex-row gap-4 items-center">
         <label class="label cursor-pointer gap-2">
           <input
@@ -39,10 +39,10 @@
         @show-annotation="showAnnotation"
       />
     </div>
-    <div :class="[`w-1/3 border p-4`, { 'w-1/2': showMetadata }]">
+    <div :class="[` border p-4`, { 'w-1/3': !showMetadata, 'w-1/2': showMetadata }]">
       <div>
         Verwerkte annotaties:
-        {{ annotationStore.totalProcessedAnnotation }}/{{ annotationStore.originalAnnotations.length }}
+        {{ annotationStore.totalProcessedAnnotation }}/{{ annotationStore.totalAnnotations }}
       </div>
       <annotation-edit-list
         :modifiedAnnotations="annotationStore.modifiedAnnotations"
