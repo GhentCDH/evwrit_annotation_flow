@@ -32,6 +32,7 @@ const props = defineProps<{
 const searchConfig = {
   project: { id: "project", title: "Project" },
   level_category_category: { id: "level_category_category", title: "Text type" },
+  era: { id: "era", title: "Era" },
 };
 
 const searchModel = ref(
