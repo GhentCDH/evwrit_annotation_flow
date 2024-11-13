@@ -49,6 +49,7 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
   const filteredAnnotations = computed(() =>
     filterAnnotations(selectedFilters.value, annotationValues.value, showModified.value, showOnlyDuplicates.value),
   );
+  const totalAnnotations = computed(() => annotationValues.value.length);
   const originalAnnotations = computed(() => filteredAnnotations.value.map((annotation) => annotation.original));
   const processedAnnotations = computed(() => filteredAnnotations.value.map((annotation) => annotation.processed));
   const modifiedAnnotations = computed(() =>
@@ -57,7 +58,9 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
 
   const duplicates = computed(() => filteredAnnotations.value.filter((annotation) => annotation.duplicates.length > 1));
 
-  const totalProcessedAnnotation = computed(() => originalAnnotations.value.length - modifiedAnnotations.value.length);
+  const totalProcessedAnnotation = computed(
+    () => annotationValues.value.filter((annotation) => annotation.hasOverride || !annotation.modified).length,
+  );
 
   const textLines = computed(() => textToLines(text.value));
   const snapper = computed(() => new WordSnapper(text.value));
@@ -96,6 +99,7 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
     modifiedAnnotations,
     selectedFilters,
     duplicates,
+    totalAnnotations,
     totalProcessedAnnotation,
     changeShowModified,
     changeShowOnlyDuplicates,
