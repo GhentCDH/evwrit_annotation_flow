@@ -2,14 +2,9 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { fileURLToPath } from "node:url";
 
-const isLocalDev = process.env.DEV === "local";
-
-if (isLocalDev) {
-  console.warn("Running in local dev mode");
-}
-
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: `annotation_flow/`,
   plugins: [vue()],
   resolve: {
     alias: {
@@ -17,17 +12,17 @@ export default defineConfig({
     },
   },
   server: {
-    proxy: {
-      // string shorthand
-      // with options
-      "/text": {
-        target: "https://dev.evwrit.ugent.be",
-        changeOrigin: true,
-      },
-      "/annotation": {
-        target: "https://dev.evwrit.ugent.be",
-        changeOrigin: true,
-      },
-    },
+    // proxy: {
+    //   // string shorthand
+    //   // with options
+    //   "/text": {
+    //     target: "https://dev.evwrit.ugent.be",
+    //     changeOrigin: true,
+    //   },
+    //   "/annotation": {
+    //     target: "https://dev.evwrit.ugent.be",
+    //     changeOrigin: true,
+    //   },
+    // },
   },
 });
