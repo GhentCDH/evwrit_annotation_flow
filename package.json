@@ -7,6 +7,7 @@
     "dev": "pnpm install && vite",
     "dev:local": "DEV=local vite",
     "build": "run-p type-check \"build-only {@}\" --",
+    "deploy": "run-s build && rm -r deploy && cp -r dist/ deploy",
     "preview": "vite preview",
     "preview:dev": "vite preview  --config vite.config.dev.ts",
     "build-only": "vite build --config vite.config.dev.ts",
