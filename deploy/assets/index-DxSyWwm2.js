@@ -13636,7 +13636,7 @@ Consider to rely on 'then' or 'done' mode instead.`);
       { path: "/", name: "search", component: tP },
       { path: "/detail/:id", name: "annotation", component: NC },
     ],
-    nP = Cy({ history: sy(), routes: eP }),
+    nP = Cy({ history: sy("/annotation_flow/"), routes: eP }),
     Hh = _v(Ry);
   Hh.use(Av()).use(nP);
   Hh.mount("#app");
