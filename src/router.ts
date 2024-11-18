@@ -4,8 +4,8 @@ import AnnotationView from "./views/AnnotationView.vue";
 import SearchView from "./views/SearchView.vue";
 
 const routes = [
-  { path: "/", name: "search", component: SearchView },
-  { path: "/detail/:id", name: "annotation", component: AnnotationView },
+  { path: "/", name: "search", component: SearchView, meta: { title: "Zoeken" } },
+  { path: "/detail/:id", name: "annotation", component: AnnotationView, meta: { title: `Annotatie: {id}` } },
 ];
 
 const router = createRouter({
@@ -13,4 +13,15 @@ const router = createRouter({
   routes,
 });
 
+router.beforeEach((to) => {
+  let title = (to.meta.title as string) ?? "";
+
+  Object.entries(to.params ?? {}).forEach(([key, value]) => {
+    title = title.replace(`{${key}}`, value.toString());
+  });
+
+  const defaultTitle = "Evwrite Annotation Flow";
+
+  window.document.title = `${defaultTitle} - ${title}`;
+});
 export default router;

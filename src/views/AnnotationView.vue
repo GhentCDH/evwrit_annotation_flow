@@ -60,6 +60,7 @@
 
 <script setup lang="ts">
 import { type Ref, ref } from "vue";
+import { useRouter } from "vue-router";
 import AnnotationEditList from "../components/AnnotationEditList.vue";
 import AnnotationTextCompare from "../components/AnnotationTextCompare.vue";
 import TypeFilter from "../components/TypeFilter.vue";
@@ -72,6 +73,7 @@ const showModified = ref<boolean>(false);
 const showOnlyDuplicates = ref<boolean>(false);
 const showMetadata = ref<boolean>(false);
 const highlightAnnotationIds: Ref<string[]> = ref([]);
+const router = useRouter();
 
 const showRuleModifiedAnnotations = () => {
   showModified.value = !showModified.value;
