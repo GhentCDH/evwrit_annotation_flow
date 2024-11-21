@@ -30,10 +30,13 @@
             :disabled="annotation.saving"
             :error="annotation.error"
             :showMetadata="showMetadata"
+            :snapper="snapper"
             @confirmAnnotation="confirmAnnotation"
             @deleteAnnotation="deleteAnnotation"
             @changeSelected="onChangeSelected"
             @onHighlight="highlight"
+            @modifyAnnotations="emit('modifyAnnotations', $event)"
+            @processesAnnotation="emit('processesAnnotation', $event)"
           />
         </Lazy>
       </li>
@@ -52,6 +55,7 @@ import AnnotationEdit from "./AnnotationEdit.vue";
 import Lazy from "./LazyComponent.vue";
 import type { ModifiedAnnotation, RuleAnnotation } from "../types/Annotation";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
+import { WordSnapper } from "../lib/snapper";
 
 const highlightIds: Ref<string[]> = ref([]);
 
@@ -60,6 +64,7 @@ interface AnnotationEditListProps {
   textLines: Line[];
   highlightAnnotationIds: string[];
   showMetadata: boolean;
+  snapper?: WordSnapper;
 }
 
 const annotationSelected: Ref<Map<string, ConfirmAnnotationType>> = ref(new Map());
@@ -85,7 +90,13 @@ const selectAll = (type: ConfirmAnnotationType) => {
 };
 
 //#region Emit
-const emit = defineEmits(["confirmAnnotations", "confirmAnnotation", "deleteAnnotation"]);
+const emit = defineEmits([
+  "confirmAnnotations",
+  "confirmAnnotation",
+  "deleteAnnotation",
+  "modifyAnnotations",
+  "processesAnnotation",
+]);
 
 const confirmSelectedAnnotations = () => {
   emit("confirmAnnotations", annotationSelected.value);
