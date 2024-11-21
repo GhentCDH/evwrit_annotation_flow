@@ -18,8 +18,6 @@ export const normalizeProperty = (
     .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
     .join(" ");
 
-  console.log(label);
-
   return {
     id: property.id,
     id_name: property.id_name,
@@ -29,9 +27,12 @@ export const normalizeProperty = (
 };
 
 export const normalizeProperties = (type: AnnotationType, properties: Properties): RuleAnnotationProperty[] => {
-  return Object.keys(properties)
-    .map((key) => normalizeProperty(type, key, properties[key]))
-    .filter((p) => !!p) as RuleAnnotationProperty[];
+  return (
+    Object.keys(properties)
+      // .filter(key => key.startsWith(`${type}_`))
+      .map((key) => normalizeProperty(type, key, properties[key]))
+      .filter((p) => !!p) as RuleAnnotationProperty[]
+  );
 };
 
 export const normalizeAnnotation = (annotation: AnnotationItem, text: string): RuleAnnotation | null => {
