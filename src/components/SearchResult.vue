@@ -3,7 +3,6 @@
     <!-- head -->
     <thead>
       <tr>
-        <th>Id</th>
         <th v-for="column in columns" :key="column.id" v-on:click="onSort(column)" class="cursor-pointer">
           <span class="flex justify-between">
             <span class="flex-grow">{{ column.label }}</span>
@@ -54,7 +53,6 @@
     <tbody>
       <!-- row 1 -->
       <tr v-for="row in data" :key="row.id" class="hover hover:cursor-pointer" v-on:click="open(row)">
-        <th>{{ row.id }}</th>
         <td v-for="column in columns" :key="column.id">{{ row[column.id] }}</td>
       </tr>
     </tbody>
@@ -92,6 +90,7 @@ interface SearchResultProps {
 }
 
 const columns: Array<{ label: string; id: keyof SearchAnnotation }> = [
+  { label: "Id", id: "id" },
   { label: "tm_id", id: "tm_id" },
   {
     label: "Title",
