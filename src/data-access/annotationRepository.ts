@@ -11,14 +11,26 @@ export class AnnotationRepository {
     return this.sendJsonRequest<AnnotationList>({ url: `/text/${annotationId}/annotations`, method: "GET" });
   }
 
-  async listTexts(filter: SearchDto, page: number, pageSize: number): Promise<Search> {
-    const params = this.buildSearchParams(filter, page, pageSize);
+  async listTexts(
+    filter: SearchDto,
+    page: number,
+    pageSize: number,
+    orderBy: string,
+    ascending: 0 | 1,
+  ): Promise<Search> {
+    const params = this.buildSearchParams(filter, page, pageSize, orderBy, ascending);
 
     return this.sendJsonRequest<Search>({ url: `/text/search_api?${params.toString()}`, method: "GET" });
   }
 
-  async paginate(filter: SearchDto, page: number, pageSize: number): Promise<number[]> {
-    const params = this.buildSearchParams(filter, page, pageSize);
+  async paginate(
+    filter: SearchDto,
+    page: number,
+    pageSize: number,
+    orderBy: string,
+    ascending: 0 | 1,
+  ): Promise<number[]> {
+    const params = this.buildSearchParams(filter, page, pageSize, orderBy, ascending);
 
     return this.sendJsonRequest<number[]>({ url: `/text/paginate?${params.toString()}`, method: "GET" });
   }
@@ -59,12 +71,18 @@ export class AnnotationRepository {
     }
   }
 
-  private buildSearchParams(filter: SearchDto, page: number, pageSize: number): URLSearchParams {
+  private buildSearchParams(
+    filter: SearchDto,
+    page: number,
+    pageSize: number,
+    orderBy: string,
+    ascending: 0 | 1,
+  ): URLSearchParams {
     const params = new URLSearchParams();
     params.append("limit", `${pageSize}`);
-    params.append("ascending", `${25}`);
+    params.append("ascending", `${ascending}`);
     params.append("page", `${page}`);
-    params.append("orderBy", "title");
+    params.append("orderBy", orderBy);
     params.append("filters[data_search_type]", "title");
 
     Object.entries(filter).forEach(([key, values]) => {

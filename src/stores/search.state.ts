@@ -17,6 +17,12 @@ export const useSearchStore = defineStore("searchStore", () => {
   const router = useRouter();
   const pageSize = ref(toNumber(route.query.pageSize) ?? defaultPageSize);
   const page = ref(toNumber(route.query.page) ?? 1);
+
+  const sort = ref<{ orderBy: string; ascending: 1 | 0 }>({
+    orderBy: (route.query.orderBy as string) ?? "title",
+    ascending: route.query.ascending === "0" ? 0 : 1,
+  });
+
   const inititalValues: Record<string, number[]> = {};
 
   Object.entries(route.query).forEach(([key, value]) => {
@@ -32,9 +38,10 @@ export const useSearchStore = defineStore("searchStore", () => {
   const searchResult = computedAsync(async () => {
     const filter = filterValues.value;
     const p = page.value;
+    const { ascending, orderBy } = sort.value;
 
     if (!p) return { count: 0, results: [] };
-    return annotationRepository.listTexts(filter, p, pageSize.value);
+    return annotationRepository.listTexts(filter, p, pageSize.value, orderBy, ascending);
   }) as ComputedRef<Search>;
 
   const data = computed(() => searchResult.value?.data ?? []);
@@ -53,9 +60,33 @@ export const useSearchStore = defineStore("searchStore", () => {
     return router.replace({ query: { ...route.query, page: page.value } });
   };
 
-  if (!route.query.pageSize || !route.query.page) {
-    router.replace({ query: { ...route.query, pageSize: pageSize.value, page: page.value } });
+  const changeOrder = (orderBy: string, ascending: 1 | 0) => {
+    sort.value = { orderBy, ascending };
+    return router.replace({ query: { ...route.query, orderBy, ascending } });
+  };
+
+  if (!route.query.pageSize || !route.query.page || !route.query.orderBy || !route.query.ascending) {
+    router.replace({
+      query: {
+        ...route.query,
+        pageSize: pageSize.value,
+        page: page.value,
+        ...sort.value,
+      },
+    });
   }
 
-  return { pageSize, page, filterValues, data, count, searchResult, aggregations, changePage, onSearch };
+  return {
+    sort,
+    pageSize,
+    page,
+    filterValues,
+    data,
+    count,
+    searchResult,
+    aggregations,
+    changePage,
+    onSearch,
+    changeOrder,
+  };
 });

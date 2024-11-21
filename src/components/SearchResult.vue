@@ -4,10 +4,50 @@
     <thead>
       <tr>
         <th>Id</th>
-        <th>tm_id</th>
-        <th>Title</th>
-        <th>Year begin</th>
-        <th>Year end</th>
+        <th v-for="column in columns" :key="column.id" v-on:click="onSort(column)" class="cursor-pointer">
+          <span class="flex justify-between">
+            <span class="flex-grow">{{ column.label }}</span>
+
+            <button class="">
+              <svg
+                v-if="sort.orderBy !== column.id"
+                class="h-4"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
+                />
+              </svg>
+
+              <svg
+                v-else-if="sort.ascending == 0"
+                class="h-4"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+              </svg>
+
+              <svg
+                v-else-if="sort.ascending === 1"
+                class="h-3"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+              </svg>
+            </button>
+          </span>
+        </th>
       </tr>
     </thead>
 
@@ -15,10 +55,7 @@
       <!-- row 1 -->
       <tr v-for="row in data" :key="row.id" class="hover hover:cursor-pointer" v-on:click="open(row)">
         <th>{{ row.id }}</th>
-        <th>{{ row.tm_id }}</th>
-        <td>{{ row.title }}</td>
-        <td>{{ row.year_begin }}</td>
-        <td>{{ row.year_end }}</td>
+        <td v-for="column in columns" :key="column.id">{{ row[column.id] }}</td>
       </tr>
     </tbody>
   </table>
@@ -51,7 +88,18 @@ interface SearchResultProps {
   data: SearchAnnotation[];
   pageSize: number;
   activePage: number;
+  sort: { orderBy: string; ascending: 1 | 0 };
 }
+
+const columns = [
+  { label: "tm_id", id: "tm_id" },
+  {
+    label: "Title",
+    id: "title",
+  },
+  { label: "Year begin", id: "year_begin" },
+  { label: "Year end", id: "year_end" },
+];
 
 const searchProps = defineProps<SearchResultProps>();
 
@@ -103,7 +151,7 @@ onBeforeUpdate(() => {
   calculatePages(searchProps);
 });
 
-const emits = defineEmits(["changePage"]);
+const emits = defineEmits(["changePage", "changeOrder"]);
 
 const changePage = (page: number) => {
   emits("changePage", page);
@@ -114,5 +162,14 @@ const route = useRoute();
 
 const open = (row: SearchAnnotation) => {
   router.push({ name: "annotation", params: { id: row.id }, query: route.query });
+};
+
+const onSort = (column: { id: string }) => {
+  let ascending = 1;
+  if (searchProps.sort.orderBy === column.id) {
+    ascending = searchProps.sort.ascending === 0 ? 1 : 0;
+  }
+
+  emits("changeOrder", column.id, ascending);
 };
 </script>

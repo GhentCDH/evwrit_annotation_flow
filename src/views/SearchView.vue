@@ -3,11 +3,13 @@
     <SearchFilter :aggregations="search.aggregations" @search="search.onSearch" />
     <hr />
     <SearchResult
+      :sort="search.sort"
       :data="search.data"
       :count="search.count"
       :activePage="search.page"
       :pageSize="search.pageSize"
       @change-page="search.changePage"
+      @change-order="search.changeOrder"
     />
   </div>
 </template>

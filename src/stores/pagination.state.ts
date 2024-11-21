@@ -15,23 +15,33 @@ export const usePaginationStore = defineStore("paginationStore", () => {
   const paginated = ref<number[]>([]);
 
   const updatePaginated = async () => {
-    const values = await repository.paginate(searchStore.filterValues, searchStore.page, searchStore.pageSize);
+    const { ascending, orderBy } = searchStore.sort;
+    const values = await repository.paginate(
+      searchStore.filterValues,
+      searchStore.page,
+      searchStore.pageSize,
+      orderBy,
+      ascending,
+    );
     paginated.value = values;
     return values;
   };
 
   const firstId = computedAsync(async () => {
-    const ids = await repository.paginate(searchStore.filterValues, 1, 1);
+    const { ascending, orderBy } = searchStore.sort;
+    const ids = await repository.paginate(searchStore.filterValues, 1, 1, orderBy, ascending);
     return ids[0];
   });
 
   const totalRecords = computedAsync(async () => {
-    const lastRecord = await repository.listTexts(searchStore.filterValues, 1, 0);
+    const { ascending, orderBy } = searchStore.sort;
+    const lastRecord = await repository.listTexts(searchStore.filterValues, 1, 0, orderBy, ascending);
     return lastRecord.count;
   });
 
   const lastId = computedAsync(async () => {
-    const ids = await repository.paginate(searchStore.filterValues, totalRecords.value!, 1);
+    const { ascending, orderBy } = searchStore.sort;
+    const ids = await repository.paginate(searchStore.filterValues, totalRecords.value!, 1, orderBy, ascending);
     return ids[0];
   });
 
