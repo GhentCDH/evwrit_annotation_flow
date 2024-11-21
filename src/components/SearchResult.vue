@@ -91,7 +91,7 @@ interface SearchResultProps {
   sort: { orderBy: string; ascending: 1 | 0 };
 }
 
-const columns = [
+const columns: Array<{ label: string; id: keyof SearchAnnotation }> = [
   { label: "tm_id", id: "tm_id" },
   {
     label: "Title",
