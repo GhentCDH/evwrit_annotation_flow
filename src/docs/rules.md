@@ -11,11 +11,11 @@
 
 ## Duplicates rule
 
-Kijkt of het annotatie type, start en einde dezelfd posities bevatten na correctie.
+Controleert indien er meerdere annotaties met hetzelfde het annotatietype, start- en eindposities zijn.
 
 ## SanitizeRule
 
-Zorgt ervoor dat de indexen groter dan 0 zijn en kleiner dan de lengte van de tekst.
+Garandeert dat de indexen minimaal 0 zijn en kleiner dan de totale lengte van de tekst.
 
 ## annotation_text_rule
 
