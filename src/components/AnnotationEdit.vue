@@ -39,8 +39,12 @@
               :selected-annotation="selectedAnnotation === 'modified'"
               :disabled="disabled"
               :text-lines="textLines"
+              :allow-edit="true"
+              :snapper="snapper"
               @change-selected="changeSelected('modified')"
               @confirm-annotation="confirmAnnotation('modified')"
+              @modifyAnnotations="emit('modifyAnnotations', $event)"
+              @processesAnnotation="emit('processesAnnotation', $event)"
             />
             <hr />
             <AnnotationEditItem
@@ -80,6 +84,7 @@ import AnnotationEditItem from "./AnnotationEditItem.vue";
 import type { AnnotationType, RuleAnnotation } from "../types/Annotation";
 import { annotationHtmlColors } from "../styles/annotation-colors";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
+import { WordSnapper } from "../lib/snapper";
 
 const selectedAnnotation = ref<ConfirmAnnotationType>();
 
@@ -94,11 +99,19 @@ interface AnnotationEditProps {
   disabled: boolean;
   error: boolean;
   showMetadata: boolean;
+  snapper?: WordSnapper;
 }
 
 const props = defineProps<AnnotationEditProps>();
 const { originalAnnotation } = props;
-const emit = defineEmits(["confirmAnnotation", "deleteAnnotation", "changeSelected", "onHighlight"]);
+const emit = defineEmits([
+  "confirmAnnotation",
+  "deleteAnnotation",
+  "changeSelected",
+  "onHighlight",
+  "modifyAnnotations",
+  "processesAnnotation",
+]);
 
 watch(
   () => props.selected,

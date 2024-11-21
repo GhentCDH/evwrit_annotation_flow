@@ -49,9 +49,12 @@
         :text-lines="annotationStore.textLines"
         :highlightAnnotationIds="highlightAnnotationIds"
         :show-metadata="showMetadata"
+        :snapper="annotationStore.snapper"
         @confirm-annotation="confirmAnnotation"
         @delete-annotation="deleteAnnotation"
         @confirm-annotations="confirmAnnotations"
+        @modify-annotations="modifyAnnotation"
+        @processes-annotation="processAnnotation"
       />
     </div>
     <span v-if="annotationStore.loading" class="absolute left-1/2 top-1/2 loading loading-bars loading-lg"></span>
@@ -92,6 +95,7 @@ const processAnnotation = (annotation: UpdateAnnotation) => {
 };
 
 const modifyAnnotation = (annotation: UpdateAnnotation) => {
+  console.log("modifyAnnotation", annotation);
   annotationStore.modifyAnnotation(annotation);
 };
 
