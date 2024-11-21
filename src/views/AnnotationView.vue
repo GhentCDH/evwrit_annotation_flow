@@ -123,11 +123,11 @@ const showAnnotation = (annotation: RuleAnnotation) => {
 
 const scrollToLine = (annotation: RuleAnnotation) => {
   const lines = getAnnotatedLines(annotationStore.textLines, annotation.start, annotation.end).lines;
-  const text = lines?.[0]?.gutter.trim();
+  const text = lines?.[0]?.gutter?.trim();
 
   if (!text) return;
 
-  const findLine = Array.from(document.querySelectorAll(`.gutter.text`))
+  Array.from(document.querySelectorAll(`.gutter.text`))
     .find((el) => el.textContent?.trim() === text)
     ?.scrollIntoView();
 };
