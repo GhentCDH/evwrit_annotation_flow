@@ -9,14 +9,18 @@
       </button>
 
       <button
-        :class="[`btn btn-ghost btn-icon btn-xs`, { 'btn-disabled': activeId === paginationStore.firstId }]"
+        :class="[`btn btn-ghost btn-icon btn-xs `, { 'btn-disabled': activeId === paginationStore.firstId }]"
         @click="paginationStore.previous"
       >
         <chevron-left-icon class="h-3" />
       </button>
-      <div class="text-sm w-16 text-center">
+      <a
+        :href="`https://dev.evwrit.ugent.be/text/${activeId}`"
+        target="_blank"
+        class="text-sm w-16 text-center hover:underline"
+      >
         {{ activeId }}
-      </div>
+      </a>
 
       <button
         :class="[`btn btn-ghost btn-icon btn-xs`, { 'btn-disabled': activeId === paginationStore.lastId }]"
@@ -40,10 +44,10 @@
 
 <script setup lang="ts">
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "@heroicons/vue/16/solid";
 
 import { useRoute } from "vue-router";
@@ -52,6 +56,7 @@ import { usePaginationStore } from "../stores/pagination.state";
 interface SearchPaginatorProps {
   activeId: number;
 }
+
 defineProps<SearchPaginatorProps>();
 
 // #region pagination
