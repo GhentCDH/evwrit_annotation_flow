@@ -61,10 +61,18 @@
               @confirm-annotation="confirmAnnotation('original')"
             />
           </div>
-          <div>
-            <ul>
+          <div class="flex items-center">
+            <ul class="flex-grow">
               <li class="badge badge-xs" v-for="rule in appliedRules" :key="rule">{{ rule }}</li>
             </ul>
+            <router-link
+              class="badge badge-info badge-xs badge-outline tooltip tooltip-left"
+              data-tip="Info over regels"
+              :to="{ name: 'docs' }"
+              target="_blank"
+            >
+              i
+            </router-link>
           </div>
         </div>
       </div>

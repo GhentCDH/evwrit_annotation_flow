@@ -62,6 +62,7 @@ export class DuplicateRule {
 
   public removeAnnotation(annotation: RuleAnnotation): RuleAnnotation[] {
     const oldKey = this.duplicates.get(annotation.id)?.duplicateKey as string;
+
     const oldAnnotations = this.duplicateRuleSet.get(oldKey)?.filter((a) => a.id !== annotation.id) ?? [];
 
     this.duplicates.delete(annotation.id);

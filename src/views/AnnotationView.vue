@@ -114,7 +114,7 @@ const confirmAnnotations = (annotations: Map<string, ConfirmAnnotationType>) => 
 
 const showAnnotation = (annotation: RuleAnnotation) => {
   highlightAnnotationIds.value = [];
-  // document.get.target.scrollIntoView();
+
   if (!annotation) return;
 
   document.querySelector(`[data-annotation="${annotation.id}"]`)?.scrollIntoView();

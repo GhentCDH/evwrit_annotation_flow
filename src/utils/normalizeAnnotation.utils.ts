@@ -18,8 +18,6 @@ export const normalizeProperty = (
     .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
     .join(" ");
 
-  console.log(label);
-
   return {
     id: property.id,
     id_name: property.id_name,

@@ -2,9 +2,11 @@ import { createRouter, createWebHistory } from "vue-router";
 
 import AnnotationView from "./views/AnnotationView.vue";
 import SearchView from "./views/SearchView.vue";
+import DocsView from "./views/DocsView.vue";
 
 const routes = [
   { path: "/", name: "search", component: SearchView, meta: { title: "Zoeken" } },
+  { path: "/docs", name: "docs", component: () => DocsView, meta: { title: "Docs" } },
   { path: "/detail/:id", name: "annotation", component: AnnotationView, meta: { title: `Annotatie: {id}` } },
 ];
 
