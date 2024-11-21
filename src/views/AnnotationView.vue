@@ -95,7 +95,6 @@ const processAnnotation = (annotation: UpdateAnnotation) => {
 };
 
 const modifyAnnotation = (annotation: UpdateAnnotation) => {
-  console.log("modifyAnnotation", annotation);
   annotationStore.modifyAnnotation(annotation);
 };
 
