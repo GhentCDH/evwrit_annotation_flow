@@ -8,16 +8,20 @@
         <div role="alert" class="alert alert-error" v-if="error">Annotatie niet bewaard, probeer opnieuw.</div>
         <div class="flex justify-between items-center">
           <div class="flex gap-2 justify-center">
-            <div class="badge badge-outline badge-sm text-color-custom" :style="getColor()">
+            <button
+              class="badge badge-outline badge-sm text-color-custom cursor-pointer"
+              :style="getColor()"
+              @click="onHighlightAnnotation"
+            >
               {{ originalAnnotation.type }}
-            </div>
-            <div
+            </button>
+            <button
               v-if="duplicates.length > 1"
               class="badge badge-sm badge-warning cursor-pointer"
               @click="onHighlight()"
             >
               Duplicaat? ({{ originalAnnotation.id }})
-            </div>
+            </button>
           </div>
           <div class="flex gap-2">
             <button
@@ -111,6 +115,7 @@ const emit = defineEmits([
   "onHighlight",
   "modifyAnnotations",
   "processesAnnotation",
+  "highlightAnnotation",
 ]);
 
 watch(
@@ -140,5 +145,9 @@ const changeSelected = (type: ConfirmAnnotationType) => {
 
 const onHighlight = () => {
   emit("onHighlight", props.duplicates);
+};
+
+const onHighlightAnnotation = () => {
+  emit("highlightAnnotation", props.originalAnnotation);
 };
 </script>

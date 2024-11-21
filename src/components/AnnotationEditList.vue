@@ -35,6 +35,7 @@
             @deleteAnnotation="deleteAnnotation"
             @changeSelected="onChangeSelected"
             @onHighlight="highlight"
+            @highlightAnnotation="emit('highlightAnnotation', $event)"
             @modifyAnnotations="emit('modifyAnnotations', $event)"
             @processesAnnotation="emit('processesAnnotation', $event)"
           />
@@ -96,6 +97,7 @@ const emit = defineEmits([
   "deleteAnnotation",
   "modifyAnnotations",
   "processesAnnotation",
+  "highlightAnnotation",
 ]);
 
 const confirmSelectedAnnotations = () => {

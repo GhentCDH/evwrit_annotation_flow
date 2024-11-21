@@ -55,6 +55,7 @@
         @confirm-annotations="confirmAnnotations"
         @modify-annotations="modifyAnnotation"
         @processes-annotation="processAnnotation"
+        @highlightAnnotation="scrollToLine"
       />
     </div>
     <span v-if="annotationStore.loading" class="absolute left-1/2 top-1/2 loading loading-bars loading-lg"></span>
@@ -70,6 +71,7 @@ import TypeFilter from "../components/TypeFilter.vue";
 import { type ConfirmAnnotationType, type UpdateAnnotation } from "../stores/annotation.store";
 import { useAnnotationStore } from "../stores/annotation.state";
 import SearchPaginator from "../components/SearchPaginator.vue";
+import { getAnnotatedLines } from "../utils/annotation_utils";
 import type { RuleAnnotation } from "@/types/Annotation";
 
 const showModified = ref<boolean>(false);
@@ -117,5 +119,16 @@ const showAnnotation = (annotation: RuleAnnotation) => {
 
   document.querySelector(`[data-annotation="${annotation.id}"]`)?.scrollIntoView();
   highlightAnnotationIds.value = [annotation.id];
+};
+
+const scrollToLine = (annotation: RuleAnnotation) => {
+  const lines = getAnnotatedLines(annotationStore.textLines, annotation.start, annotation.end).lines;
+  const text = lines?.[0]?.gutter?.trim();
+
+  if (!text) return;
+
+  Array.from(document.querySelectorAll(`.gutter.text`))
+    .find((el) => el.textContent?.trim() === text)
+    ?.scrollIntoView();
 };
 </script>
