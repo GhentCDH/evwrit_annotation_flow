@@ -45,7 +45,7 @@ const searchModel = ref(
       acc[key] = [];
       return acc;
     },
-    {} as Record<string, Array<string | number>>,
+    {} as Record<string, Array<any>>,
   ),
 );
 

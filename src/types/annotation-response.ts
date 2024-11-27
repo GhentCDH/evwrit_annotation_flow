@@ -1,5 +1,3 @@
-import type { AnnotationFlags } from "@/types/Annotation";
-
 export interface AnnotationList {
   id: number;
   text: string;
@@ -17,7 +15,6 @@ export interface AnnotationItem {
   hasOverride: boolean;
   isDeleted: boolean;
   context?: Context;
-  flags: AnnotationFlags;
 }
 
 export interface TextSelection {

@@ -23,7 +23,7 @@ export const useSearchStore = defineStore("searchStore", () => {
     ascending: route.query.ascending === "0" ? 0 : 1,
   });
 
-  const inititalValues: Record<string, number[]> = {
+  const inititalValues: Record<string, any[]> = {
     project: [3],
   };
 

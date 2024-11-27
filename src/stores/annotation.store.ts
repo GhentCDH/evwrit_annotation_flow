@@ -18,7 +18,7 @@ export class AnnotationStore {
   private duplicateRule!: DuplicateRule;
   //#endregion
 
-  private id: number | string;
+  private id!: number | string;
   private text: string = "";
   private readonly annotations = ref<Map<string, ModifiedAnnotation>>(new Map());
   public readonly annotationValues = computed(() => Array.from(this.annotations.value.values()));
