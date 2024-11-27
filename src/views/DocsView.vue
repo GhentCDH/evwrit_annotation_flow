@@ -10,7 +10,7 @@ import { ref } from "vue";
 
 const markdown = ref("");
 
-fetch("../docs/rules.md")
+fetch("../assets/docs/rules.md")
   .then((response) => response.text())
   .then((text) => marked(text))
   .then((text) => {
