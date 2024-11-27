@@ -15899,7 +15899,7 @@ Please report this to https://github.com/markedjs/marked.`),
     }),
     Fj = [
       { path: "/", name: "search", component: ij, meta: { title: "Zoeken" } },
-      { path: "/docs", name: "docs", component: () => Dj, meta: { title: "Docs" } },
+      { path: "/docs", name: "docs", component: Dj, meta: { title: "Docs" } },
       { path: "/detail/:id", name: "annotation", component: CR, meta: { title: "Annotatie: {id}" } },
     ],
     Ip = yb({ history: Jv("/annotation_flow/"), routes: Fj });
