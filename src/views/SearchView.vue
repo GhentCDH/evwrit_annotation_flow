@@ -1,6 +1,6 @@
 <template>
   <div class="m-auto max-w-2xl">
-    <SearchFilter :aggregations="search.aggregations" @search="search.onSearch" />
+    <SearchFilter :searchFilters="search.searchFilters" :filters="search.filters" @search="search.onSearch" />
     <hr />
     <SearchResult
       :sort="search.sort"

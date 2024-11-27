@@ -1,4 +1,4 @@
-import type { Search, SearchDto } from "../types/Search";
+import type { Filters, Search, SearchDto } from "../types/Search";
 import type { AnnotationList } from "../types/annotation-response";
 import type { AnnotationPatch, AnnotationType } from "@/types/Annotation";
 
@@ -11,6 +11,10 @@ export class AnnotationRepository {
     return this.sendJsonRequest<AnnotationList>({ url: `/text/${annotationId}/annotations`, method: "GET" });
   }
 
+  async filters(): Promise<Filters> {
+    return this.sendJsonRequest<Filters>({ url: `/text/search_flags/filters`, method: "GET" });
+  }
+
   async listTexts(
     filter: SearchDto,
     page: number,
@@ -20,7 +24,7 @@ export class AnnotationRepository {
   ): Promise<Search> {
     const params = this.buildSearchParams(filter, page, pageSize, orderBy, ascending);
 
-    return this.sendJsonRequest<Search>({ url: `/text/search_api?${params.toString()}`, method: "GET" });
+    return this.sendJsonRequest<Search>({ url: `/text/search_flags?${params.toString()}`, method: "GET" });
   }
 
   async paginate(
@@ -30,9 +34,9 @@ export class AnnotationRepository {
     orderBy: string,
     ascending: 0 | 1,
   ): Promise<number[]> {
-    const params = this.buildSearchParams(filter, page, pageSize, orderBy, ascending);
+    const search = await this.listTexts(filter, page, pageSize, orderBy, ascending);
 
-    return this.sendJsonRequest<number[]>({ url: `/text/paginate?${params.toString()}`, method: "GET" });
+    return search.data.map((d) => d.id);
   }
 
   async patchAnnotation(annotationId: string | number, type: AnnotationType, annotation: AnnotationPatch) {
@@ -40,6 +44,22 @@ export class AnnotationRepository {
       url: `/annotation/${type}/${annotationId}/override`,
       method: "PATCH",
       body: annotation,
+    });
+  }
+
+  async reviewDone(textId: string | number) {
+    return this.sendJsonRequest<number[]>({
+      url: `/text/${textId}/flags`,
+      method: "PATCH",
+      body: { review_done: true, needs_attention: false },
+    });
+  }
+
+  async needsAttention(textId: string | number) {
+    return this.sendJsonRequest<number[]>({
+      url: `/text/${textId}/flags`,
+      method: "PATCH",
+      body: { review_done: false, needs_attention: true },
     });
   }
 
@@ -83,9 +103,12 @@ export class AnnotationRepository {
     params.append("ascending", `${ascending}`);
     params.append("page", `${page}`);
     params.append("orderBy", orderBy);
-    params.append("filters[data_search_type]", "title");
+
+    const ignoreKeys = ["page", "orderBy", "ascending"];
 
     Object.entries(filter).forEach(([key, values]) => {
+      if (ignoreKeys.includes(key)) return;
+
       values.forEach((value, index) => {
         params.append(`filters[${key}][${index}]`, `${value}`);
       });

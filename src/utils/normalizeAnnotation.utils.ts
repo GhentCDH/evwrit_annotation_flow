@@ -67,6 +67,7 @@ export const normalizeAnnotation = (annotation: AnnotationItem, text: string): R
     },
     color: annotationColors[type],
     hasOverride: annotation.hasOverride,
+    flags: annotation.flags,
     properties: normalizeProperties(type, annotation.properties),
   } as unknown as RuleAnnotation;
 };
