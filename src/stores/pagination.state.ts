@@ -73,9 +73,12 @@ export const usePaginationStore = defineStore("paginationStore", () => {
     if (nextId) {
       await annotationStore.changeId(nextId);
     } else {
+      if (searchStore.page === 1) return;
+
       await searchStore.changePage(searchStore.page - 1);
       await updatePaginated();
       nextId = paginated.value[maxIndex];
+      if (nextId == firstId.value) return;
 
       if (nextId) await annotationStore.changeId(nextId);
     }
@@ -88,11 +91,18 @@ export const usePaginationStore = defineStore("paginationStore", () => {
     if (nextId) {
       await annotationStore.changeId(nextId);
     } else {
+      if (searchStore.page >= searchStore.maxPage) return;
+
       await searchStore.changePage(searchStore.page + 1);
       await updatePaginated();
       nextId = paginated.value[0];
 
-      if (nextId) await annotationStore.changeId(nextId);
+      if (nextId == lastId.value) {
+        await searchStore.changePage(searchStore.page + 1);
+        return;
+      }
+
+      if (nextId && nextId !== lastId.value) await annotationStore.changeId(nextId);
     }
   };
 

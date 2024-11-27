@@ -17,6 +17,7 @@ export const useSearchStore = defineStore("searchStore", () => {
   const router = useRouter();
   const pageSize = ref(toNumber(route.query.pageSize) ?? defaultPageSize);
   const page = ref(toNumber(route.query.page) ?? 1);
+  const refresh = ref(Date.now());
 
   const sort = ref<{ orderBy: string; ascending: 1 | 0 }>({
     orderBy: (route.query.orderBy as string) ?? "title",
@@ -45,6 +46,8 @@ export const useSearchStore = defineStore("searchStore", () => {
     const filter = filterValues.value;
     const p = page.value;
     const { ascending, orderBy } = sort.value;
+    const r = refresh.value;
+    console.log("refresh", r);
 
     if (!p) return { count: 0, results: [] };
     return annotationRepository.listTexts(filter, p, pageSize.value, orderBy, ascending);
@@ -59,10 +62,18 @@ export const useSearchStore = defineStore("searchStore", () => {
     return router.replace({ query: { ...route.query, ...filter } });
   };
 
+  const maxPage = computed(() => Math.ceil(count.value / pageSize.value));
+
   const changePage = (p: number = 1) => {
     const value = toNumber(p) ?? 1;
-    page.value = value < 1 ? 1 : value;
+    let nextP = value < 1 ? 1 : value;
 
+    const max = maxPage.value;
+    if (nextP > max) nextP = max;
+
+    page.value = nextP;
+
+    console.log("change page", maxPage, nextP);
     return router.replace({ query: { ...route.query, page: page.value } });
   };
 
@@ -92,6 +103,8 @@ export const useSearchStore = defineStore("searchStore", () => {
     searchFilters,
     count,
     searchResult,
+    maxPage,
+    refresh: () => (refresh.value = Date.now()),
     changePage,
     onSearch,
     changeOrder,

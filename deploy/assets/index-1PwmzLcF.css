@@ -3977,6 +3977,9 @@ html {
 .w-2\/3 {
   width: 66.666667%;
 }
+.w-4 {
+  width: 1rem;
+}
 .w-6 {
   width: 1.5rem;
 }

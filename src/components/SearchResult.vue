@@ -53,7 +53,24 @@
     <tbody>
       <!-- row 1 -->
       <tr v-for="row in data" :key="row.id" class="hover hover:cursor-pointer" v-on:click="open(row)">
-        <td v-for="column in columns" :key="column.id">{{ row[column.id] }}</td>
+        <td v-for="column in columns" :key="column.id" :class="{ 'text-center': column.type === 'boolean' }">
+          <span v-if="column.type === 'boolean'">
+            <svg
+              v-if="row[column.id]"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="{1.5}"
+              stroke="currentColor"
+              class="w-4 m-auto"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+            </svg>
+          </span>
+          <span v-else>
+            {{ row[column.id] }}
+          </span>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -89,7 +106,7 @@ interface SearchResultProps {
   sort: { orderBy: string; ascending: 1 | 0 };
 }
 
-const columns: Array<{ label: string; id: keyof SearchAnnotation }> = [
+const columns: Array<{ label: string; id: keyof SearchAnnotation; type?: "boolean" }> = [
   { label: "Id", id: "id" },
   { label: "tm_id", id: "tm_id" },
   {
@@ -98,8 +115,8 @@ const columns: Array<{ label: string; id: keyof SearchAnnotation }> = [
   },
   { label: "Year begin", id: "year_begin" },
   { label: "Year end", id: "year_end" },
-  { label: "Verwerkt", id: "flag_review_done" },
-  { label: "Vereist aaandacht", id: "flag_needs_attention" },
+  { label: "Vereist aaandacht", id: "flag_needs_attention", type: "boolean" },
+  { label: "Verwerkt", id: "flag_review_done", type: "boolean" },
 ];
 
 const searchProps = defineProps<SearchResultProps>();

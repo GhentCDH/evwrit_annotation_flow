@@ -4,6 +4,7 @@ import { defineStore } from "pinia";
 import { computedAsync } from "@vueuse/core";
 import { AnnotationStore, type ConfirmAnnotationType, type UpdateAnnotation } from "./annotation.store";
 import { usePaginationStore } from "./pagination.state";
+import { useSearchStore } from "./search.state";
 import { textToLines } from "../text_utilities";
 import { WordSnapper } from "../lib/snapper";
 import { filterAnnotations } from "../utils/filter.utils";
@@ -95,14 +96,16 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
 
   const changeShowOnlyDuplicates = (value: boolean) => (showOnlyDuplicates.value = value);
 
-  const reviewDone = () => {
-    annotationStore.value?.reviewDone();
+  const reviewDone = async () => {
+    await annotationStore.value?.reviewDone();
     usePaginationStore().next();
+    useSearchStore().refresh();
   };
 
-  const needsAttention = () => {
-    annotationStore.value?.needsAttention();
+  const needsAttention = async () => {
+    await annotationStore.value?.needsAttention();
     usePaginationStore().next();
+    useSearchStore().refresh();
   };
 
   return {

@@ -176,10 +176,10 @@ export class AnnotationStore {
   }
 
   public reviewDone() {
-    this.annotationRepository.reviewDone(this.id);
+    return this.annotationRepository.reviewDone(this.id);
   }
 
   public needsAttention() {
-    this.annotationRepository.needsAttention(this.id);
+    return this.annotationRepository.needsAttention(this.id);
   }
 }
