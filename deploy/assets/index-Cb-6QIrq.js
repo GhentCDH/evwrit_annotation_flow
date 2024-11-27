@@ -15887,7 +15887,7 @@ Please report this to https://github.com/markedjs/marked.`),
       setup(t) {
         const e = ut("");
         return (
-          fetch("../assets/docs/rules.md")
+          fetch("/annotation_flow/assets/docs/rules.md")
             .then((n) => n.text())
             .then((n) => yt(n))
             .then((n) => {
