@@ -3,6 +3,7 @@ import { useRoute, useRouter } from "vue-router";
 import { defineStore } from "pinia";
 import { computedAsync } from "@vueuse/core";
 import { AnnotationStore, type ConfirmAnnotationType, type UpdateAnnotation } from "./annotation.store";
+import { usePaginationStore } from "./pagination.state";
 import { textToLines } from "../text_utilities";
 import { WordSnapper } from "../lib/snapper";
 import { filterAnnotations } from "../utils/filter.utils";
@@ -20,7 +21,6 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
 
     try {
       const response = await annotationStore.getAnnotation(id.value);
-
       return { annotationStore, ...response };
     } catch (error) {
       console.error(error);
@@ -38,6 +38,14 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
   const text = computed(() => fetchNewValue.value?.text || "");
   const annotationStore = computed(() => {
     return fetchNewValue.value?.annotationStore || null;
+  });
+  const flags = computed(() => {
+    return (
+      fetchNewValue.value?.flags || {
+        needs_attention: false,
+        review_done: false,
+      }
+    );
   });
 
   const showModified = ref(false);
@@ -87,6 +95,16 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
 
   const changeShowOnlyDuplicates = (value: boolean) => (showOnlyDuplicates.value = value);
 
+  const reviewDone = () => {
+    annotationStore.value?.reviewDone();
+    usePaginationStore().next();
+  };
+
+  const needsAttention = () => {
+    annotationStore.value?.needsAttention();
+    usePaginationStore().next();
+  };
+
   return {
     id,
     loading,
@@ -100,6 +118,7 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
     selectedFilters,
     duplicates,
     totalAnnotations,
+    flags,
     totalProcessedAnnotation,
     changeShowModified,
     changeShowOnlyDuplicates,
@@ -110,5 +129,7 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
     confirmAnnotations: (annotations: Map<string, ConfirmAnnotationType>) =>
       annotationStore.value?.confirmAnnotations(annotations),
     deleteAnnotation: (id: string) => annotationStore.value?.deleteAnnotation(id),
+    needsAttention: needsAttention,
+    reviewDone: reviewDone,
   };
 });

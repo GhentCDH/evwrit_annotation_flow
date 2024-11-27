@@ -43,7 +43,9 @@
       </li>
     </ul>
     <hr />
-    <div class="flex justify-end">
+    <div class="flex justify-end gap-2">
+      <button class="btn" @click="emit('needsAttention')">Text heeft extra aandacht nodig</button>
+      <button class="btn" @click="emit('reviewDone')">Text Verwerkt</button>
       <button class="btn" @click="confirmSelectedAnnotations">Bevestig Selectie</button>
     </div>
   </div>
@@ -98,6 +100,8 @@ const emit = defineEmits([
   "modifyAnnotations",
   "processesAnnotation",
   "highlightAnnotation",
+  "needsAttention",
+  "reviewDone",
 ]);
 
 const confirmSelectedAnnotations = () => {

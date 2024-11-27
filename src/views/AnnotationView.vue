@@ -40,9 +40,13 @@
       />
     </div>
     <div :class="[` border p-4`, { 'w-1/3': !showMetadata, 'w-1/2': showMetadata }]">
-      <div>
-        Verwerkte annotaties:
-        {{ annotationStore.totalProcessedAnnotation }}/{{ annotationStore.totalAnnotations }}
+      <div class="flex flex-row gap-2">
+        <div>
+          Verwerkte annotaties:
+          {{ annotationStore.totalProcessedAnnotation }}/{{ annotationStore.totalAnnotations }}
+        </div>
+        <div v-if="annotationStore.flags.review_done" class="badge badge-success badge-outline">Text verwerkt</div>
+        <div v-if="annotationStore.flags.needs_attention" class="badge badge-error badge-outline">Aandacht vereist</div>
       </div>
       <annotation-edit-list
         :modifiedAnnotations="annotationStore.modifiedAnnotations"
@@ -56,6 +60,8 @@
         @modify-annotations="modifyAnnotation"
         @processes-annotation="processAnnotation"
         @highlightAnnotation="scrollToLine"
+        @needs-attention="annotationStore.needsAttention"
+        @review-done="annotationStore.reviewDone"
       />
     </div>
     <span v-if="annotationStore.loading" class="absolute left-1/2 top-1/2 loading loading-bars loading-lg"></span>

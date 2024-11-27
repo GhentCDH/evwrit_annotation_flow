@@ -4,6 +4,7 @@ export interface AnnotationList {
   annotations: AnnotationItem[];
   has_generic_text_structure: string;
   has_layout_text_structure: any;
+  flags: TextFlags;
 }
 
 export interface AnnotationItem {
@@ -41,3 +42,8 @@ export interface Context {
   start: number;
   end: number;
 }
+
+export type TextFlags = {
+  needs_attention: boolean;
+  review_done: boolean;
+};

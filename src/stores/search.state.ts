@@ -4,7 +4,7 @@ import { defineStore } from "pinia";
 import { computedAsync } from "@vueuse/core";
 import { cloneDeep } from "lodash-es";
 import { AnnotationRepository } from "../data-access/annotationRepository";
-import type { Search, SearchAggregations } from "@/types/Search";
+import type { Search, SearchFilter } from "@/types/Search";
 
 const toNumber = (value: any) => {
   const newValue = Number(value);
@@ -23,17 +23,23 @@ export const useSearchStore = defineStore("searchStore", () => {
     ascending: route.query.ascending === "0" ? 0 : 1,
   });
 
-  const inititalValues: Record<string, number[]> = {};
+  const inititalValues: Record<string, any[]> = {
+    project: [3],
+  };
 
   Object.entries(route.query).forEach(([key, value]) => {
     if (["pageSize", "page"].includes(key)) return;
 
-    if (Array.isArray(value)) inititalValues[key] = value.map((v) => Number(v));
-    else inititalValues[key] = [Number(value)];
+    if (Array.isArray(value)) inititalValues[key] = value.map((v) => v);
+    else inititalValues[key] = [value];
   });
 
   const filterValues = ref<any>(cloneDeep(inititalValues));
   const annotationRepository = new AnnotationRepository();
+
+  const filters = computedAsync(async () => {
+    return annotationRepository.filters();
+  });
 
   const searchResult = computedAsync(async () => {
     const filter = filterValues.value;
@@ -46,7 +52,7 @@ export const useSearchStore = defineStore("searchStore", () => {
 
   const data = computed(() => searchResult.value?.data ?? []);
   const count = computed(() => searchResult.value?.count ?? 0);
-  const aggregations = computed(() => searchResult.value?.aggregation ?? ({} as SearchAggregations));
+  const searchFilters = computed(() => searchResult.value?.filters ?? ([] as SearchFilter[]));
 
   const onSearch = (filter: any) => {
     filterValues.value = cloneDeep(filter);
@@ -80,11 +86,12 @@ export const useSearchStore = defineStore("searchStore", () => {
     sort,
     pageSize,
     page,
+    filters,
     filterValues,
     data,
+    searchFilters,
     count,
     searchResult,
-    aggregations,
     changePage,
     onSearch,
     changeOrder,

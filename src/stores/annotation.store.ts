@@ -18,20 +18,17 @@ export class AnnotationStore {
   private duplicateRule!: DuplicateRule;
   //#endregion
 
-  //#region define annotation computed
-  public readonly text = ref<string>("");
+  private id!: number | string;
+  private text: string = "";
   private readonly annotations = ref<Map<string, ModifiedAnnotation>>(new Map());
   public readonly annotationValues = computed(() => Array.from(this.annotations.value.values()));
-
-  //#endregion
 
   async getAnnotation(id: string | number) {
     this.reset();
     try {
       const result = await this.annotationRepository.fetchAnnotation(id);
-      const { text } = result;
-      const annotations = result.annotations;
-
+      const { text, flags, annotations } = result;
+      this.id = id;
       this.createRulesSet(text);
       console.group("Load annotations for ", id);
       console.log("Totaal aantal annotaties", annotations.length, "textlengte", text.length);
@@ -47,7 +44,7 @@ export class AnnotationStore {
 
       console.timeEnd(`process_${id}`);
       console.groupEnd();
-      return { text, id };
+      return { text, id, flags };
     } catch (err) {
       console.error(err);
       throw new Error(err as unknown as string);
@@ -55,13 +52,12 @@ export class AnnotationStore {
   }
 
   private reset() {
-    this.text.value = "";
     this.annotations.value.clear();
   }
 
   private checkForDuplicates(modifiedAnnotations: ModifiedAnnotation[]) {
     const annotations = modifiedAnnotations.map((a) => a.processed);
-    this.duplicateRule = new DuplicateRule(this.text.value, annotations);
+    this.duplicateRule = new DuplicateRule(this.text, annotations);
 
     modifiedAnnotations.forEach((modifiedAnnotation) => {
       modifiedAnnotation.duplicates = this.duplicateRule.hasDuplicate(modifiedAnnotation.processed);
@@ -69,7 +65,7 @@ export class AnnotationStore {
   }
 
   private createRulesSet(text: string) {
-    this.text.value = text;
+    this.text = text;
     this.annotationRuleSets = new AnnotationRuleSets(text);
   }
 
@@ -177,5 +173,13 @@ export class AnnotationStore {
     await Promise.all(promises);
 
     this.checkForDuplicates(Array.from(this.annotations.value.values()));
+  }
+
+  public reviewDone() {
+    this.annotationRepository.reviewDone(this.id);
+  }
+
+  public needsAttention() {
+    this.annotationRepository.needsAttention(this.id);
   }
 }

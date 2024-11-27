@@ -98,6 +98,8 @@ const columns: Array<{ label: string; id: keyof SearchAnnotation }> = [
   },
   { label: "Year begin", id: "year_begin" },
   { label: "Year end", id: "year_end" },
+  { label: "Verwerkt", id: "flag_review_done" },
+  { label: "Vereist aaandacht", id: "flag_needs_attention" },
 ];
 
 const searchProps = defineProps<SearchResultProps>();

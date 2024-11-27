@@ -4,18 +4,33 @@ export interface SearchAnnotation {
   year_begin: number;
   year_end: number;
   id: number;
+  flag_needs_attention: boolean;
+  flag_review_done: boolean;
 }
 
-export type SearchAggregation = { id: number; name: string; count: number; active: boolean };
-
-export type SearchAggregations = Record<string, SearchAggregation[]>;
+export interface SearchFilter {
+  id: string;
+  field: string;
+  value: string[];
+}
 
 export interface Search {
   count: number;
   data: SearchAnnotation[];
-  search: SearchAnnotation;
-  filters: any;
-  aggregation: SearchAggregations;
+  filters: SearchFilter[];
 }
+
+export type Filter = {
+  id: string | number;
+  name: string;
+};
+
+export type Filters = {
+  era: Filter[];
+  level_category_category: Filter[];
+  project: Filter[];
+  flag_review_done: Filter[];
+  flag_needs_attention: Filter[];
+};
 
 export type SearchDto = Record<string, number[]>;
