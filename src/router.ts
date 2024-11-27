@@ -6,7 +6,7 @@ import DocsView from "./views/DocsView.vue";
 
 const routes = [
   { path: "/", name: "search", component: SearchView, meta: { title: "Zoeken" } },
-  { path: "/docs", name: "docs", component: () => DocsView, meta: { title: "Docs" } },
+  { path: "/docs", name: "docs", component: DocsView, meta: { title: "Docs" } },
   { path: "/detail/:id", name: "annotation", component: AnnotationView, meta: { title: `Annotatie: {id}` } },
 ];
 
