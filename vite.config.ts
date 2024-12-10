@@ -43,6 +43,11 @@ export default defineConfig({
         // target: "https://dev.evwrit.ugent.be",
         changeOrigin: true,
       },
+      "/health": {
+        target: "http://localhost:8080",
+        // target: "https://dev.evwrit.ugent.be",
+        changeOrigin: true,
+      },
     },
   },
 });
