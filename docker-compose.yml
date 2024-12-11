@@ -10,5 +10,4 @@ services:
       - 443:443
     volumes:
       - .:/app
-    environment:
-      - base=fooo
+      - /app/node_modules

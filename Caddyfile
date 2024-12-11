@@ -1,5 +1,5 @@
 :80 {
-    root * /app/dist
+    root * /srv
     encode gzip
 
     file_server {
@@ -7,7 +7,8 @@
     }
 
     handle_path /annotation_flow/* {
-        root * /app/dist
+        root * /srv
 		file_server
     }
+
 }
