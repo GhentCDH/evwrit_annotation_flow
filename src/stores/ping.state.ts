@@ -29,6 +29,8 @@ export const usePingStore = defineStore("alive", () => {
     isAlive.value = isAlive.value + 1;
   }, TIMOUT_MS);
 
+  console.log("Ping store created, timeout: ", TIMOUT_MS);
+
   return {
     isAlive,
   };

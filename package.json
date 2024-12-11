@@ -23,6 +23,7 @@
   "dependencies": {
     "@ghentcdh/vue-component-annotated-text": "0.4.6",
     "@heroicons/vue": "^2.1.5",
+    "@rollup/rollup-linux-arm64-gnu": "^4.28.1",
     "@vueuse/core": "^11.1.0",
     "axios": "^1.7.7",
     "diff": "^5.2.0",

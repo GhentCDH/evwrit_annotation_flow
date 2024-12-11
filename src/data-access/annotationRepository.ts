@@ -80,6 +80,11 @@ export class AnnotationRepository {
         },
         body: body ? JSON.stringify(body) : undefined,
       });
+
+      if (response.status === 401) {
+        window.location.reload();
+      }
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
