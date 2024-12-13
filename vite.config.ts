@@ -35,17 +35,14 @@ export default defineConfig({
       // with options
       "/text": {
         target: "http://localhost:8080",
-        // target: "https://dev.evwrit.ugent.be",
         changeOrigin: true,
       },
       "/annotation": {
         target: "http://localhost:8080",
-        // target: "https://dev.evwrit.ugent.be",
         changeOrigin: true,
       },
       "/health": {
         target: "http://localhost:8080",
-        // target: "https://dev.evwrit.ugent.be",
         changeOrigin: true,
       },
     },
