@@ -21,9 +21,4 @@ COPY . .
 
 RUN pnpm run build
 
-# ====== RUN CADDY =======
-FROM caddy:2.8.4-alpine
-
-COPY Caddyfile /etc/caddy/Caddyfile
-COPY --from=builder /app/dist /srv
-EXPOSE 80 443 8080
+CMD npx vite serve --port 9000 /app/dist --host
