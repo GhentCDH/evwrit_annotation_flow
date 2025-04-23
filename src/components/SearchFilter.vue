@@ -17,12 +17,25 @@
         Search
       </button>
     </div>
+    <div class="flex gap-2 items-center">
+      <label
+        class="input input-sm input-bordered border w-64 rounded px-2 py-1 text-sm min-h-12 flex items-center gap-2"
+      >
+        <span>EvwritId: </span>
+        <input v-model="evwritId" type="number" class="grow" />
+      </label>
+      <button class="btn btn-sm" @click="onSearchId" :disabled="!evwritId">
+        <magnifying-glass-icon class="h-6" />
+        Zoek op id
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { MagnifyingGlassIcon } from "@heroicons/vue/16/solid";
 import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
 import SearchField from "./SearchField.vue";
 import type { Filters, SearchFilter } from "@/types/Search";
 
@@ -48,6 +61,7 @@ const searchModel = ref(
     {} as Record<string, Array<any>>,
   ),
 );
+const evwritId = ref<number | null>(null);
 
 const fields = computed(() => {
   return Object.values(searchConfig).map((field) => {
@@ -73,5 +87,11 @@ const emits = defineEmits(["search"]);
 const onSearch = () => {
   const filterValues = searchModel.value;
   emits("search", filterValues);
+};
+
+const router = useRouter();
+
+const onSearchId = () => {
+  router.push({ name: "annotation", params: { id: evwritId.value } });
 };
 </script>
