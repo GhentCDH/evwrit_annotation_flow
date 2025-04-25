@@ -1,6 +1,6 @@
-import { cloneDeep } from "lodash-es";
+import { cloneDeep, pick } from "lodash-es";
 import type { AnnotationRule, AnnotationRuleResult } from "./rules/annotation.rule";
-import { type RuleAnnotation } from "../types/Annotation";
+import { type AnnotationType, type RuleAnnotation } from "../types/Annotation";
 
 import { shiftToWordBoundary } from "../text_utilities";
 
@@ -44,7 +44,12 @@ export class AnnotationRuleSet implements AnnotationRule {
   alwaysApplyFirstRule: boolean; // Eerste regel altijd toepassen
   stopWhenRuleApplied: boolean; // Stop bij de eerste succesvolle toepassing
 
-  constructor(rules: AnnotationRule[], alwaysApplyFirstRule: boolean = false, stopWhenRuleApplied: boolean = false) {
+  constructor(
+    private readonly annotationType: AnnotationType | "default",
+    rules: AnnotationRule[],
+    alwaysApplyFirstRule: boolean = false,
+    stopWhenRuleApplied: boolean = false,
+  ) {
     this.name = "annotation_rule_set";
     this.rules = rules;
     this.text = rules[0]?.text || "";
@@ -52,26 +57,21 @@ export class AnnotationRuleSet implements AnnotationRule {
     this.stopWhenRuleApplied = stopWhenRuleApplied;
   }
 
-  apply(annotation: RuleAnnotation): AnnotationRuleResult {
+  apply(annotation: RuleAnnotation, debug = false): AnnotationRuleResult {
+    const log = (...args: any[]) => {
+      if (debug) console.log(...args);
+    };
+    log("apply ruleset", this.annotationType, this.rules);
+    log(pick(this, "rules", "alwaysApplyFirstRule", "stopWhenRuleApplied"));
     let applied_rule = false;
-    const appliedRules = [];
-    if (this.alwaysApplyFirstRule) {
-      const firstRuleResult = this.rules[0].apply(annotation);
-      if (firstRuleResult.rule_applied) {
-        appliedRules.push(this.rules[0].name);
-        //console.log('rule applied', this.rules[0].name);
-        annotation = firstRuleResult.annotation;
-        applied_rule = firstRuleResult.rule_applied;
-        //console.log('rule applied', this.rules[0].name);
-        if (this.stopWhenRuleApplied) {
-          return { annotation: annotation, rule_applied: applied_rule, appliedRules };
-        }
-      }
-    }
-    for (let i = this.alwaysApplyFirstRule ? 1 : 0; i < this.rules.length; i++) {
-      const ruleResult = this.rules[i].apply(annotation);
+    const appliedRules: string[] = [];
+
+    const applyRule = (ruleIndex: number) => {
+      const rule = this.rules[ruleIndex];
+      const ruleResult = rule.apply(annotation);
+      log("\t -- apply: ", rule.name, ruleResult.rule_applied);
       if (ruleResult.rule_applied) {
-        appliedRules.push(this.rules[i].name);
+        appliedRules.push(rule.name);
         //console.log('rule applied', this.rules[i].name);
         annotation = ruleResult.annotation;
         applied_rule = ruleResult.rule_applied;
@@ -81,6 +81,17 @@ export class AnnotationRuleSet implements AnnotationRule {
           return { annotation: annotation, rule_applied: applied_rule, appliedRules };
         }
       }
+
+      return null;
+    };
+
+    if (this.alwaysApplyFirstRule) {
+      const rule = applyRule(0);
+      if (rule) return rule;
+    }
+    for (let i = this.alwaysApplyFirstRule ? 1 : 0; i < this.rules.length; i++) {
+      const rule = applyRule(i);
+      if (rule) return rule;
     }
     return { annotation: annotation, rule_applied: applied_rule, appliedRules };
   }

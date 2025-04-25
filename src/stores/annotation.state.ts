@@ -8,7 +8,7 @@ import { useSearchStore } from "./search.state";
 import { textToLines } from "../text_utilities";
 import { WordSnapper } from "../lib/snapper";
 import { filterAnnotations } from "../utils/filter.utils";
-import type { AnnotationType } from "@/types/Annotation";
+import type { AnnotationType, RuleAnnotation } from "@/types/Annotation";
 
 export const useAnnotationStore = defineStore("annotationStore", () => {
   const route = useRoute();
@@ -108,6 +108,8 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
     useSearchStore().refresh();
   };
 
+  const debugRule = (annotation: RuleAnnotation) => annotationStore.value?.debugRule(annotation);
+
   return {
     id,
     loading,
@@ -123,6 +125,7 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
     totalAnnotations,
     flags,
     totalProcessedAnnotation,
+    debugRule,
     changeShowModified,
     changeShowOnlyDuplicates,
     processAnnotation: (annotation: UpdateAnnotation) => annotationStore.value?.processAnnotation(annotation),

@@ -23,16 +23,21 @@ export class AnnotationRuleSets {
     const textRule = new AnnotationTextRule(text, 3);
     const sanitizeRule = new SanitizeAnnotationRule(text);
 
-    this.languageRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule], true, true);
-    this.typographyRuleSet = new AnnotationRuleSet([sanitizeRule, textRule], true, true);
-    this.orthographyRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule, textRule], true, true);
-    this.lexisRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule], true, true);
-    this.morphoSyntacticalRuleSet = new AnnotationRuleSet([sanitizeRule, textRule, tokenizeRule], true, false);
-    this.handshiftRuleSet = new AnnotationRuleSet([sanitizeRule, tokenizeRule], true, true);
-    this.defaultRuleSet = new AnnotationRuleSet([sanitizeRule], true, false);
+    this.languageRuleSet = new AnnotationRuleSet("language", [sanitizeRule, tokenizeRule], true, true);
+    this.typographyRuleSet = new AnnotationRuleSet("typography", [sanitizeRule, textRule, tokenizeRule], true, true);
+    this.orthographyRuleSet = new AnnotationRuleSet("orthography", [sanitizeRule, tokenizeRule, textRule], true, true);
+    this.lexisRuleSet = new AnnotationRuleSet("lexis", [sanitizeRule, tokenizeRule], true, true);
+    this.morphoSyntacticalRuleSet = new AnnotationRuleSet(
+      "morpho_syntactical",
+      [sanitizeRule, textRule, tokenizeRule],
+      true,
+      false,
+    );
+    this.handshiftRuleSet = new AnnotationRuleSet("handshift", [sanitizeRule, tokenizeRule], true, true);
+    this.defaultRuleSet = new AnnotationRuleSet("default", [sanitizeRule], true, false);
   }
 
-  private _applyRules(normalizedAnnotations: RuleAnnotation) {
+  private _applyRules(normalizedAnnotations: RuleAnnotation, debug = false) {
     let resultAnnotation: AnnotationRuleResult = {
       annotation: {} as RuleAnnotation,
       rule_applied: false,
@@ -44,24 +49,25 @@ export class AnnotationRuleSets {
 
     switch (normalizedAnnotations.type) {
       case "typography":
-        resultAnnotation = this.typographyRuleSet.apply(normalizedAnnotations);
+        resultAnnotation = this.typographyRuleSet.apply(normalizedAnnotations, debug);
         break;
       case "orthography":
-        resultAnnotation = this.orthographyRuleSet.apply(normalizedAnnotations);
+        resultAnnotation = this.orthographyRuleSet.apply(normalizedAnnotations, debug);
         break;
       case "lexis":
-        resultAnnotation = this.lexisRuleSet.apply(normalizedAnnotations);
+        resultAnnotation = this.lexisRuleSet.apply(normalizedAnnotations, debug);
         break;
       case "morpho_syntactical":
-        resultAnnotation = this.morphoSyntacticalRuleSet.apply(normalizedAnnotations);
+        resultAnnotation = this.morphoSyntacticalRuleSet.apply(normalizedAnnotations, debug);
         break;
       case "handshift":
-        resultAnnotation = this.handshiftRuleSet.apply(normalizedAnnotations);
+        resultAnnotation = this.handshiftRuleSet.apply(normalizedAnnotations, debug);
         break;
       case "language":
-        resultAnnotation = this.languageRuleSet.apply(normalizedAnnotations);
+        resultAnnotation = this.languageRuleSet.apply(normalizedAnnotations, debug);
         break;
       default:
+        console.warn("no default applied rule for", normalizedAnnotations.type);
         //resultAnnotation = defaultRuleSet.apply(normalizedAnnotations);
         break;
     }
@@ -77,25 +83,28 @@ export class AnnotationRuleSets {
         resolve(null);
         return;
       }
-
-      const resultAnnotation = this._applyRules(normalizedAnnotations);
-
-      const processedAnnotion = resultAnnotation.rule_applied ? resultAnnotation.annotation : normalizedAnnotations;
-
-      if (resultAnnotation.rule_applied)
-        processedAnnotion.color = annotationHighlightColors[processedAnnotion.type as AnnotationType];
-
-      resolve({
-        id: normalizedAnnotations.id,
-        processed: processedAnnotion,
-        original: normalizedAnnotations,
-        modified: resultAnnotation.rule_applied ? resultAnnotation.annotation : null,
-        appliedRules: resultAnnotation.appliedRules,
-        saving: false,
-        error: false,
-      } as ModifiedAnnotation);
+      resolve(this.runRules(normalizedAnnotations));
 
       return;
     });
+  }
+
+  public runRules(normalizedAnnotations: RuleAnnotation, debug = false): ModifiedAnnotation | null {
+    const resultAnnotation = this._applyRules(normalizedAnnotations, debug);
+
+    const processedAnnotion = resultAnnotation.rule_applied ? resultAnnotation.annotation : normalizedAnnotations;
+
+    if (resultAnnotation.rule_applied)
+      processedAnnotion.color = annotationHighlightColors[processedAnnotion.type as AnnotationType];
+
+    return {
+      id: normalizedAnnotations.id,
+      processed: processedAnnotion,
+      original: normalizedAnnotations,
+      modified: resultAnnotation.rule_applied ? resultAnnotation.annotation : null,
+      appliedRules: resultAnnotation.appliedRules,
+      saving: false,
+      error: false,
+    } as ModifiedAnnotation;
   }
 }

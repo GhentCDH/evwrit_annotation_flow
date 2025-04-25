@@ -79,6 +79,14 @@ export class AnnotationStore {
     return annotationObj;
   }
 
+  public async debugRule(annotation: RuleAnnotation) {
+    const annotationObj = this.annotationRuleSets.runRules(annotation, true);
+
+    if (!annotationObj) return null;
+
+    return annotationObj;
+  }
+
   public processAnnotation({ end, start, id }: UpdateAnnotation) {
     const ann = this.annotations.value.get(id)!;
     const { processed } = ann;
