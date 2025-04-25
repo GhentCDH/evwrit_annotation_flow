@@ -135,6 +135,11 @@ const showAnnotation = (annotation: RuleAnnotation) => {
   highlightAnnotationIds.value = [];
   if (!annotation) return;
 
+  console.group("Debugging applied rules: ");
+
+  annotationStore.debugRule(annotation);
+  console.groupEnd();
+
   document.querySelector(`[data-annotation="${annotation.id}"]`)?.scrollIntoView();
   highlightAnnotationIds.value = [annotation.id];
 };
