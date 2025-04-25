@@ -40,6 +40,9 @@
       />
     </div>
     <div :class="[` border p-4`, { 'w-1/3': !showMetadata, 'w-1/2': showMetadata }]">
+      <div class="card border mb-2 p-2" v-for="annotation in highlightAnnotations" :key="annotation.id">
+        <SelectedAnnotation :annotation="annotation" :text-lines="annotationStore.textLines" />
+      </div>
       <div class="flex flex-row gap-2">
         <div>
           Verwerkte annotaties:
@@ -69,8 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { type Ref, ref } from "vue";
-import { useRouter } from "vue-router";
+import { computed, type Ref, ref } from "vue";
 import AnnotationEditList from "../components/AnnotationEditList.vue";
 import AnnotationTextCompare from "../components/AnnotationTextCompare.vue";
 import TypeFilter from "../components/TypeFilter.vue";
@@ -78,20 +80,31 @@ import { type ConfirmAnnotationType, type UpdateAnnotation } from "../stores/ann
 import { useAnnotationStore } from "../stores/annotation.state";
 import SearchPaginator from "../components/SearchPaginator.vue";
 import { getAnnotatedLines } from "../utils/annotation_utils";
+import SelectedAnnotation from "../components/selected-annotation.vue";
 import type { RuleAnnotation } from "@/types/Annotation";
 
 const showModified = ref<boolean>(false);
 const showOnlyDuplicates = ref<boolean>(false);
 const showMetadata = ref<boolean>(false);
 const highlightAnnotationIds: Ref<string[]> = ref([]);
-const router = useRouter();
+const highlightAnnotations = computed(() => {
+  const ids = highlightAnnotationIds.value;
+  if (ids.length === 0) return null;
+  const notModifiedAnnotations = ids.filter((id) => !annotationStore.modifiedAnnotations.some((a) => a.id === id));
+
+  return notModifiedAnnotations
+    .map((id) => annotationStore.originalAnnotations.find((annotation) => annotation.id === id) ?? null)
+    .filter((annotation) => annotation !== null) as RuleAnnotation[]; // Filter out null values
+});
 
 const showRuleModifiedAnnotations = () => {
+  highlightAnnotationIds.value = [];
   showModified.value = !showModified.value;
   annotationStore.changeShowModified(showModified.value);
 };
 
 const showDuplicates = () => {
+  highlightAnnotationIds.value = [];
   showOnlyDuplicates.value = !showOnlyDuplicates.value;
   annotationStore.changeShowOnlyDuplicates(showOnlyDuplicates.value);
 };
@@ -120,7 +133,6 @@ const confirmAnnotations = (annotations: Map<string, ConfirmAnnotationType>) => 
 
 const showAnnotation = (annotation: RuleAnnotation) => {
   highlightAnnotationIds.value = [];
-
   if (!annotation) return;
 
   document.querySelector(`[data-annotation="${annotation.id}"]`)?.scrollIntoView();

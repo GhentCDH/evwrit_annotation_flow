@@ -74,16 +74,15 @@
               i
             </router-link>
           </div>
+          <p class="pt-2 text-sm text-gray-400">
+            <strong class="underline">LineLinguisticCharacteristic:</strong>
+            {{ originalAnnotation.metadata?.text }}
+          </p>
         </div>
       </div>
     </div>
     <div v-if="showMetadata">
-      <strong class="underline">Metadata</strong>
-      <ul class="text-sm text-content">
-        <li v-for="property of originalAnnotation.properties" :key="property.id_name">
-          <strong> {{ property.label }}:</strong> {{ property.name }}
-        </li>
-      </ul>
+      <AnnotationMetadata :annotation="originalAnnotation" />
     </div>
   </div>
 </template>
@@ -93,6 +92,7 @@ import { TrashIcon } from "@heroicons/vue/16/solid";
 import { type Line } from "@ghentcdh/vue-component-annotated-text";
 import { ref, watch } from "vue";
 import AnnotationEditItem from "./AnnotationEditItem.vue";
+import AnnotationMetadata from "./AnnotationMetadata.vue";
 import type { AnnotationType, RuleAnnotation } from "../types/Annotation";
 import { annotationHtmlColors } from "../styles/annotation-colors";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
