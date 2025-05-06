@@ -28,11 +28,8 @@ export class WordSnapper implements Snapper {
   }
 
   fixOffset(newStart: number, newEnd: number) {
-    const newAnnotationStartCharIndex = this.mapStartCharIndexToToken[newStart] ?? newStart;
-    const newAnnotationStopCharIndex = this.mapStopCharIndexToToken[newEnd] ?? newEnd;
-
-    const closestStart = this.mapStartCharIndexToToken[newStart] || this.mapStartCharIndexToToken[newEnd];
-    const closestEnd = this.mapStopCharIndexToToken[newEnd] || this.mapStopCharIndexToToken[newStart];
+    const closestStart = this.mapStartCharIndexToToken[newStart] ?? this.mapStartCharIndexToToken[newEnd];
+    const closestEnd = this.mapStopCharIndexToToken[newEnd] ?? this.mapStopCharIndexToToken[newStart];
 
     return {
       start: closestStart,
