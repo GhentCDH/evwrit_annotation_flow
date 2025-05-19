@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, type Ref, ref, watch } from "vue";
+import { type Ref, ref, watch } from "vue";
 import AnnotationEdit from "./AnnotationEdit.vue";
 import AnnotationEditListPaginator from "./AnnotationEditListPaginator.vue";
 import type { RuleAnnotation } from "../types/Annotation";
@@ -63,8 +63,6 @@ import type { TextLines } from "../stores/text-lines";
 import { useEditPaginationStore } from "../stores/edit-pagination.state";
 
 const highlightIds: Ref<string[]> = ref([]);
-
-const render = ref(5);
 
 interface AnnotationEditListProps {
   // modifiedAnnotations: ModifiedAnnotation[];
@@ -126,8 +124,5 @@ const highlight = (ids: string[]) => {
   highlightIds.value = ids;
 };
 
-onMounted(() => {
-  console.log("---> annotation edit list mounted");
-});
 //#endregion
 </script>

@@ -53,7 +53,13 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
 
   const showModified = ref(false);
   const showOnlyDuplicates = ref(false);
-  const selectedFilters = ref([] as AnnotationType[]);
+  const selectedFilters = ref([
+    "language",
+    "typography",
+    "orthography",
+    "lexis",
+    "morpho_syntactical",
+  ] as AnnotationType[]);
 
   const annotationValues = computed(() => annotationStore.value?.annotationValues?.value || []);
 
