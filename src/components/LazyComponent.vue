@@ -1,6 +1,6 @@
 <script lang="ts">
 import { useIntersectionObserver } from "@vueuse/core";
-import { ref, nextTick } from "vue";
+import { nextTick, ref } from "vue";
 
 function onIdle(cb = () => {}) {
   if ("requestIdleCallback" in window) {
@@ -25,7 +25,7 @@ export default {
   setup(props) {
     const shouldRender = ref(false);
     const targetEl = ref();
-    const fixedMinHeight = ref(0);
+    const fixedMinHeight = ref(200);
     let unrenderTimer: number;
     let renderTimer: number;
 
@@ -45,7 +45,7 @@ export default {
           // if the component was set to render, cancel that
           clearTimeout(renderTimer);
           unrenderTimer = setTimeout(() => {
-            fixedMinHeight.value = targetEl.value.clientHeight;
+            fixedMinHeight.value = targetEl.value.clientHeight ?? 200;
             shouldRender.value = false;
           }, props.unrenderDelay);
         }
