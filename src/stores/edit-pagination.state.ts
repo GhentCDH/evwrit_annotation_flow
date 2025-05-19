@@ -13,16 +13,20 @@ export const useEditPaginationStore = defineStore("editPaginationStore", () => {
     return Math.ceil(totalItems.value / itemsPerPage.value);
   });
 
+  const getValidPage = (page: number) => {
+    if (page <= 1) return 1;
+    if (page > totalPages.value) return totalPages.value;
+    return page;
+  };
+
   const paginatedItems = computed(() => {
-    const start = (activePage.value - 1) * itemsPerPage.value;
+    const start = (getValidPage(activePage.value) - 1) * itemsPerPage.value;
     const end = start + itemsPerPage.value;
     return annotationStore.modifiedAnnotations.slice(start, end);
   });
 
   const setPage = (page: number) => {
-    if (page < 1) activePage.value = 1;
-    else if (page > totalPages.value) activePage.value = totalPages.value;
-    else activePage.value = page;
+    activePage.value = getValidPage(page);
   };
 
   return {
