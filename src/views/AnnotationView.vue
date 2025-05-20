@@ -32,7 +32,7 @@
       <AnnotationTextCompare
         :originalAnnotations="annotationStore.originalAnnotations"
         :processedAnnotations="annotationStore.processedAnnotations"
-        :text-lines="annotationStore.textLines"
+        :text-lines="annotationStore.textLines.getAllLines()"
         :snapper="annotationStore.snapper"
         @modify-annotations="modifyAnnotation"
         @processes-annotation="processAnnotation"
@@ -79,7 +79,6 @@ import TypeFilter from "../components/TypeFilter.vue";
 import { type ConfirmAnnotationType, type UpdateAnnotation } from "../stores/annotation.store";
 import { useAnnotationStore } from "../stores/annotation.state";
 import SearchPaginator from "../components/SearchPaginator.vue";
-import { getAnnotatedLines } from "../utils/annotation_utils";
 import SelectedAnnotation from "../components/selected-annotation.vue";
 import type { RuleAnnotation } from "@/types/Annotation";
 
@@ -145,7 +144,7 @@ const showAnnotation = (annotation: RuleAnnotation) => {
 };
 
 const scrollToLine = (annotation: RuleAnnotation) => {
-  const lines = getAnnotatedLines(annotationStore.textLines, annotation.start, annotation.end).lines;
+  const lines = annotationStore.textLines.getAnnotatedLines(annotation.start, annotation.end);
   const text = lines?.[0]?.gutter?.trim();
 
   if (!text) return;

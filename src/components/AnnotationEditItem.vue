@@ -14,7 +14,7 @@
         <!-- Originele annotatie -->
         <AnnotatedText
           :annotations="[annotation]"
-          :lines="getAnnotatedLines(textLines, annotation.start, annotation.end).lines"
+          :lines="textLines"
           :allow-edit="allowEdit ?? false"
           :listen-to-on-update-start="true"
           :listen-to-on-updating="true"
@@ -41,7 +41,6 @@ import { AnnotatedText, type Line, UpdateAnnotationState } from "@ghentcdh/vue-c
 import { pick } from "lodash-es";
 import SaveIcon from "./SaveIcon.vue";
 import type { RuleAnnotation } from "../types/Annotation";
-import { getAnnotatedLines } from "../utils/annotation_utils";
 import { WordSnapper } from "../lib/snapper";
 
 interface AnnotationEditProps {

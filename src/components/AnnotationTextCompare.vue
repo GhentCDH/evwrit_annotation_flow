@@ -22,9 +22,9 @@
 </template>
 
 <script setup lang="ts">
-import { type Line } from "@ghentcdh/vue-component-annotated-text";
-import { AnnotatedText, UpdateAnnotationState } from "@ghentcdh/vue-component-annotated-text";
+import { AnnotatedText, type Line, UpdateAnnotationState } from "@ghentcdh/vue-component-annotated-text";
 
+import { pick } from "lodash-es";
 import { WordSnapper } from "../lib/snapper/WordSnapper";
 import type { RuleAnnotation } from "../types/Annotation";
 
@@ -35,16 +35,14 @@ interface AnnotationTextCompareProps {
   snapper?: WordSnapper;
 }
 
-const { processedAnnotations, snapper, originalAnnotations, textLines } = defineProps<AnnotationTextCompareProps>();
-
-import { pick } from "lodash-es";
+const props = defineProps<AnnotationTextCompareProps>();
 
 //#region Emit
 const emit = defineEmits(["modifyAnnotations", "processesAnnotation", "showAnnotation"]);
 
 // AnnotatedText event handlers
 const fixOffset = function (updateState: UpdateAnnotationState) {
-  const result = snapper!.fixOffset(updateState.newStart, updateState.newEnd);
+  const result = props.snapper!.fixOffset(updateState.newStart, updateState.newEnd);
   updateState.newStart = result.start;
   updateState.newEnd = result.end;
 
