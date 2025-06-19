@@ -144,7 +144,7 @@ const showAnnotation = (annotation: RuleAnnotation) => {
 };
 
 const scrollToLine = (annotation: RuleAnnotation) => {
-  const lines = annotationStore.textLines.getAnnotatedLines(annotation.start, annotation.end);
+  const lines = annotationStore.textLines.getAnnotatedLines(annotation.start, annotation.end).lines;
   const text = lines?.[0]?.gutter?.trim();
 
   if (!text) return;

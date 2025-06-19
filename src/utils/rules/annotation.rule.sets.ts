@@ -92,14 +92,14 @@ export class AnnotationRuleSets {
   public runRules(normalizedAnnotations: RuleAnnotation, debug = false): ModifiedAnnotation | null {
     const resultAnnotation = this._applyRules(normalizedAnnotations, debug);
 
-    const processedAnnotion = resultAnnotation.rule_applied ? resultAnnotation.annotation : normalizedAnnotations;
+    const processedAnnotation = resultAnnotation.rule_applied ? resultAnnotation.annotation : normalizedAnnotations;
 
     if (resultAnnotation.rule_applied)
-      processedAnnotion.color = annotationHighlightColors[processedAnnotion.type as AnnotationType];
+      (processedAnnotation as any).color = annotationHighlightColors[processedAnnotation.type as AnnotationType];
 
     return {
       id: normalizedAnnotations.id,
-      processed: processedAnnotion,
+      processed: processedAnnotation,
       original: normalizedAnnotations,
       modified: resultAnnotation.rule_applied ? resultAnnotation.annotation : null,
       appliedRules: resultAnnotation.appliedRules,

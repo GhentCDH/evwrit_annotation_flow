@@ -7,6 +7,7 @@ import {
   AnnotatedText_,
   Annotation,
   type AnnotationConfig,
+  type AnnotationEvent,
   type AnnotationEventData,
   type AnnotationEventType,
   type Line,
@@ -70,7 +71,7 @@ const createConfig = (): Partial<AnnotationConfig> => {
       edit: props.allowEdit ?? false,
       create: false,
     },
-    onEvent: ({ event, data }: AnnotationEventData) => onEventListener(event, data),
+    onEvent: ({ event, data }: AnnotationEvent<AnnotationEventData>) => onEventListener(event, data),
     visualEvent: {
       useSnapper: fixOffsetSnapper.bind(this),
     },

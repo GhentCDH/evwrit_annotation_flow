@@ -21,7 +21,7 @@ export class TextLines {
     return this.textLines.findIndex((line) => isStartLine(line, start));
   }
 
-  getAnnotatedLines(start: number, end: number) {
+  getAnnotatedLines(start: number, end: number): { lines: Line[] } {
     const annotatedLines = [] as Line[];
 
     const startIndex = this.findStartLineIndex(start);
