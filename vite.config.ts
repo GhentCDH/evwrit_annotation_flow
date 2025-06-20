@@ -19,10 +19,10 @@ export default defineConfig({
             // This can be usefull to test the local version of the vue component annotated text before release
             // to use this, you need to symlink the vue_component_annotated_text root folder to the root of this project
             "@ghentcdh/vue-component-annotated-text/style.css": fileURLToPath(
-              new URL("./vue_component_annotated_text/dist/style.css", import.meta.url),
+              new URL("./link/]vue_component_annotated_text/dist/style.css", import.meta.url),
             ),
             "@ghentcdh/vue-component-annotated-text": fileURLToPath(
-              new URL("./vue_component_annotated_text/src/index.ts", import.meta.url),
+              new URL("./link/vue_component_annotated_text/src/index.ts", import.meta.url),
             ),
           }
         : {}),

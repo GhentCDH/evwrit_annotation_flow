@@ -11,16 +11,13 @@
         @click="changeSelected"
       />
       <div class="w-full">
-        <!-- Originele annotatie -->
-        <AnnotatedText
+        <TextAnnotation
           :annotations="[annotation]"
-          :lines="getAnnotatedLines(textLines, annotation.start, annotation.end).lines"
+          :text-lines="textLines"
           :allow-edit="allowEdit ?? false"
-          :listen-to-on-update-start="true"
-          :listen-to-on-updating="true"
-          @annotation-update-begin="onAnnotationUpdateBegin"
-          @annotation-updating="onAnnotationUpdating"
-          @annotation-update-end="onAnnotationUpdateEnd"
+          :snapper="snapper"
+          @modify-annotations="emit('modifyAnnotations', $event)"
+          @processes-annotations="emit('processesAnnotation', $event)"
         />
       </div>
       <button
@@ -37,11 +34,10 @@
 </template>
 
 <script setup lang="ts">
-import { AnnotatedText, type Line, UpdateAnnotationState } from "@ghentcdh/vue-component-annotated-text";
-import { pick } from "lodash-es";
+import { type Line } from "@ghentcdh/vue-component-annotated-text";
+import TextAnnotation from "./TextAnnotation.vue";
 import SaveIcon from "./SaveIcon.vue";
 import type { RuleAnnotation } from "../types/Annotation";
-import { getAnnotatedLines } from "../utils/annotation_utils";
 import { WordSnapper } from "../lib/snapper";
 
 interface AnnotationEditProps {
@@ -64,33 +60,4 @@ const confirmAnnotation = () => {
 const changeSelected = () => {
   emit("changeSelected");
 };
-
-//#region edit annotations
-
-// AnnotatedText event handlers
-const fixOffset = function (updateState: UpdateAnnotationState) {
-  const result = props.snapper!.fixOffset(updateState.newStart, updateState.newEnd);
-  updateState.newStart = result.start;
-  updateState.newEnd = result.end;
-
-  if (result.modified) {
-    emit("modifyAnnotations", { ...result, id: updateState.annotation.id });
-  }
-};
-
-const onAnnotationUpdateBegin = function (updateState: UpdateAnnotationState) {
-  fixOffset(updateState);
-
-  updateState.confirmStartUpdating();
-};
-const onAnnotationUpdating = function (updateState: UpdateAnnotationState) {
-  fixOffset(updateState);
-
-  updateState.confirmUpdate();
-};
-const onAnnotationUpdateEnd = function (updateState: UpdateAnnotationState) {
-  emit("processesAnnotation", pick(updateState.annotation, ["id", "start", "end"]));
-};
-
-// #endregion
 </script>

@@ -42,7 +42,7 @@
               tip="Bewaar gewijzigde annotatie"
               :selected-annotation="selectedAnnotation === 'modified'"
               :disabled="disabled"
-              :text-lines="textLines"
+              :text-lines="textLines.getAnnotatedLines(annotation.start, annotation.end).lines"
               :allow-edit="true"
               :snapper="snapper"
               @change-selected="changeSelected('modified')"
@@ -56,7 +56,7 @@
               tip="Bewaar originele annotatie"
               :selected-annotation="selectedAnnotation === 'original'"
               :disabled="disabled"
-              :text-lines="textLines"
+              :text-lines="textLines.getAnnotatedLines(originalAnnotation.start, originalAnnotation.end).lines"
               @change-selected="changeSelected('original')"
               @confirm-annotation="confirmAnnotation('original')"
             />
@@ -74,10 +74,6 @@
               i
             </router-link>
           </div>
-          <p class="pt-2 text-sm text-gray-400">
-            <strong class="underline">LineLinguisticCharacteristic:</strong>
-            {{ originalAnnotation.metadata?.text }}
-          </p>
         </div>
       </div>
     </div>
@@ -89,7 +85,6 @@
 
 <script setup lang="ts">
 import { TrashIcon } from "@heroicons/vue/16/solid";
-import { type Line } from "@ghentcdh/vue-component-annotated-text";
 import { ref, watch } from "vue";
 import AnnotationEditItem from "./AnnotationEditItem.vue";
 import AnnotationMetadata from "./AnnotationMetadata.vue";
@@ -97,6 +92,7 @@ import type { AnnotationType, RuleAnnotation } from "../types/Annotation";
 import { annotationHtmlColors } from "../styles/annotation-colors";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
 import { WordSnapper } from "../lib/snapper";
+import type { TextLines } from "../stores/text-lines";
 
 const selectedAnnotation = ref<ConfirmAnnotationType>();
 
@@ -104,7 +100,7 @@ interface AnnotationEditProps {
   annotation?: RuleAnnotation;
   originalAnnotation: RuleAnnotation;
   appliedRules: string[];
-  textLines: Line[];
+  textLines: TextLines;
   selected: ConfirmAnnotationType;
   duplicates: string[];
   highlight: boolean;
