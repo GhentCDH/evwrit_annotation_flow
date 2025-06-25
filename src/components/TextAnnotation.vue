@@ -4,12 +4,9 @@
 
 <script setup lang="ts">
 import {
-  AnnotatedText_,
-  Annotation,
-  type AnnotationConfig,
-  type AnnotationEvent,
-  type AnnotationEventData,
-  type AnnotationEventType,
+  type Annotation,
+  createAnnotatedText,
+  type CreateAnnotations,
   type Line,
   type SnapperAction,
   type SnapperFn,
@@ -35,22 +32,6 @@ const editMode = ref(false);
 
 //#region edit annotations
 
-const onEventListener = (event: AnnotationEventType, data: AnnotationEventData) => {
-  switch (event) {
-    case "double-click":
-      // Emit the double click event to the parent component
-      emit("doubleClickAnnotation", data.annotation);
-      break;
-    case "annotation-edit--start":
-      editMode.value = true;
-      break;
-    case "annotation-edit--end":
-      editMode.value = false;
-      emit("processesAnnotation", pick(data.annotation, ["id", "start", "end"]));
-      break;
-  }
-};
-
 const fixOffsetSnapper: SnapperFn = (action: SnapperAction, annotation: Annotation) => {
   if (!props.snapper?.fixOffset) {
     console.warn("No snapper provided for fixOffsetSnapper");
@@ -65,24 +46,30 @@ const fixOffsetSnapper: SnapperFn = (action: SnapperAction, annotation: Annotati
 };
 
 const id = `annotated-edit-${uuidv4()}`;
-const createConfig = (): Partial<AnnotationConfig> => {
-  return {
-    actions: {
-      edit: props.allowEdit ?? false,
-      create: false,
-    },
-    onEvent: ({ event, data }: AnnotationEvent<AnnotationEventData>) => onEventListener(event, data),
-    visualEvent: {
-      useSnapper: fixOffsetSnapper.bind(this),
-    },
-  } as Partial<AnnotationConfig>;
-};
-const textAnnotation = AnnotatedText_.init(createConfig());
+let textAnnotation: CreateAnnotations<Line, Annotation>;
 
 onMounted(() => {
-  textAnnotation.setLines(props.textLines, false);
-  textAnnotation.setAnnotations(props.annotations, false);
-  textAnnotation.init(id);
+  textAnnotation = createAnnotatedText(id, {
+    annotation: {
+      edit: props.allowEdit,
+      create: false,
+      snapper: fixOffsetSnapper.bind(this),
+    },
+  })
+    .setLines(props.textLines, false)
+    .setAnnotations(props.annotations)
+    .on("double-click", ({ data }) => {
+      // Emit the double click event to the parent component
+      emit("doubleClickAnnotation", data.annotation);
+    })
+    .on("annotation-edit--start", ({}) => {
+      editMode.value = true;
+    })
+    .on("annotation-edit--end", ({ data }) => {
+      editMode.value = false;
+      // Emit the double click event to the parent component
+      emit("processesAnnotation", pick(data.annotation, ["id", "start", "end"]));
+    });
 });
 
 watch(
@@ -90,7 +77,7 @@ watch(
   (textLines: Line) => {
     // Only update annotations if not in edit mode
     if (editMode.value) return;
-    textAnnotation.setLines(textLines);
+    textAnnotation?.setLines(textLines);
   },
   { deep: true },
 );
@@ -100,7 +87,7 @@ watch(
   (annotations: RuleAnnotation[]) => {
     // Only update annotations if not in edit mode
     if (editMode.value) return;
-    textAnnotation.setAnnotations(annotations);
+    textAnnotation?.setAnnotations(annotations);
   },
   { deep: true },
 );
