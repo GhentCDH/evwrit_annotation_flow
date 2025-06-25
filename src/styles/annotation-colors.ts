@@ -1,4 +1,4 @@
-import { AnnotationColor, createAnnotationColors } from "@ghentcdh/vue-component-annotated-text";
+import { type AnnotationColor, createAnnotationColors } from "@ghentcdh/vue-component-annotated-text";
 import type { AnnotationType } from "../types/Annotation";
 
 export const annotationHtmlColors: Partial<Record<AnnotationType, string>> = {
