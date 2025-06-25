@@ -6,7 +6,7 @@
 import {
   type Annotation,
   createAnnotatedText,
-  type CreateAnnotations,
+  CreateAnnotations,
   type Line,
   type SnapperAction,
   type SnapperFn,
