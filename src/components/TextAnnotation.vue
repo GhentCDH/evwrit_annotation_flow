@@ -4,12 +4,13 @@
 
 <script setup lang="ts">
 import {
+  type AnnotatedText,
   type Annotation,
   createAnnotatedText,
-  CreateAnnotations,
-  type Line,
+  type Limit,
   type SnapperAction,
   type SnapperFn,
+  TextLineAdapter,
 } from "@ghentcdh/vue-component-annotated-text";
 import { pick } from "lodash-es";
 import { v4 as uuidv4 } from "uuid";
@@ -18,8 +19,9 @@ import type { RuleAnnotation } from "../types/Annotation";
 import { WordSnapper } from "../lib/snapper";
 
 interface AnnotationEditProps {
+  limit?: { start: number; end: number };
   annotations: RuleAnnotation[];
-  textLines: Line[];
+  text: string;
   allowEdit?: boolean;
   snapper?: WordSnapper;
 }
@@ -46,17 +48,18 @@ const fixOffsetSnapper: SnapperFn = (action: SnapperAction, annotation: Annotati
 };
 
 const id = `annotated-edit-${uuidv4()}`;
-let textAnnotation: CreateAnnotations<Line, Annotation>;
+let textAnnotation: AnnotatedText<Annotation>;
 
 onMounted(() => {
   textAnnotation = createAnnotatedText(id, {
+    text: TextLineAdapter({ limit: props.limit }),
     annotation: {
       edit: props.allowEdit,
       create: false,
       snapper: fixOffsetSnapper.bind(this),
     },
   })
-    .setLines(props.textLines, false)
+    .setText(props.text, false)
     .setAnnotations(props.annotations)
     .on("double-click", ({ data }) => {
       // Emit the double click event to the parent component
@@ -73,11 +76,21 @@ onMounted(() => {
 });
 
 watch(
-  () => props.textLines,
-  (textLines: Line) => {
+  () => props.text,
+  (text: string) => {
     // Only update annotations if not in edit mode
     if (editMode.value) return;
-    textAnnotation?.setLines(textLines);
+    textAnnotation?.setText(text);
+  },
+  { deep: true },
+);
+
+watch(
+  () => props.limit,
+  (limit: Limit) => {
+    // Only update annotations if not in edit mode
+    if (editMode.value) return;
+    textAnnotation?.changeTextAdapterConfig("limit", limit);
   },
   { deep: true },
 );
