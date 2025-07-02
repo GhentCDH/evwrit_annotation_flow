@@ -5,7 +5,6 @@ import { computedAsync } from "@vueuse/core";
 import { AnnotationStore, type ConfirmAnnotationType, type UpdateAnnotation } from "./annotation.store";
 import { usePaginationStore } from "./pagination.state";
 import { useSearchStore } from "./search.state";
-import { TextLines } from "./text-lines";
 import { WordSnapper } from "../lib/snapper";
 import { filterAnnotations } from "../utils/filter.utils";
 import type { AnnotationType, RuleAnnotation } from "@/types/Annotation";
@@ -37,7 +36,6 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
   });
 
   const text = computed(() => fetchNewValue.value?.text || "");
-  const textLines = computed(() => new TextLines(text.value));
 
   const annotationStore = computed(() => {
     return fetchNewValue.value?.annotationStore || null;
@@ -143,6 +141,6 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
     deleteAnnotation: (id: string) => annotationStore.value?.deleteAnnotation(id),
     needsAttention: needsAttention,
     reviewDone: reviewDone,
-    textLines,
+    text,
   };
 });
