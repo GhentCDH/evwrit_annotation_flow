@@ -42,9 +42,8 @@
               tip="Bewaar gewijzigde annotatie"
               :selected-annotation="selectedAnnotation === 'modified'"
               :disabled="disabled"
-              :text-lines="textLines.getAnnotatedLines(annotation.start, annotation.end).lines"
+              :text="text"
               :allow-edit="true"
-              :snapper="snapper"
               @change-selected="changeSelected('modified')"
               @confirm-annotation="confirmAnnotation('modified')"
               @modifyAnnotations="emit('modifyAnnotations', $event)"
@@ -56,7 +55,7 @@
               tip="Bewaar originele annotatie"
               :selected-annotation="selectedAnnotation === 'original'"
               :disabled="disabled"
-              :text-lines="textLines.getAnnotatedLines(originalAnnotation.start, originalAnnotation.end).lines"
+              :text="text"
               @change-selected="changeSelected('original')"
               @confirm-annotation="confirmAnnotation('original')"
             />
@@ -91,8 +90,6 @@ import AnnotationMetadata from "./AnnotationMetadata.vue";
 import type { AnnotationType, RuleAnnotation } from "../types/Annotation";
 import { annotationHtmlColors } from "../styles/annotation-colors";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
-import { WordSnapper } from "../lib/snapper";
-import type { TextLines } from "../stores/text-lines";
 
 const selectedAnnotation = ref<ConfirmAnnotationType>();
 
@@ -100,14 +97,13 @@ interface AnnotationEditProps {
   annotation?: RuleAnnotation;
   originalAnnotation: RuleAnnotation;
   appliedRules: string[];
-  textLines: TextLines;
+  text: string;
   selected: ConfirmAnnotationType;
   duplicates: string[];
   highlight: boolean;
   disabled: boolean;
   error: boolean;
   showMetadata: boolean;
-  snapper?: WordSnapper;
 }
 
 const props = defineProps<AnnotationEditProps>();

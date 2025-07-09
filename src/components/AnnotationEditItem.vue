@@ -13,9 +13,9 @@
       <div class="w-full">
         <TextAnnotation
           :annotations="[annotation]"
-          :text-lines="textLines"
+          :limit="annotation"
+          :text="text"
           :allow-edit="allowEdit ?? false"
-          :snapper="snapper"
           @modify-annotations="emit('modifyAnnotations', $event)"
           @processes-annotations="emit('processesAnnotation', $event)"
         />
@@ -34,23 +34,20 @@
 </template>
 
 <script setup lang="ts">
-import { type Line } from "@ghentcdh/vue-component-annotated-text";
 import TextAnnotation from "./TextAnnotation.vue";
 import SaveIcon from "./SaveIcon.vue";
 import type { RuleAnnotation } from "../types/Annotation";
-import { WordSnapper } from "../lib/snapper";
 
 interface AnnotationEditProps {
   annotation: RuleAnnotation;
   tip: string;
   selectedAnnotation: boolean;
   disabled: boolean;
-  textLines: Line[];
+  text: string;
   allowEdit?: boolean;
-  snapper?: WordSnapper;
 }
 
-const props = defineProps<AnnotationEditProps>();
+defineProps<AnnotationEditProps>();
 const emit = defineEmits(["confirmAnnotation", "changeSelected", "modifyAnnotations", "processesAnnotation"]);
 
 const confirmAnnotation = () => {
