@@ -7,23 +7,21 @@ import {
   type AnnotatedText,
   type Annotation,
   createAnnotatedText,
-  type Limit,
   type SnapperAction,
   type SnapperFn,
   TextLineAdapter,
+  WordSnapper,
 } from "@ghentcdh/vue-component-annotated-text";
 import { pick } from "lodash-es";
 import { v4 as uuidv4 } from "uuid";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 import type { RuleAnnotation } from "../types/Annotation";
-import { WordSnapper } from "../lib/snapper";
 
 interface AnnotationEditProps {
   limit?: { start: number; end: number };
   annotations: RuleAnnotation[];
   text: string;
   allowEdit?: boolean;
-  snapper?: WordSnapper;
 }
 
 const props = defineProps<AnnotationEditProps>();
@@ -35,28 +33,30 @@ const editMode = ref(false);
 //#region edit annotations
 
 const fixOffsetSnapper: SnapperFn = (action: SnapperAction, annotation: Annotation) => {
-  if (!props.snapper?.fixOffset) {
-    console.warn("No snapper provided for fixOffsetSnapper");
-    return pick(annotation, ["start", "end"]);
-  }
-  const result = props.snapper!.fixOffset(annotation.start, annotation.end);
-
-  if (result.modified) {
-    emit("modifyAnnotations", { ...result, id: annotation.id });
-  }
-  return pick(result, ["start", "end"]);
+  // if (!props.snapper?.fixOffset) {
+  //   console.warn("No snapper provided for fixOffsetSnapper");
+  //   return pick(annotation, ["start", "end"]);
+  // }
+  // const result = props.snapper!.fixOffset(annotation.start, annotation.end);
+  //
+  // if (result.modified) {
+  //   emit("modifyAnnotations", { ...result, id: annotation.id });
+  // }
+  // return pick(result, ["start", "end"]);
 };
 
 const id = `annotated-edit-${uuidv4()}`;
 let textAnnotation: AnnotatedText<Annotation>;
 
 onMounted(() => {
+  const limit = props.limit ? pick(props.limit, ["start", "end"]) : undefined;
+
   textAnnotation = createAnnotatedText(id, {
-    text: TextLineAdapter({ limit: props.limit }),
+    text: TextLineAdapter({ limit }),
     annotation: {
       edit: props.allowEdit,
       create: false,
-      snapper: fixOffsetSnapper.bind(this),
+      snapper: new WordSnapper(),
     },
   })
     .setText(props.text, false)
@@ -67,6 +67,9 @@ onMounted(() => {
     })
     .on("annotation-edit--start", ({}) => {
       editMode.value = true;
+    })
+    .on("annotation-create--move", ({ data }) => {
+      emit("modifyAnnotations", pick(data.annotation, ["id", "start", "end"]));
     })
     .on("annotation-edit--end", ({ data }) => {
       editMode.value = false;
@@ -87,9 +90,10 @@ watch(
 
 watch(
   () => props.limit,
-  (limit: Limit) => {
+  () => {
     // Only update annotations if not in edit mode
     if (editMode.value) return;
+    const limit = props.limit ? pick(props.limit, ["start", "end"]) : undefined;
     textAnnotation?.changeTextAdapterConfig("limit", limit);
   },
   { deep: true },

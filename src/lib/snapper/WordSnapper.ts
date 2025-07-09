@@ -1,5 +1,5 @@
 import { type Snapper } from "./Types";
-import { tokenize } from "./../../text_utilities";
+import { tokenize } from "../../text_utilities";
 
 export class WordSnapper implements Snapper {
   private mapStartCharIndexToToken: { [index: number]: number } = {};
