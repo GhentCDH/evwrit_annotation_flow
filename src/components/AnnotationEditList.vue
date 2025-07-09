@@ -31,7 +31,6 @@
           :disabled="annotation.saving"
           :error="annotation.error"
           :showMetadata="showMetadata"
-          :snapper="snapper"
           @confirmAnnotation="confirmAnnotation"
           @deleteAnnotation="deleteAnnotation"
           @changeSelected="onChangeSelected"
@@ -58,7 +57,6 @@ import AnnotationEdit from "./AnnotationEdit.vue";
 import AnnotationEditListPaginator from "./AnnotationEditListPaginator.vue";
 import type { RuleAnnotation } from "../types/Annotation";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
-import { WordSnapper } from "../lib/snapper";
 import { useEditPaginationStore } from "../stores/edit-pagination.state";
 
 const highlightIds: Ref<string[]> = ref([]);
@@ -67,7 +65,6 @@ interface AnnotationEditListProps {
   // modifiedAnnotations: ModifiedAnnotation[];
   highlightAnnotationIds: string[];
   showMetadata: boolean;
-  snapper?: WordSnapper;
   text: string;
 }
 

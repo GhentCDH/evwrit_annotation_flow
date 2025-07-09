@@ -5,7 +5,6 @@ import { computedAsync } from "@vueuse/core";
 import { AnnotationStore, type ConfirmAnnotationType, type UpdateAnnotation } from "./annotation.store";
 import { usePaginationStore } from "./pagination.state";
 import { useSearchStore } from "./search.state";
-import { WordSnapper } from "../lib/snapper";
 import { filterAnnotations } from "../utils/filter.utils";
 import type { AnnotationType, RuleAnnotation } from "@/types/Annotation";
 
@@ -77,8 +76,6 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
     () => annotationValues.value.filter((annotation) => annotation.hasOverride || !annotation.modified).length,
   );
 
-  const snapper = computed(() => new WordSnapper(text.value));
-
   const loading = computed(() => {
     const value = fetchNewValue.value;
     return !value || value.id !== id.value;
@@ -120,7 +117,6 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
     loading,
     changeId,
     fetchNewValue,
-    snapper,
     originalAnnotations,
     processedAnnotations,
     modifiedAnnotations,

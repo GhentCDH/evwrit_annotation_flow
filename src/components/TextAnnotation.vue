@@ -7,8 +7,6 @@ import {
   type AnnotatedText,
   type Annotation,
   createAnnotatedText,
-  type SnapperAction,
-  type SnapperFn,
   TextLineAdapter,
   WordSnapper,
 } from "@ghentcdh/vue-component-annotated-text";
@@ -31,19 +29,6 @@ const emit = defineEmits(["modifyAnnotations", "processesAnnotation", "doubleCli
 const editMode = ref(false);
 
 //#region edit annotations
-
-const fixOffsetSnapper: SnapperFn = (action: SnapperAction, annotation: Annotation) => {
-  // if (!props.snapper?.fixOffset) {
-  //   console.warn("No snapper provided for fixOffsetSnapper");
-  //   return pick(annotation, ["start", "end"]);
-  // }
-  // const result = props.snapper!.fixOffset(annotation.start, annotation.end);
-  //
-  // if (result.modified) {
-  //   emit("modifyAnnotations", { ...result, id: annotation.id });
-  // }
-  // return pick(result, ["start", "end"]);
-};
 
 const id = `annotated-edit-${uuidv4()}`;
 let textAnnotation: AnnotatedText<Annotation>;

@@ -10,7 +10,6 @@
         :text="text"
         :annotations="processedAnnotations"
         :allow-edit="true"
-        :snapper="snapper"
         @double-click-annotation="emit('showAnnotation', $event)"
         @modify-annotations="emit('modifyAnnotations', $event)"
         @processes-annotations="emit('processesAnnotation', $event)"
@@ -21,14 +20,12 @@
 
 <script setup lang="ts">
 import TextAnnotation from "./TextAnnotation.vue";
-import { WordSnapper } from "../lib/snapper";
 import type { RuleAnnotation } from "../types/Annotation";
 
 interface AnnotationTextCompareProps {
   originalAnnotations: RuleAnnotation[];
   processedAnnotations: RuleAnnotation[];
   text: string;
-  snapper?: WordSnapper;
 }
 
 defineProps<AnnotationTextCompareProps>();

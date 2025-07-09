@@ -16,7 +16,6 @@
           :limit="annotation"
           :text="text"
           :allow-edit="allowEdit ?? false"
-          :snapper="snapper"
           @modify-annotations="emit('modifyAnnotations', $event)"
           @processes-annotations="emit('processesAnnotation', $event)"
         />
@@ -38,7 +37,6 @@
 import TextAnnotation from "./TextAnnotation.vue";
 import SaveIcon from "./SaveIcon.vue";
 import type { RuleAnnotation } from "../types/Annotation";
-import { WordSnapper } from "../lib/snapper";
 
 interface AnnotationEditProps {
   annotation: RuleAnnotation;
@@ -47,7 +45,6 @@ interface AnnotationEditProps {
   disabled: boolean;
   text: string;
   allowEdit?: boolean;
-  snapper?: WordSnapper;
 }
 
 defineProps<AnnotationEditProps>();
