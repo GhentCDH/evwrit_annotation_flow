@@ -68,7 +68,7 @@ onMounted(() => {
     .on("annotation-edit--start", ({}) => {
       editMode.value = true;
     })
-    .on("annotation-create--move", ({ data }) => {
+    .on("annotation-edit--move", ({ data }) => {
       emit("modifyAnnotations", pick(data.annotation, ["id", "start", "end"]));
     })
     .on("annotation-edit--end", ({ data }) => {
