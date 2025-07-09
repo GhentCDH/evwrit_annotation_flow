@@ -132,6 +132,7 @@ const showAnnotation = (annotation: RuleAnnotation) => {
   if (!annotation) return;
 
   console.group("Debugging applied rules: ");
+  console.log(annotation.id);
 
   annotationStore.debugRule(annotation);
   console.groupEnd();
