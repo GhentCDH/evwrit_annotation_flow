@@ -61,6 +61,7 @@ export const normalizeAnnotation = (annotation: AnnotationItem, text: string): R
     target: annotationTarget,
     type: type,
     metadata: {
+      lineLinguisticCharacteristic: annotation.text_selection.text,
       text: selectedText,
       id: annotation.id,
       index: annotation.id,
