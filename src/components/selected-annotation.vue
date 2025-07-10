@@ -1,5 +1,11 @@
 <template>
-  <TextAnnotation :annotations="[annotation]" :text="text" :limit="annotation" :allow-edit="false" />
+  <TextAnnotation
+    :annotation-id="`annotation-metatadata-${annotation.id}`"
+    :annotations="[annotation]"
+    :text="text"
+    :limit="annotation"
+    :allow-edit="false"
+  />
   <AnnotationMetadata :annotation="annotation" />
 </template>
 

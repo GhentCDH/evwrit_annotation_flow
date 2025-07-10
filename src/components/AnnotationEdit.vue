@@ -38,6 +38,7 @@
           <div class="annotation-body">
             <AnnotationEditItem
               v-if="annotation"
+              :textId="textId"
               :annotation="annotation"
               tip="Bewaar gewijzigde annotatie"
               :selected-annotation="selectedAnnotation === 'modified'"
@@ -47,10 +48,10 @@
               @change-selected="changeSelected('modified')"
               @confirm-annotation="confirmAnnotation('modified')"
               @modifyAnnotations="emit('modifyAnnotations', $event)"
-              @processesAnnotation="emit('processesAnnotation', $event)"
             />
             <hr />
             <AnnotationEditItem
+              :textId="textId"
               :annotation="originalAnnotation"
               tip="Bewaar originele annotatie"
               :selected-annotation="selectedAnnotation === 'original'"
@@ -108,6 +109,7 @@ interface AnnotationEditProps {
   disabled: boolean;
   error: boolean;
   showMetadata: boolean;
+  textId: number;
 }
 
 const props = defineProps<AnnotationEditProps>();
@@ -118,7 +120,6 @@ const emit = defineEmits([
   "changeSelected",
   "onHighlight",
   "modifyAnnotations",
-  "processesAnnotation",
   "highlightAnnotation",
 ]);
 

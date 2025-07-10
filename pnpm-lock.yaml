@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@ghentcdh/vue-component-annotated-text':
-        specifier: 2.0.0-beta.12
-        version: 2.0.0-beta.12(vue@3.5.17(typescript@5.8.3))
+        specifier: 2.0.0-beta.13
+        version: 2.0.0-beta.13(vue@3.5.17(typescript@5.8.3))
       '@heroicons/vue':
         specifier: ^2.2.0
         version: 2.2.0(vue@3.5.17(typescript@5.8.3))
@@ -388,8 +388,8 @@ packages:
     resolution: {integrity: sha512-4SaFZCNfJqvk/kenHpI8xvN42DMaoycy4PzKc5otHxRswww1kAt82OlBuwRVLofCACCTZEcla2Ydxv8scMXaTg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@ghentcdh/vue-component-annotated-text@2.0.0-beta.12':
-    resolution: {integrity: sha512-RF9dem0ZsPFRidTW658ewZn9jEcChjsINt0L1ZI9Tsrz+i5abeBuH73CavWnbbkCUsTegpksG7by55whV8LVHg==}
+  '@ghentcdh/vue-component-annotated-text@2.0.0-beta.13':
+    resolution: {integrity: sha512-rt2Vgo9G3DI9LDRbOgH78CRyHK5rdiS1kpqWp2fCwAltCIpUJ8Suw2QQ+Tj/HidfacoFthawoAAGhT7UuAbbsA==}
     engines: {node: '>=22', pnpm: '>=10'}
     peerDependencies:
       vue: ^3.0.0
@@ -3322,7 +3322,7 @@ snapshots:
       '@eslint/core': 0.15.0
       levn: 0.4.1
 
-  '@ghentcdh/vue-component-annotated-text@2.0.0-beta.12(vue@3.5.17(typescript@5.8.3))':
+  '@ghentcdh/vue-component-annotated-text@2.0.0-beta.13(vue@3.5.17(typescript@5.8.3))':
     dependencies:
       d3: 7.9.0
       lodash-es: 4.17.21

@@ -33,8 +33,8 @@
         :text="annotationStore.text"
         :originalAnnotations="annotationStore.originalAnnotations"
         :processedAnnotations="annotationStore.processedAnnotations"
+        :text-id="annotationStore.id"
         @modify-annotations="modifyAnnotation"
-        @processes-annotation="processAnnotation"
         @show-annotation="showAnnotation"
       />
     </div>
@@ -55,11 +55,11 @@
         :text="annotationStore.text"
         :highlightAnnotationIds="highlightAnnotationIds"
         :show-metadata="showMetadata"
+        :text-id="annotationStore.id"
         @confirm-annotation="confirmAnnotation"
         @delete-annotation="deleteAnnotation"
         @confirm-annotations="confirmAnnotations"
         @modify-annotations="modifyAnnotation"
-        @processes-annotation="processAnnotation"
         @needs-attention="annotationStore.needsAttention"
         @review-done="annotationStore.reviewDone"
       />
@@ -107,11 +107,8 @@ const showDuplicates = () => {
 
 const annotationStore = useAnnotationStore();
 
-const processAnnotation = (annotation: UpdateAnnotation) => {
-  annotationStore.processAnnotation(annotation);
-};
-
 const modifyAnnotation = (annotation: UpdateAnnotation) => {
+  console.log("modify annotations");
   annotationStore.modifyAnnotation(annotation);
 };
 

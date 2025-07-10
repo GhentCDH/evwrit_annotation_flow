@@ -128,7 +128,6 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
     debugRule,
     changeShowModified,
     changeShowOnlyDuplicates,
-    processAnnotation: (annotation: UpdateAnnotation) => annotationStore.value?.processAnnotation(annotation),
     modifyAnnotation: (annotation: UpdateAnnotation) => annotationStore.value?.modifyAnnotation(annotation),
     confirmAnnotation: (id: string, confirm: ConfirmAnnotationType) =>
       annotationStore.value?.confirmAnnotation(id, confirm),
