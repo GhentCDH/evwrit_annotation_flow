@@ -73,6 +73,10 @@
               i
             </router-link>
           </div>
+          <p class="pt-2 text-sm text-gray-400">
+            <strong class="underline">LineLinguisticCharacteristic:</strong>
+            {{ annotation?.metadata?.lineLinguisticCharacteristic }}
+          </p>
         </div>
       </div>
     </div>
