@@ -23,6 +23,7 @@
         <AnnotationEdit
           :annotation="annotation.modified!"
           :originalAnnotation="annotation.original"
+          :textId="textId"
           :text="text"
           :selected="annotationSelected.get(annotation.id)"
           :duplicates="annotation.duplicates"
@@ -37,7 +38,6 @@
           @onHighlight="highlight"
           @highlightAnnotation="emit('highlightAnnotation', $event)"
           @modifyAnnotations="emit('modifyAnnotations', $event)"
-          @processesAnnotation="emit('processesAnnotation', $event)"
         />
       </div>
       <AnnotationEditListPaginator />
@@ -66,6 +66,7 @@ interface AnnotationEditListProps {
   highlightAnnotationIds: string[];
   showMetadata: boolean;
   text: string;
+  textId: number;
 }
 
 const annotationSelected: Ref<Map<string, ConfirmAnnotationType>> = ref(new Map());
@@ -98,7 +99,6 @@ const emit = defineEmits([
   "confirmAnnotation",
   "deleteAnnotation",
   "modifyAnnotations",
-  "processesAnnotation",
   "highlightAnnotation",
   "needsAttention",
   "reviewDone",

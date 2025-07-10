@@ -16,8 +16,9 @@
           :limit="annotation"
           :text="text"
           :allow-edit="allowEdit ?? false"
+          :annotation-id="allowEdit ? annotation.id : `read-only${annotation.id}`"
+          :full-text-id="textId"
           @modify-annotations="emit('modifyAnnotations', $event)"
-          @processes-annotations="emit('processesAnnotation', $event)"
         />
       </div>
       <button
@@ -39,6 +40,7 @@ import SaveIcon from "./SaveIcon.vue";
 import type { RuleAnnotation } from "../types/Annotation";
 
 interface AnnotationEditProps {
+  textId: number;
   annotation: RuleAnnotation;
   tip: string;
   selectedAnnotation: boolean;
@@ -48,7 +50,7 @@ interface AnnotationEditProps {
 }
 
 defineProps<AnnotationEditProps>();
-const emit = defineEmits(["confirmAnnotation", "changeSelected", "modifyAnnotations", "processesAnnotation"]);
+const emit = defineEmits(["confirmAnnotation", "changeSelected", "modifyAnnotations"]);
 
 const confirmAnnotation = () => {
   emit("confirmAnnotation");
