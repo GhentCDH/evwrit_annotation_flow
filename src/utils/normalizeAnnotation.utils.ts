@@ -64,6 +64,7 @@ export const normalizeAnnotation = (annotation: AnnotationItem, text: string): R
       text: selectedText,
       id: annotation.id,
       index: annotation.id,
+      lineLinguisticCharacteristic: annotation.text_selection.text,
     },
     color: annotationColors[type],
     hasOverride: annotation.hasOverride,

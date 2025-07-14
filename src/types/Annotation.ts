@@ -43,6 +43,7 @@ export type AnnotationMetaData = {
   text: string;
   index: number;
   id: string;
+  lineLinguisticCharacteristic: string;
 };
 
 export type ModifiedAnnotation = {

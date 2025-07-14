@@ -1,6 +1,7 @@
 <template>
   <p class="py-2">
     <strong class="underline">LineLinguisticCharacteristic:</strong>
+    {{ annotation.metadata?.lineLinguisticCharacteristic }}
   </p>
   <strong class="underline">Metadata</strong>
   <ul class="text-sm text-content">

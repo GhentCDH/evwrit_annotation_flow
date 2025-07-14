@@ -76,7 +76,7 @@
           </div>
           <p class="pt-2 text-sm text-gray-400">
             <strong class="underline">LineLinguisticCharacteristic:</strong>
-            {{ originalAnnotation.metadata?.text }}
+            {{ originalAnnotation.metadata?.lineLinguisticCharacteristic }}
           </p>
         </div>
       </div>
