@@ -1,4 +1,4 @@
-import type { Annotation } from "@ghentcdh/vue-component-annotated-text";
+import type { Annotation } from "@ghentcdh/annotated-text";
 
 export const annotationTypes = [
   "language",

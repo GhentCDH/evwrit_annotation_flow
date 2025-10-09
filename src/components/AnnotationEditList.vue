@@ -22,7 +22,7 @@
           <AnnotationEdit
             :annotation="annotation.modified!"
             :originalAnnotation="annotation.original"
-            :textLines="textLines"
+            :text="text"
             :selected="annotationSelected.get(annotation.id)"
             :duplicates="annotation.duplicates"
             :highlight="highlightIds.includes(annotation.id)"
@@ -30,7 +30,6 @@
             :disabled="annotation.saving"
             :error="annotation.error"
             :showMetadata="showMetadata"
-            :snapper="snapper"
             @confirmAnnotation="confirmAnnotation"
             @deleteAnnotation="deleteAnnotation"
             @changeSelected="onChangeSelected"
@@ -53,21 +52,18 @@
 
 <script setup lang="ts">
 import { type Ref, ref, watch } from "vue";
-import { type Line } from "@ghentcdh/vue-component-annotated-text";
 import AnnotationEdit from "./AnnotationEdit.vue";
 import Lazy from "./LazyComponent.vue";
 import type { ModifiedAnnotation, RuleAnnotation } from "../types/Annotation";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
-import { WordSnapper } from "../lib/snapper";
 
 const highlightIds: Ref<string[]> = ref([]);
 
 interface AnnotationEditListProps {
   modifiedAnnotations: ModifiedAnnotation[];
-  textLines: Line[];
   highlightAnnotationIds: string[];
+  text: string;
   showMetadata: boolean;
-  snapper?: WordSnapper;
 }
 
 const annotationSelected: Ref<Map<string, ConfirmAnnotationType>> = ref(new Map());

@@ -32,7 +32,7 @@
       <AnnotationTextCompare
         :originalAnnotations="annotationStore.originalAnnotations"
         :processedAnnotations="annotationStore.processedAnnotations"
-        :text-lines="annotationStore.textLines"
+        :text="annotationStore.text"
         :snapper="annotationStore.snapper"
         @modify-annotations="modifyAnnotation"
         @processes-annotation="processAnnotation"
@@ -41,7 +41,7 @@
     </div>
     <div :class="[` border p-4`, { 'w-1/3': !showMetadata, 'w-1/2': showMetadata }]">
       <div class="card border mb-2 p-2" v-for="annotation in highlightAnnotations" :key="annotation.id">
-        <SelectedAnnotation :annotation="annotation" :text-lines="annotationStore.textLines" />
+        <SelectedAnnotation :annotation="annotation" :text="annotationStore.text" />
       </div>
       <div class="flex flex-row gap-2">
         <div>
@@ -53,7 +53,7 @@
       </div>
       <annotation-edit-list
         :modifiedAnnotations="annotationStore.modifiedAnnotations"
-        :text-lines="annotationStore.textLines"
+        :text="annotationStore.text"
         :highlightAnnotationIds="highlightAnnotationIds"
         :show-metadata="showMetadata"
         :snapper="annotationStore.snapper"

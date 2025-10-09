@@ -1,4 +1,4 @@
-import { type Line } from "@ghentcdh/vue-component-annotated-text";
+import { type Line } from "@ghentcdh/annotated-text";
 
 export const getAnnotatedLines = <L extends Line>(lines: L[], start: number, end: number) => {
   const annotatedLines = [] as Line[];

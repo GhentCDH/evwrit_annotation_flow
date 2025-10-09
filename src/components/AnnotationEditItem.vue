@@ -11,17 +11,18 @@
         @click="changeSelected"
       />
       <div class="w-full">
+        <div :id="annotatedTextId" />
         <!-- Originele annotatie -->
-        <AnnotatedText
-          :annotations="[annotation]"
-          :lines="getAnnotatedLines(textLines, annotation.start, annotation.end).lines"
-          :allow-edit="allowEdit ?? false"
-          :listen-to-on-update-start="true"
-          :listen-to-on-updating="true"
-          @annotation-update-begin="onAnnotationUpdateBegin"
-          @annotation-updating="onAnnotationUpdating"
-          @annotation-update-end="onAnnotationUpdateEnd"
-        />
+        <!--        <AnnotatedText-->
+        <!--          :annotations="[annotation]"-->
+        <!--          :lines="getAnnotatedLines(textLines, annotation.start, annotation.end).lines"-->
+        <!--          :allow-edit="allowEdit ?? false"-->
+        <!--          :listen-to-on-update-start="true"-->
+        <!--          :listen-to-on-updating="true"-->
+        <!--          @annotation-update-begin="onAnnotationUpdateBegin"-->
+        <!--          @annotation-updating="onAnnotationUpdating"-->
+        <!--          @annotation-update-end="onAnnotationUpdateEnd"-->
+        <!--        />-->
       </div>
       <button
         v-if="annotation"
@@ -37,21 +38,19 @@
 </template>
 
 <script setup lang="ts">
-import { AnnotatedText, type Line, UpdateAnnotationState } from "@ghentcdh/vue-component-annotated-text";
-import { pick } from "lodash-es";
+import { AnnotatedText, Annotation, createAnnotatedText, TextLineAdapter, WordSnapper } from "@ghentcdh/annotated-text";
+import { v4 as uuidv4 } from "uuid";
+import { onMounted, onUnmounted, watch } from "vue";
 import SaveIcon from "./SaveIcon.vue";
 import type { RuleAnnotation } from "../types/Annotation";
-import { getAnnotatedLines } from "../utils/annotation_utils";
-import { WordSnapper } from "../lib/snapper";
 
 interface AnnotationEditProps {
   annotation: RuleAnnotation;
   tip: string;
   selectedAnnotation: boolean;
   disabled: boolean;
-  textLines: Line[];
+  text: string;
   allowEdit?: boolean;
-  snapper?: WordSnapper;
 }
 
 const props = defineProps<AnnotationEditProps>();
@@ -65,32 +64,67 @@ const changeSelected = () => {
   emit("changeSelected");
 };
 
+const annotatedTextId = `annotated-text-edit-item--${uuidv4()}`;
+
+let annotatedText: AnnotatedText;
 //#region edit annotations
 
-// AnnotatedText event handlers
-const fixOffset = function (updateState: UpdateAnnotationState) {
-  const result = props.snapper!.fixOffset(updateState.newStart, updateState.newEnd);
-  updateState.newStart = result.start;
-  updateState.newEnd = result.end;
+onMounted(() => {
+  annotatedText = createAnnotatedText(annotatedTextId, {
+    text: TextLineAdapter(),
+    annotation: {
+      edit: props.allowEdit,
+      snapper: new WordSnapper(),
+    },
+  })
+    .setText(props.text)
+    .on("annotation-edit--move", (data: any) => {
+      annotationMoved(data.data.annotation);
+    })
+    .on("annotation-edit--move-end", (data: any) => {
+      annotationMovedEnd(data.data.annotation);
+    });
 
-  if (result.modified) {
-    emit("modifyAnnotations", { ...result, id: updateState.annotation.id });
+  if (props.annotation) {
+    annotatedText
+      .changeTextAdapterConfig("limit", {
+        start: props.annotation.start,
+        end: props.annotation.end,
+      })
+      .setAnnotations([props.annotation]);
   }
-};
+});
 
-const onAnnotationUpdateBegin = function (updateState: UpdateAnnotationState) {
-  fixOffset(updateState);
+watch(
+  () => props.text,
+  (newValue) => {
+    annotatedText.setText(newValue);
+  },
+);
 
-  updateState.confirmStartUpdating();
-};
-const onAnnotationUpdating = function (updateState: UpdateAnnotationState) {
-  fixOffset(updateState);
+watch(
+  () => props.annotation,
+  (newVal) => {
+    annotatedText.changeTextAdapterConfig("limit", { start: newVal.start, end: newVal.end }).setAnnotations([newVal]);
+  },
+);
 
-  updateState.confirmUpdate();
+onUnmounted(() => {
+  annotatedText?.destroy();
+});
+const isSame = (annotation: Annotation) => {
+  return props.annotation.start == annotation.start && props.annotation.end === annotation.end;
 };
-const onAnnotationUpdateEnd = function (updateState: UpdateAnnotationState) {
-  emit("processesAnnotation", pick(updateState.annotation, ["id", "start", "end"]));
+const annotationMoved = (annotation: Annotation) => {
+  if (isSame(annotation)) {
+    return;
+  }
+  emit("modifyAnnotations", annotation);
 };
-
-// #endregion
+const annotationMovedEnd = (annotation: Annotation) => {
+  if (isSame(annotation)) {
+    return;
+  }
+  emit("processesAnnotation", annotation);
+};
 </script>
