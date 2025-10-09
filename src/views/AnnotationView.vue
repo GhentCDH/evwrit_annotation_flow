@@ -30,18 +30,17 @@
         </label>
       </div>
       <AnnotationTextCompare
+        :text="annotationStore.text"
         :originalAnnotations="annotationStore.originalAnnotations"
         :processedAnnotations="annotationStore.processedAnnotations"
-        :text-lines="annotationStore.textLines"
-        :snapper="annotationStore.snapper"
+        :text-id="annotationStore.id"
         @modify-annotations="modifyAnnotation"
-        @processes-annotation="processAnnotation"
         @show-annotation="showAnnotation"
       />
     </div>
     <div :class="[` border p-4`, { 'w-1/3': !showMetadata, 'w-1/2': showMetadata }]">
       <div class="card border mb-2 p-2" v-for="annotation in highlightAnnotations" :key="annotation.id">
-        <SelectedAnnotation :annotation="annotation" :text-lines="annotationStore.textLines" />
+        <SelectedAnnotation :annotation="annotation" :text="annotationStore.text" />
       </div>
       <div class="flex flex-row gap-2">
         <div>
@@ -53,16 +52,14 @@
       </div>
       <annotation-edit-list
         :modifiedAnnotations="annotationStore.modifiedAnnotations"
-        :text-lines="annotationStore.textLines"
+        :text="annotationStore.text"
         :highlightAnnotationIds="highlightAnnotationIds"
         :show-metadata="showMetadata"
-        :snapper="annotationStore.snapper"
+        :text-id="annotationStore.id"
         @confirm-annotation="confirmAnnotation"
         @delete-annotation="deleteAnnotation"
         @confirm-annotations="confirmAnnotations"
         @modify-annotations="modifyAnnotation"
-        @processes-annotation="processAnnotation"
-        @highlightAnnotation="scrollToLine"
         @needs-attention="annotationStore.needsAttention"
         @review-done="annotationStore.reviewDone"
       />
@@ -79,7 +76,6 @@ import TypeFilter from "../components/TypeFilter.vue";
 import { type ConfirmAnnotationType, type UpdateAnnotation } from "../stores/annotation.store";
 import { useAnnotationStore } from "../stores/annotation.state";
 import SearchPaginator from "../components/SearchPaginator.vue";
-import { getAnnotatedLines } from "../utils/annotation_utils";
 import SelectedAnnotation from "../components/selected-annotation.vue";
 import type { RuleAnnotation } from "@/types/Annotation";
 
@@ -111,11 +107,8 @@ const showDuplicates = () => {
 
 const annotationStore = useAnnotationStore();
 
-const processAnnotation = (annotation: UpdateAnnotation) => {
-  annotationStore.processAnnotation(annotation);
-};
-
 const modifyAnnotation = (annotation: UpdateAnnotation) => {
+  console.log("modify annotations");
   annotationStore.modifyAnnotation(annotation);
 };
 
@@ -136,22 +129,12 @@ const showAnnotation = (annotation: RuleAnnotation) => {
   if (!annotation) return;
 
   console.group("Debugging applied rules: ");
+  console.log(annotation.id);
 
   annotationStore.debugRule(annotation);
   console.groupEnd();
 
   document.querySelector(`[data-annotation="${annotation.id}"]`)?.scrollIntoView();
   highlightAnnotationIds.value = [annotation.id];
-};
-
-const scrollToLine = (annotation: RuleAnnotation) => {
-  const lines = getAnnotatedLines(annotationStore.textLines, annotation.start, annotation.end).lines;
-  const text = lines?.[0]?.gutter?.trim();
-
-  if (!text) return;
-
-  Array.from(document.querySelectorAll(`.gutter.text`))
-    .find((el) => el.textContent?.trim() === text)
-    ?.scrollIntoView();
 };
 </script>

@@ -11,18 +11,21 @@
         </button>
       </div>
     </div>
-    <ul class="flex flex-col gap-2 overflow-auto">
-      <li
-        v-for="annotation in modifiedAnnotations"
+    <div class="flex flex-col gap-2 overflow-auto">
+      <AnnotationEditListPaginator />
+      <div
+        v-for="annotation in editPaginationStore.items"
         :key="annotation.id"
         :data-annotation="annotation.id"
         :ref="`annotation-${annotation.id}`"
+        :class="{ 'min-h-[20px]': false }"
       >
         <Lazy>
           <AnnotationEdit
             :annotation="annotation.modified!"
             :originalAnnotation="annotation.original"
-            :textLines="textLines"
+            :textId="textId"
+            :text="text"
             :selected="annotationSelected.get(annotation.id)"
             :duplicates="annotation.duplicates"
             :highlight="highlightIds.includes(annotation.id)"
@@ -30,18 +33,17 @@
             :disabled="annotation.saving"
             :error="annotation.error"
             :showMetadata="showMetadata"
-            :snapper="snapper"
             @confirmAnnotation="confirmAnnotation"
             @deleteAnnotation="deleteAnnotation"
             @changeSelected="onChangeSelected"
             @onHighlight="highlight"
             @highlightAnnotation="emit('highlightAnnotation', $event)"
             @modifyAnnotations="emit('modifyAnnotations', $event)"
-            @processesAnnotation="emit('processesAnnotation', $event)"
           />
         </Lazy>
-      </li>
-    </ul>
+      </div>
+      <AnnotationEditListPaginator />
+    </div>
     <hr />
     <div class="flex justify-end gap-2">
       <button class="btn" @click="emit('needsAttention')">Text heeft extra aandacht nodig</button>
@@ -53,33 +55,34 @@
 
 <script setup lang="ts">
 import { type Ref, ref, watch } from "vue";
-import { type Line } from "@ghentcdh/vue-component-annotated-text";
 import AnnotationEdit from "./AnnotationEdit.vue";
-import Lazy from "./LazyComponent.vue";
+import AnnotationEditListPaginator from "./AnnotationEditListPaginator.vue";
 import type { ModifiedAnnotation, RuleAnnotation } from "../types/Annotation";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
-import { WordSnapper } from "../lib/snapper";
+import { useEditPaginationStore } from "../stores/edit-pagination.state";
 
 const highlightIds: Ref<string[]> = ref([]);
 
 interface AnnotationEditListProps {
   modifiedAnnotations: ModifiedAnnotation[];
-  textLines: Line[];
   highlightAnnotationIds: string[];
   showMetadata: boolean;
-  snapper?: WordSnapper;
+  text: string;
+  textId: number;
 }
 
 const annotationSelected: Ref<Map<string, ConfirmAnnotationType>> = ref(new Map());
 
-const { modifiedAnnotations, highlightAnnotationIds } = defineProps<AnnotationEditListProps>();
+const props = defineProps<AnnotationEditListProps>();
 
 watch(
-  () => highlightAnnotationIds,
+  () => props.highlightAnnotationIds,
   (newVal) => {
     highlight(newVal);
   },
 );
+
+const editPaginationStore = useEditPaginationStore();
 
 const onChangeSelected = function (annotation: RuleAnnotation, selected: ConfirmAnnotationType) {
   if (!selected) annotationSelected.value.delete(annotation.id);
@@ -87,7 +90,7 @@ const onChangeSelected = function (annotation: RuleAnnotation, selected: Confirm
 };
 
 const selectAll = (type: ConfirmAnnotationType) => {
-  modifiedAnnotations.forEach((annotation) => {
+  props.modifiedAnnotations.forEach((annotation) => {
     onChangeSelected(annotation.original, type);
   });
 };
@@ -98,7 +101,6 @@ const emit = defineEmits([
   "confirmAnnotation",
   "deleteAnnotation",
   "modifyAnnotations",
-  "processesAnnotation",
   "highlightAnnotation",
   "needsAttention",
   "reviewDone",
@@ -119,5 +121,6 @@ const deleteAnnotation = (annotation: RuleAnnotation) => {
 const highlight = (ids: string[]) => {
   highlightIds.value = ids;
 };
+
 //#endregion
 </script>

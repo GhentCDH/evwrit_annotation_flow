@@ -1,20 +1,21 @@
 <template>
-  <AnnotatedText
+  <TextAnnotation
+    :annotation-id="`annotation-metatadata-${annotation.id}`"
     :annotations="[annotation]"
-    :lines="getAnnotatedLines(textLines, annotation.start, annotation.end).lines"
+    :text="text"
+    :limit="annotation"
     :allow-edit="false"
   />
   <AnnotationMetadata :annotation="annotation" />
 </template>
 
 <script setup lang="ts">
-import { AnnotatedText, type Line } from "@ghentcdh/vue-component-annotated-text";
 import AnnotationMetadata from "./AnnotationMetadata.vue";
-import { getAnnotatedLines } from "../utils/annotation_utils";
+import TextAnnotation from "./TextAnnotation.vue";
 import type { RuleAnnotation } from "@/types/Annotation";
 
 defineProps<{
-  textLines: Line[];
+  text: string;
   annotation: RuleAnnotation;
 }>();
 </script>

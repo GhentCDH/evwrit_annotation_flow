@@ -1,7 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import './annotation';
 
 h2 {
   @apply text-xl font-bold;
@@ -12,5 +11,5 @@ h2 {
 }
 
 .viewer {
-  height: calc(100VH - 80px)
+  height: calc(100vh - 80px);
 }

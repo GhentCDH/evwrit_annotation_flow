@@ -1,74 +1,43 @@
 <template>
-  <div class="grid grid-cols-2 gap-2 overflow-auto h-full">
+  <div class="grid grid-cols-2 gap-2 overflow-auto h-full" v-if="text">
     <div class="border border-x-0 border-y-0 border-l-0 border-r-2 border-dashed">
       <div class="text-lg font-bold">Originele Tekst</div>
-      <AnnotatedText :annotations="originalAnnotations" :lines="textLines" />
+      <TextAnnotation
+        :full-text-id="textId"
+        :text="text"
+        :annotations="originalAnnotations"
+        :allow-edit="false"
+        :annotation-id="'original-text' + textId"
+      />
     </div>
     <div>
       <div class="text-lg font-bold">Verwerkte Tekst</div>
-      <AnnotatedText
+      <TextAnnotation
+        :full-text-id="textId"
+        :text="text"
         :annotations="processedAnnotations"
-        :lines="textLines"
         :allow-edit="true"
-        :listen-to-on-update-start="true"
-        :listen-to-on-updating="true"
-        @annotation-update-begin="onAnnotationUpdateBegin"
-        @annotation-updating="onAnnotationUpdating"
-        @annotation-update-end="onAnnotationUpdateEnd"
-        @annotation-double-click="onAnnotationDoubleClick"
+        @double-click-annotation="emit('showAnnotation', $event)"
+        @modify-annotations="emit('modifyAnnotations', $event)"
       />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { type Line } from "@ghentcdh/vue-component-annotated-text";
-import { AnnotatedText, UpdateAnnotationState } from "@ghentcdh/vue-component-annotated-text";
-
-import { WordSnapper } from "../lib/snapper/WordSnapper";
+import TextAnnotation from "./TextAnnotation.vue";
 import type { RuleAnnotation } from "../types/Annotation";
 
 interface AnnotationTextCompareProps {
   originalAnnotations: RuleAnnotation[];
   processedAnnotations: RuleAnnotation[];
-  textLines: Line[];
-  snapper?: WordSnapper;
+  text: string;
+  textId: number;
 }
 
-const { processedAnnotations, snapper, originalAnnotations, textLines } = defineProps<AnnotationTextCompareProps>();
-
-import { pick } from "lodash-es";
+defineProps<AnnotationTextCompareProps>();
 
 //#region Emit
-const emit = defineEmits(["modifyAnnotations", "processesAnnotation", "showAnnotation"]);
-
-// AnnotatedText event handlers
-const fixOffset = function (updateState: UpdateAnnotationState) {
-  const result = snapper!.fixOffset(updateState.newStart, updateState.newEnd);
-  updateState.newStart = result.start;
-  updateState.newEnd = result.end;
-
-  if (result.modified) {
-    emit("modifyAnnotations", { ...result, id: updateState.annotation.id });
-  }
-};
-
-const onAnnotationUpdateBegin = function (updateState: UpdateAnnotationState) {
-  fixOffset(updateState);
-
-  updateState.confirmStartUpdating();
-};
-const onAnnotationUpdating = function (updateState: UpdateAnnotationState) {
-  fixOffset(updateState);
-
-  updateState.confirmUpdate();
-};
-const onAnnotationUpdateEnd = function (updateState: UpdateAnnotationState) {
-  emit("processesAnnotation", pick(updateState.annotation, ["id", "start", "end"]));
-};
-
-const onAnnotationDoubleClick = function (updateState: UpdateAnnotationState) {
-  emit("showAnnotation", updateState.annotation);
-};
+const emit = defineEmits(["modifyAnnotations", "showAnnotation"]);
 // #endregion
 </script>

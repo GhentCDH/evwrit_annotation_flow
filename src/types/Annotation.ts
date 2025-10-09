@@ -41,9 +41,9 @@ export type AnnotationTarget = "gutter" | "text";
 
 export type AnnotationMetaData = {
   text: string;
+  lineLinguisticCharacteristic: string;
   index: number;
   id: string;
-  lineLinguisticCharacteristic: string;
 };
 
 export type ModifiedAnnotation = {

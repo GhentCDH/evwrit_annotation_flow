@@ -38,25 +38,25 @@
           <div class="annotation-body">
             <AnnotationEditItem
               v-if="annotation"
+              :textId="textId"
               :annotation="annotation"
               tip="Bewaar gewijzigde annotatie"
               :selected-annotation="selectedAnnotation === 'modified'"
               :disabled="disabled"
-              :text-lines="textLines"
+              :text="text"
               :allow-edit="true"
-              :snapper="snapper"
               @change-selected="changeSelected('modified')"
               @confirm-annotation="confirmAnnotation('modified')"
               @modifyAnnotations="emit('modifyAnnotations', $event)"
-              @processesAnnotation="emit('processesAnnotation', $event)"
             />
             <hr />
             <AnnotationEditItem
+              :textId="textId"
               :annotation="originalAnnotation"
               tip="Bewaar originele annotatie"
               :selected-annotation="selectedAnnotation === 'original'"
               :disabled="disabled"
-              :text-lines="textLines"
+              :text="text"
               @change-selected="changeSelected('original')"
               @confirm-annotation="confirmAnnotation('original')"
             />
@@ -76,7 +76,7 @@
           </div>
           <p class="pt-2 text-sm text-gray-400">
             <strong class="underline">LineLinguisticCharacteristic:</strong>
-            {{ originalAnnotation.metadata?.lineLinguisticCharacteristic }}
+            {{ annotation?.metadata?.lineLinguisticCharacteristic }}
           </p>
         </div>
       </div>
@@ -89,14 +89,12 @@
 
 <script setup lang="ts">
 import { TrashIcon } from "@heroicons/vue/16/solid";
-import { type Line } from "@ghentcdh/vue-component-annotated-text";
 import { ref, watch } from "vue";
 import AnnotationEditItem from "./AnnotationEditItem.vue";
 import AnnotationMetadata from "./AnnotationMetadata.vue";
 import type { AnnotationType, RuleAnnotation } from "../types/Annotation";
 import { annotationHtmlColors } from "../styles/annotation-colors";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
-import { WordSnapper } from "../lib/snapper";
 
 const selectedAnnotation = ref<ConfirmAnnotationType>();
 
@@ -104,14 +102,14 @@ interface AnnotationEditProps {
   annotation?: RuleAnnotation;
   originalAnnotation: RuleAnnotation;
   appliedRules: string[];
-  textLines: Line[];
+  text: string;
   selected: ConfirmAnnotationType;
   duplicates: string[];
   highlight: boolean;
   disabled: boolean;
   error: boolean;
   showMetadata: boolean;
-  snapper?: WordSnapper;
+  textId: number;
 }
 
 const props = defineProps<AnnotationEditProps>();
@@ -122,7 +120,6 @@ const emit = defineEmits([
   "changeSelected",
   "onHighlight",
   "modifyAnnotations",
-  "processesAnnotation",
   "highlightAnnotation",
 ]);
 

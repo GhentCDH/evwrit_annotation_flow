@@ -14,5 +14,6 @@
 <script setup lang="ts">
 import type { RuleAnnotation } from "@/types/Annotation";
 
-defineProps<{ annotation: RuleAnnotation }>();
+const props = defineProps<{ annotation: RuleAnnotation }>();
+console.table(props.annotation.metadata);
 </script>

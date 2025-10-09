@@ -5,8 +5,6 @@ import { computedAsync } from "@vueuse/core";
 import { AnnotationStore, type ConfirmAnnotationType, type UpdateAnnotation } from "./annotation.store";
 import { usePaginationStore } from "./pagination.state";
 import { useSearchStore } from "./search.state";
-import { textToLines } from "../text_utilities";
-import { WordSnapper } from "../lib/snapper";
 import { filterAnnotations } from "../utils/filter.utils";
 import type { AnnotationType, RuleAnnotation } from "@/types/Annotation";
 
@@ -37,6 +35,7 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
   });
 
   const text = computed(() => fetchNewValue.value?.text || "");
+
   const annotationStore = computed(() => {
     return fetchNewValue.value?.annotationStore || null;
   });
@@ -61,18 +60,15 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
   const totalAnnotations = computed(() => annotationValues.value.length);
   const originalAnnotations = computed(() => filteredAnnotations.value.map((annotation) => annotation.original));
   const processedAnnotations = computed(() => filteredAnnotations.value.map((annotation) => annotation.processed));
-  const modifiedAnnotations = computed(() =>
-    filteredAnnotations.value.filter((annotation) => !!annotation.modified || annotation.duplicates.length > 1),
-  );
+  const modifiedAnnotations = computed(() => {
+    return filteredAnnotations.value.filter((annotation) => !!annotation.modified || annotation.duplicates.length > 1);
+  });
 
   const duplicates = computed(() => filteredAnnotations.value.filter((annotation) => annotation.duplicates.length > 1));
 
   const totalProcessedAnnotation = computed(
     () => annotationValues.value.filter((annotation) => annotation.hasOverride || !annotation.modified).length,
   );
-
-  const textLines = computed(() => textToLines(text.value));
-  const snapper = computed(() => new WordSnapper(text.value));
 
   const loading = computed(() => {
     const value = fetchNewValue.value;
@@ -115,8 +111,6 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
     loading,
     changeId,
     fetchNewValue,
-    textLines,
-    snapper,
     originalAnnotations,
     processedAnnotations,
     modifiedAnnotations,
@@ -128,7 +122,6 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
     debugRule,
     changeShowModified,
     changeShowOnlyDuplicates,
-    processAnnotation: (annotation: UpdateAnnotation) => annotationStore.value?.processAnnotation(annotation),
     modifyAnnotation: (annotation: UpdateAnnotation) => annotationStore.value?.modifyAnnotation(annotation),
     confirmAnnotation: (id: string, confirm: ConfirmAnnotationType) =>
       annotationStore.value?.confirmAnnotation(id, confirm),
@@ -137,5 +130,6 @@ export const useAnnotationStore = defineStore("annotationStore", () => {
     deleteAnnotation: (id: string) => annotationStore.value?.deleteAnnotation(id),
     needsAttention: needsAttention,
     reviewDone: reviewDone,
+    text,
   };
 });

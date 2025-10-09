@@ -1,8 +1,5 @@
-import { createAnnotationColors } from "@ghentcdh/vue-component-annotated-text";
+import { type AnnotationColor, createAnnotationColors } from "@ghentcdh/vue-component-annotated-text";
 import type { AnnotationType } from "../types/Annotation";
-
-// FIXME after update @ghentcdh/vue-component-annotated-text
-type AnnotationColor = any;
 
 export const annotationHtmlColors: Partial<Record<AnnotationType, string>> = {
   orthography: "#f58231",
@@ -23,7 +20,8 @@ export const createHighlightColors = (): Record<string, AnnotationColor> => {
   const colorSet: Record<string, AnnotationColor> = {};
 
   Object.entries(annotationColors).forEach(([key, value]) => {
-    colorSet[key] = value ? { ...value, border: `rgb(0, 128, 0)` } : null;
+    if (!value) return;
+    colorSet[key as string] = { ...value, border: `rgb(0, 128, 0)` } as AnnotationColor;
   });
 
   return colorSet;
