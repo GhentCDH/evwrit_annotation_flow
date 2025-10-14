@@ -244,9 +244,7 @@ export class AnnotationViewer {
   }
 
   private _filterAnnotations() {
-    console.log(this.annotations);
     if (!this.annotations) {
-      console.log("no annotations");
       this.completeTextView.clearAnnotations();
       this.displayModified.value = [];
       return this;
