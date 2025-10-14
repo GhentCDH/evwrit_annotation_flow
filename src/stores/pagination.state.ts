@@ -2,13 +2,13 @@ import { defineStore } from "pinia";
 import { computedAsync } from "@vueuse/core";
 import { computed, ref } from "vue";
 import { useSearchStore } from "./search.state";
-import { useAnnotationStore } from "./annotation.state";
+import { useAnnotationStoreViewer } from "./annotation-viewer.store.ts";
 import { AnnotationRepository } from "../data-access/annotationRepository";
 import { calculateTotalPages } from "../utils/page.utils";
 
 export const usePaginationStore = defineStore("paginationStore", () => {
   const searchStore = useSearchStore();
-  const annotationStore = useAnnotationStore();
+  const annotationStore = useAnnotationStoreViewer();
 
   const repository = new AnnotationRepository();
 

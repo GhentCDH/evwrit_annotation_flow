@@ -7,9 +7,13 @@ export default defineConfig({
   plugins: [vue()],
   assetsInclude: ["docs/**"],
   resolve: {
+    // preserveSymlinks: true,  // Important for pnpm links
     alias: {
       "@/types": fileURLToPath(new URL("./src/types", import.meta.url)),
     },
+  },
+  optimizeDeps: {
+    exclude: ["@ghentcdh/annotated-text"], // Add all your linked packages here
   },
   server: {
     proxy: {

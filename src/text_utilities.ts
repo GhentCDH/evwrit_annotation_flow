@@ -1,5 +1,4 @@
 import Tokenizr from "tokenizr";
-import { type Line } from "@ghentcdh/annotated-text";
 
 //returns an array of tokens for a text, uses a defined word boundry
 export function tokenize(text: string) {
@@ -187,93 +186,4 @@ export function shiftToWordBoundary(
   fixed = fixedStart || fixedStop;
 
   return { start: newAnnotationStartCharIndex, end: newAnnotationStopCharIndex, modified: fixed };
-}
-
-export const textToLines = (text: string): Line[] => {
-  text = text.replace(/\r\n/g, "\n").replace(/\u000b/g, "\n");
-  const regLineNumber = /^([0-9/]+[a-z]?)\./g;
-  let lineStart = 0;
-  let lineEnd = 0;
-  let gutter = "";
-
-  // split text into lines
-  const lines = text.split("\n");
-  const lineObjects = [] as Line[];
-
-  // split lines into line number, text, start and end
-  for (let i = 0; i < lines.length; i++) {
-    lineEnd = lineStart + (lines[i].length - 1);
-    let matchArray = lines[i].match(regLineNumber);
-
-    if (matchArray) {
-      gutter = matchArray[0];
-    } else {
-      gutter = "";
-    }
-
-    let lineObject: Line = {
-      gutter: gutter,
-      text: lines[i].replace(regLineNumber, ""),
-      start: lineStart + gutter.length,
-      end: lineEnd,
-    } as Line;
-    lineObjects.push(lineObject);
-    lineStart = lineEnd + 2;
-
-    //empty lines:
-    lineObjects[i].end = Math.max(lineObjects[i].end, lineObjects[i].start);
-  }
-  return lineObjects;
-};
-
-export function shiftUpdateToWordBoundary(
-  newStart: number,
-  newEnd: number,
-  mapStartCharIndexToToken: { [index: number]: number },
-  mapStopCharIndexToToken: { [index: number]: number },
-): AnnotationFix {
-  const newAnnotationStartCharIndex = mapStartCharIndexToToken[newStart] ?? newStart;
-  const newAnnotationStopCharIndex = mapStopCharIndexToToken[newEnd] ?? newEnd;
-  console.log("New Start:", newStart, "Mapped Start:", newAnnotationStartCharIndex);
-  console.log("New End:", newEnd, "Mapped End:", newAnnotationStopCharIndex);
-
-  const closestStart = mapStartCharIndexToToken[newStart] || mapStartCharIndexToToken[newEnd];
-  const closestEnd = mapStopCharIndexToToken[newEnd] || mapStopCharIndexToToken[newStart];
-  const modified = closestStart !== newStart || closestEnd !== newEnd;
-  console.log("Closest Start:", closestStart);
-  console.log("Closest End:", closestEnd);
-
-  return {
-    start: newAnnotationStartCharIndex,
-    end: newAnnotationStopCharIndex,
-    modified: modified,
-  };
-}
-
-export function createWordBoundaryMaps(text: string): {
-  mapStartCharIndexToToken: { [index: number]: number };
-  mapStopCharIndexToToken: { [index: number]: number };
-} {
-  const mapStartCharIndexToToken: { [index: number]: number } = {};
-  const mapStopCharIndexToToken: { [index: number]: number } = {};
-  tokenize(text).forEach((token: any) => {
-    const start = token.pos;
-    const end = token.pos + token.value.length - 1;
-
-    mapStartCharIndexToToken[start] = start;
-    mapStopCharIndexToToken[end] = end;
-  });
-
-  for (let i = 0; i < text.length; i++) {
-    if (!mapStartCharIndexToToken[i]) {
-      // Find the closest previous start index
-      mapStartCharIndexToToken[i] = i > 0 ? mapStartCharIndexToToken[i - 1] : 0;
-    }
-    if (!mapStopCharIndexToToken[i]) {
-      // Find the closest previous end index
-      mapStopCharIndexToToken[i] = i > 0 ? mapStopCharIndexToToken[i - 1] : 0;
-    }
-  }
-
-  return { mapStartCharIndexToToken, mapStopCharIndexToToken };
 }

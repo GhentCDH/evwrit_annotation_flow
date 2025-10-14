@@ -1,52 +1,22 @@
 <template>
-  >
-  <div :id="annotatedTextId"></div>
-  <AnnotationMetadata :annotation="annotation" />
+  <div :id="view.view.viewerId"></div>
+  <AnnotationMetadata :annotation="view.view.annotation.original" />
 </template>
 
 <script setup lang="ts">
-import { AnnotatedText, createAnnotatedText, TextLineAdapter } from "@ghentcdh/annotated-text";
-import { v4 as uuidv4 } from "uuid";
-import { onMounted, onUnmounted, watch } from "vue";
+import { onMounted, onUnmounted } from "vue";
 import AnnotationMetadata from "./AnnotationMetadata.vue";
-import type { RuleAnnotation } from "@/types/Annotation";
+import type { SingleAnnotationView } from "../stores/annotation-viewer.ts";
 
 const props = defineProps<{
-  annotation: RuleAnnotation;
-  text: string;
+  view: { id: number; view: SingleAnnotationView };
 }>();
 
-const annotatedTextId = `annotated-text-selected-item--${uuidv4()}`;
-
-let annotatedText: AnnotatedText;
-
 onMounted(() => {
-  annotatedText = createAnnotatedText(annotatedTextId, {
-    text: TextLineAdapter(),
-  }).setText(props.text);
-
-  if (props.annotation) {
-    annotatedText
-      .setAnnotations([props.annotation])
-      .changeTextAdapterConfig("limit", { start: props.annotation.start, end: props.annotation.end });
-  }
+  props.view.view.initViewer();
 });
 
-watch(
-  () => props.text,
-  (newValue) => {
-    annotatedText.setText(newValue);
-  },
-);
-
-watch(
-  () => props.annotation,
-  (newVal) => {
-    annotatedText.setAnnotations([newVal]).changeTextAdapterConfig("limit", { start: newVal.start, end: newVal.end });
-  },
-);
-
 onUnmounted(() => {
-  annotatedText?.destroy();
+  props.view.view?.destroy();
 });
 </script>

@@ -1,4 +1,4 @@
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { cloneDeep } from "lodash-es";
 import { AnnotationRepository } from "../data-access/annotationRepository";
 import type { ModifiedAnnotation, RuleAnnotation } from "../types/Annotation";
@@ -20,8 +20,9 @@ export class AnnotationStore {
 
   private id!: number | string;
   private text: string = "";
-  private readonly annotations = ref<Map<string, ModifiedAnnotation>>(new Map());
-  public readonly annotationValues = computed(() => Array.from(this.annotations.value.values()));
+  // private readonly annotations = ref<Map<string, ModifiedAnnotation>>(new Map());
+  private readonly annotations = new Map<string, ModifiedAnnotation>();
+  public readonly annotationValues = computed(() => Array.from(this.annotations.values()));
 
   async getAnnotation(id: string | number) {
     this.reset();
@@ -51,8 +52,8 @@ export class AnnotationStore {
     }
   }
 
-  private reset() {
-    this.annotations.value.clear();
+  public reset() {
+    this.annotations.clear();
   }
 
   private checkForDuplicates(modifiedAnnotations: ModifiedAnnotation[]) {
@@ -74,57 +75,37 @@ export class AnnotationStore {
 
     if (!annotationObj) return null;
 
-    this.annotations.value.set(annotation.id as unknown as string, annotationObj);
+    this.annotations.set(annotation.id as unknown as string, annotationObj);
 
     return annotationObj;
   }
 
-  public async debugRule(annotation: RuleAnnotation) {
-    const annotationObj = this.annotationRuleSets.runRules(annotation, true);
+  public async debugRule(annotationId: string) {
+    const annotation = this.annotations.get(annotationId)!;
+    const annotationObj = this.annotationRuleSets.runRules(annotation.original, true);
 
     if (!annotationObj) return null;
 
     return annotationObj;
   }
 
-  public processAnnotation({ end, start, id }: UpdateAnnotation) {
-    const ann = this.annotations.value.get(id)!;
-    const { processed } = ann;
-
-    processed.end = end;
-    processed.start = start;
-  }
-
-  public modifyAnnotation({ start, end, id }: UpdateAnnotation) {
-    const ann = this.annotations.value.get(id)!;
-    const { processed, modified } = ann;
-
-    if (!modified) {
-      ann.modified = cloneDeep(processed);
-    }
-
-    ann.modified!.end = end;
-    ann.modified!.start = start;
-  }
-
   private async confirmAnnotationLocal(id: string, confirm: ConfirmAnnotationType) {
-    const ann = this.annotations.value.get(id)!;
-    const processed = confirm === "modified" ? cloneDeep(ann.modified!) : cloneDeep(ann.original);
+    const ann = this.annotations.get(id)!;
+    const processed = confirm === "modified" ? cloneDeep(ann.processed!) : cloneDeep(ann.original);
 
-    ann.saving = true;
-    ann.error = false;
+    ann.saving.value = true;
+    ann.error.value = false;
     await this.updateAnnotation(processed).catch((e) => {
       console.error(e);
-      ann.saving = false;
-      ann.error = true;
+      ann.saving.value = false;
+      ann.error.value = true;
 
       throw Error(e);
     });
 
-    ann.modified = null;
+    ann.isModified = false;
     ann.hasOverride = true;
     ann.processed = processed;
-
     return ann;
   }
 
@@ -140,22 +121,23 @@ export class AnnotationStore {
   }
 
   public async deleteAnnotation(id: string) {
-    const original = this.annotations.value.get(id)!;
-    original.saving = true;
-    original.error = false;
+    const annotation = this.annotations.get(id)!;
+    annotation.saving.value = true;
+    annotation.error.value = false;
 
-    await this.updateAnnotation(original.processed, true).catch((e) => {
+    await this.updateAnnotation(annotation.processed, true).catch((e) => {
       console.error(e);
-      original.saving = false;
-      original.error = true;
+      annotation.saving.value = false;
+      annotation.error.value = true;
 
       throw Error(e);
     });
+    this.annotations.delete(id);
 
-    this.annotations.value.delete(id);
-
-    const oldIds = this.duplicateRule.removeAnnotation(original.processed);
+    const oldIds = this.duplicateRule.removeAnnotation(annotation.processed);
     oldIds.forEach((ann) => this.updateDuplicates(ann));
+
+    return annotation;
   }
 
   private updateAnnotation(annotation: RuleAnnotation, is_deleted = false) {
@@ -169,7 +151,7 @@ export class AnnotationStore {
   }
 
   private updateDuplicates(annotation: RuleAnnotation) {
-    const original = this.annotations.value.get(annotation.id);
+    const original = this.annotations.get(annotation.id);
     if (original) original.duplicates = this.duplicateRule.hasDuplicate(annotation);
   }
 
@@ -180,7 +162,7 @@ export class AnnotationStore {
 
     await Promise.all(promises);
 
-    this.checkForDuplicates(Array.from(this.annotations.value.values()));
+    this.checkForDuplicates(Array.from(this.annotations.values()));
   }
 
   public reviewDone() {
