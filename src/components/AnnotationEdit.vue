@@ -86,7 +86,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { TrashIcon } from "@heroicons/vue/16/solid";
 import AnnotationMetadata from "./AnnotationMetadata.vue";
 import AnnotationEditItem from "./AnnotationEditItem.vue";
@@ -148,8 +148,4 @@ const onHighlight = () => {
 const onHighlightAnnotation = () => {
   emit("highlightAnnotation");
 };
-
-onUnmounted(() => {
-  props.view.destroy(props.id);
-});
 </script>
