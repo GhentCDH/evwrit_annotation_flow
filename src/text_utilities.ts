@@ -109,8 +109,8 @@ export function shiftToAnnotationMetaDataText(
     //use the annotation text to determine end char index
     //console.log("fixes",[filteredIndexes[0],filteredIndexes[0] + annotationText.length]);
     return {
-      start: filteredIndexes[0],
-      end: filteredIndexes[0] + annotationText.length - 1,
+      start: filteredIndexes[0]!,
+      end: filteredIndexes[0]! + annotationText.length - 1,
       modified: true,
     };
   }

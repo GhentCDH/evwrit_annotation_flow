@@ -21,7 +21,7 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
-    "@ghentcdh/annotated-text": "^0.7.7",
+    "@ghentcdh/annotated-text": "^0.7.9",
     "@heroicons/vue": "^2.2.0",
     "@rollup/rollup-linux-arm64-gnu": "^4.52.4",
     "@vueuse/core": "^13.9.0",

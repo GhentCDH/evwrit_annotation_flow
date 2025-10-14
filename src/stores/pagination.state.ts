@@ -30,7 +30,7 @@ export const usePaginationStore = defineStore("paginationStore", () => {
   const firstId = computedAsync(async () => {
     const { ascending, orderBy } = searchStore.sort;
     const ids = await repository.paginate(searchStore.filterValues, 1, 1, orderBy, ascending);
-    return ids[0];
+    return ids[0]!;
   });
 
   const totalRecords = computedAsync(async () => {
