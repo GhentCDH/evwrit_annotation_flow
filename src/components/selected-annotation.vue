@@ -1,6 +1,6 @@
 <template>
-  <div :id="view.view.viewerId"></div>
-  <AnnotationMetadata :annotation="view.view.annotation.original" />
+  <div :id="view.viewerId"></div>
+  <AnnotationMetadata :annotation="view.annotation.original" />
 </template>
 
 <script setup lang="ts">
@@ -9,14 +9,14 @@ import AnnotationMetadata from "./AnnotationMetadata.vue";
 import type { SingleAnnotationView } from "../stores/annotation-viewer.ts";
 
 const props = defineProps<{
-  view: { id: number; view: SingleAnnotationView };
+  view: SingleAnnotationView;
 }>();
 
 onMounted(() => {
-  props.view.view.initViewer();
+  props.view.initViewer();
 });
 
 onUnmounted(() => {
-  props.view.view?.destroy();
+  props.view.destroy();
 });
 </script>

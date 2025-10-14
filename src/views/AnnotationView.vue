@@ -30,8 +30,8 @@
       <AnnotationTextCompare :annotation-view="annotationStore.annotationViewer.completeTextView" />
     </div>
     <div :class="[` border p-4`, { 'w-1/3': !showMetadata, 'w-1/2': showMetadata }]">
-      <div class="card border mb-2 p-2" v-for="annotation in highlightAnnotations" :key="annotation.id">
-        <SelectedAnnotation :view="annotation" />
+      <div class="card border mb-2 p-2" v-for="annotationView in highlightAnnotations" :key="annotationView.id">
+        <SelectedAnnotation :view="annotationView" />
       </div>
       <div class="flex flex-row gap-2">
         <div>
@@ -78,7 +78,7 @@ const highlightAnnotations = computed(() => {
   if (ids.length === 0) return null;
   const notModifiedAnnotations = ids.filter((id) => !annotationStore.modifiedIds.some((aId) => aId === id));
 
-  return notModifiedAnnotations.map((id) => ({ id, view: annotationStore.annotationViewer.getView(id) }));
+  return notModifiedAnnotations.map((id) => annotationStore.annotationViewer.getView(id));
 });
 
 const showRuleModifiedAnnotations = () => {

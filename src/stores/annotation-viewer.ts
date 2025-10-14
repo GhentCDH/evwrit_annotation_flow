@@ -34,7 +34,7 @@ export class AnnotationView {
     }
 
     this.readonlyView.setAnnotations(this.originalAnnotations ?? []);
-    this.readonlyView.on("double-click", (data) => this.dblClickCallback(data.data.annotation));
+    this.readonlyView.on("double-click", (data: any) => this.dblClickCallback(data.data.annotation));
     return this.readonlyView;
   }
 
@@ -52,8 +52,8 @@ export class AnnotationView {
       // Delay to ensure the component is fully initialized
       this.editView
         ?.setAnnotations(this.updatedAnnotations ?? [])
-        .on("annotation-edit--move", (data) => this.moveCallback(data.data.annotation))
-        .on("double-click", (data) => this.dblClickCallback(data.data.annotation));
+        .on("annotation-edit--move", (data: any) => this.moveCallback(data.data.annotation))
+        .on("double-click", (data: any) => this.dblClickCallback(data.data.annotation));
     }, 200);
     return this.editView;
   }
@@ -290,15 +290,12 @@ export class AnnotationViewer {
 
   modifiedViews = computed(() =>
     this.displayModified.value.map((id) => {
-      return {
-        id,
-        view: this.getView(id),
-      };
+      return this.getView(id);
     }),
   );
 
   getView(annotationId: string) {
-    return this.views.get(annotationId);
+    return this.views.get(annotationId) as SingleAnnotationView;
   }
 
   reset() {

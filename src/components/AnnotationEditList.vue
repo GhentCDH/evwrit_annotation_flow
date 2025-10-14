@@ -13,24 +13,24 @@
     </div>
     <ul class="flex flex-col gap-2 overflow-auto">
       <li
-        v-for="annotation in views"
-        :key="annotation.id"
-        :data-annotation="annotation.id"
-        :ref="`annotation-${annotation.id}`"
-        :data-highlight="annotation.id"
+        v-for="view in views"
+        :key="view.id"
+        :data-annotation="view.id"
+        :ref="`annotation-${view.id}`"
+        :data-highlight="view.id"
       >
         <AnnotationEdit
-          v-if="annotation.view"
-          :view="annotation.view"
+          v-if="view"
+          :view="view"
           :showMetadata="showMetadata"
-          :selected="annotationSelected.get(annotation.id)"
-          :highlight="highlightIds.includes(annotation.id)"
-          @confirmAnnotation="confirmAnnotation(annotation, $event)"
-          @deleteAnnotation="deleteAnnotation(annotation)"
-          @changeSelected="onChangeSelected(annotation.id, $event)"
+          :selected="annotationSelected.get(view.id)"
+          :highlight="highlightIds.includes(view.id)"
+          @confirmAnnotation="confirmAnnotation(view, $event)"
+          @deleteAnnotation="deleteAnnotation(view)"
+          @changeSelected="onChangeSelected(view.id, $event)"
           @onHighlight="highlight"
         />
-        <div v-if="!annotation.view">Annotation view is loading ....</div>
+        <div v-if="!view">Annotation view is loading ....</div>
       </li>
     </ul>
     <hr />
@@ -53,7 +53,7 @@ const highlightIds: Ref<string[]> = ref([]);
 interface AnnotationEditListProps {
   highlightAnnotationIds: string[];
   showMetadata: boolean;
-  views: { id: string; view: SingleAnnotationView }[];
+  views: SingleAnnotationView[];
 }
 
 const annotationSelected: Ref<Map<string, ConfirmAnnotationType>> = ref(new Map());
