@@ -154,14 +154,6 @@ export class SingleAnnotationView extends AnnotationView {
     super.setUpdatedAnnotations([this.annotation.processed]);
   }
 
-  private setUpdatedAnnotations(annotations: RuleAnnotation[]) {
-    return super.setUpdatedAnnotations(annotations);
-  }
-
-  private setOriginalAnnotations(annotations: RuleAnnotation[]) {
-    return super.setOriginalAnnotations(annotations);
-  }
-
   public updateAnnotation(annotation: RuleAnnotation): this {
     this.displayEdit = true;
     this.setLimit();
@@ -172,7 +164,7 @@ export class SingleAnnotationView extends AnnotationView {
 }
 
 export class AnnotationViewer {
-  public completeTextView = new AnnotationView(
+  public readonly completeTextView = new AnnotationView(
     `annotation-text-viewer`,
     (annotation) => this.updateSingleView(annotation),
     (annotation) => this.dblClick(annotation),

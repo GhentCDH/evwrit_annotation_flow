@@ -1,4 +1,4 @@
-import type { Annotation } from "@ghentcdh/annotated-text";
+import type { Annotation, AnnotationColor } from "@ghentcdh/annotated-text";
 import type { Ref } from "vue";
 
 export const annotationTypes = [
@@ -27,7 +27,7 @@ export interface RuleAnnotation extends Annotation {
   id: string;
   start: number;
   end: number;
-  class?: string;
+  color?: AnnotationColor;
   label?: string;
   target: AnnotationTarget;
   type?: AnnotationType;

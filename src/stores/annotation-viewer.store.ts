@@ -14,7 +14,7 @@ export const useAnnotationStoreViewer = defineStore("useAnnotationStoreViewer" +
   const id = ref(Number(route.params.id));
   const highlightAnnotationIds = ref<string[]>([]);
 
-  const changeId = (newId: string | number) => {
+  const changeId = (newId: string) => {
     id.value = newId;
     return router.push({ name: "annotation", params: { id: newId }, query: route.query });
   };

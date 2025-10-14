@@ -13,10 +13,9 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
-import { AnnotationView } from "../stores/annotation-viewer";
 
 interface AnnotationTextCompareProps {
-  annotationView: AnnotationView;
+  annotationView: any;
 }
 
 const props = defineProps<AnnotationTextCompareProps>();

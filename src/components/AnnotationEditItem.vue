@@ -49,15 +49,11 @@ const changeSelected = () => {
   emit("changeSelected");
 };
 
-let annotatedText: SingleAnnotationView;
-//#region edit annotations
-
 onMounted(() => {
   props.annotationView.init(props.viewId);
 });
 
 onUnmounted(() => {
-  annotatedText?.destroy();
   props.annotationView?.destroy(props.viewId);
 });
 </script>
