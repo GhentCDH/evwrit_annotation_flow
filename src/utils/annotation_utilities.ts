@@ -67,7 +67,7 @@ export class AnnotationRuleSet implements AnnotationRule {
     const appliedRules: string[] = [];
 
     const applyRule = (ruleIndex: number) => {
-      const rule = this.rules[ruleIndex];
+      const rule = this.rules[ruleIndex]!;
       const ruleResult = rule.apply(annotation);
       log("\t -- apply: ", rule.name, ruleResult.rule_applied);
       if (ruleResult.rule_applied) {

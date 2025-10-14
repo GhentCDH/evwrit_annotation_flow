@@ -1,30 +1,18 @@
 <template>
-  <div v-if="annotation">
+  <div>
     <label class="label cursor-pointer gap-2">
       <input
-        v-if="annotation"
         type="radio"
-        :name="annotation.id"
+        :name="annotationView?.id"
         class="radio radio-success"
         :disabled="disabled"
         :checked="selectedAnnotation"
         @click="changeSelected"
       />
       <div class="w-full">
-        <!-- Originele annotatie -->
-        <AnnotatedText
-          :annotations="[annotation]"
-          :lines="getAnnotatedLines(textLines, annotation.start, annotation.end).lines"
-          :allow-edit="allowEdit ?? false"
-          :listen-to-on-update-start="true"
-          :listen-to-on-updating="true"
-          @annotation-update-begin="onAnnotationUpdateBegin"
-          @annotation-updating="onAnnotationUpdating"
-          @annotation-update-end="onAnnotationUpdateEnd"
-        />
+        <div :id="viewId" />
       </div>
       <button
-        v-if="annotation"
         :disabled="disabled"
         class="btn btn-xs btn-circle text-gray-500 btn-ghost tooltip tooltip-left z-[9999]"
         :data-tip="tip"
@@ -37,25 +25,21 @@
 </template>
 
 <script setup lang="ts">
-import { AnnotatedText, type Line, UpdateAnnotationState } from "@ghentcdh/vue-component-annotated-text";
-import { pick } from "lodash-es";
+import { onMounted, onUnmounted } from "vue";
 import SaveIcon from "./SaveIcon.vue";
-import type { RuleAnnotation } from "../types/Annotation";
-import { getAnnotatedLines } from "../utils/annotation_utils";
-import { WordSnapper } from "../lib/snapper";
+import { SingleAnnotationView } from "../stores/annotation-viewer";
 
 interface AnnotationEditProps {
-  annotation: RuleAnnotation;
   tip: string;
   selectedAnnotation: boolean;
   disabled: boolean;
-  textLines: Line[];
   allowEdit?: boolean;
-  snapper?: WordSnapper;
+  annotationView: SingleAnnotationView;
+  viewId: string;
 }
 
 const props = defineProps<AnnotationEditProps>();
-const emit = defineEmits(["confirmAnnotation", "changeSelected", "modifyAnnotations", "processesAnnotation"]);
+const emit = defineEmits(["confirmAnnotation", "changeSelected"]);
 
 const confirmAnnotation = () => {
   emit("confirmAnnotation");
@@ -65,32 +49,11 @@ const changeSelected = () => {
   emit("changeSelected");
 };
 
-//#region edit annotations
+onMounted(() => {
+  props.annotationView.init(props.viewId);
+});
 
-// AnnotatedText event handlers
-const fixOffset = function (updateState: UpdateAnnotationState) {
-  const result = props.snapper!.fixOffset(updateState.newStart, updateState.newEnd);
-  updateState.newStart = result.start;
-  updateState.newEnd = result.end;
-
-  if (result.modified) {
-    emit("modifyAnnotations", { ...result, id: updateState.annotation.id });
-  }
-};
-
-const onAnnotationUpdateBegin = function (updateState: UpdateAnnotationState) {
-  fixOffset(updateState);
-
-  updateState.confirmStartUpdating();
-};
-const onAnnotationUpdating = function (updateState: UpdateAnnotationState) {
-  fixOffset(updateState);
-
-  updateState.confirmUpdate();
-};
-const onAnnotationUpdateEnd = function (updateState: UpdateAnnotationState) {
-  emit("processesAnnotation", pick(updateState.annotation, ["id", "start", "end"]));
-};
-
-// #endregion
+onUnmounted(() => {
+  props.annotationView?.destroy(props.viewId);
+});
 </script>

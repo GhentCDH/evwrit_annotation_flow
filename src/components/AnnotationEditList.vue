@@ -13,33 +13,24 @@
     </div>
     <ul class="flex flex-col gap-2 overflow-auto">
       <li
-        v-for="annotation in modifiedAnnotations"
-        :key="annotation.id"
-        :data-annotation="annotation.id"
-        :ref="`annotation-${annotation.id}`"
+        v-for="view in views"
+        :key="view.id"
+        :data-annotation="view.id"
+        :ref="`annotation-${view.id}`"
+        :data-highlight="view.id"
       >
-        <Lazy>
-          <AnnotationEdit
-            :annotation="annotation.modified!"
-            :originalAnnotation="annotation.original"
-            :textLines="textLines"
-            :selected="annotationSelected.get(annotation.id)"
-            :duplicates="annotation.duplicates"
-            :highlight="highlightIds.includes(annotation.id)"
-            :appliedRules="annotation.appliedRules"
-            :disabled="annotation.saving"
-            :error="annotation.error"
-            :showMetadata="showMetadata"
-            :snapper="snapper"
-            @confirmAnnotation="confirmAnnotation"
-            @deleteAnnotation="deleteAnnotation"
-            @changeSelected="onChangeSelected"
-            @onHighlight="highlight"
-            @highlightAnnotation="emit('highlightAnnotation', $event)"
-            @modifyAnnotations="emit('modifyAnnotations', $event)"
-            @processesAnnotation="emit('processesAnnotation', $event)"
-          />
-        </Lazy>
+        <AnnotationEdit
+          v-if="view"
+          :view="view"
+          :showMetadata="showMetadata"
+          :selected="annotationSelected.get(view.id)"
+          :highlight="highlightIds.includes(view.id)"
+          @confirmAnnotation="confirmAnnotation(view, $event)"
+          @deleteAnnotation="deleteAnnotation(view)"
+          @changeSelected="onChangeSelected(view.id, $event)"
+          @onHighlight="highlight"
+        />
+        <div v-if="!view">Annotation view is loading ....</div>
       </li>
     </ul>
     <hr />
@@ -53,42 +44,37 @@
 
 <script setup lang="ts">
 import { type Ref, ref, watch } from "vue";
-import { type Line } from "@ghentcdh/vue-component-annotated-text";
 import AnnotationEdit from "./AnnotationEdit.vue";
-import Lazy from "./LazyComponent.vue";
-import type { ModifiedAnnotation, RuleAnnotation } from "../types/Annotation";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
-import { WordSnapper } from "../lib/snapper";
+import { SingleAnnotationView } from "../stores/annotation-viewer.ts";
 
 const highlightIds: Ref<string[]> = ref([]);
 
 interface AnnotationEditListProps {
-  modifiedAnnotations: ModifiedAnnotation[];
-  textLines: Line[];
   highlightAnnotationIds: string[];
   showMetadata: boolean;
-  snapper?: WordSnapper;
+  views: SingleAnnotationView[];
 }
 
 const annotationSelected: Ref<Map<string, ConfirmAnnotationType>> = ref(new Map());
 
-const { modifiedAnnotations, highlightAnnotationIds } = defineProps<AnnotationEditListProps>();
+const props = defineProps<AnnotationEditListProps>();
 
 watch(
-  () => highlightAnnotationIds,
+  () => props.highlightAnnotationIds,
   (newVal) => {
     highlight(newVal);
   },
 );
 
-const onChangeSelected = function (annotation: RuleAnnotation, selected: ConfirmAnnotationType) {
-  if (!selected) annotationSelected.value.delete(annotation.id);
-  else annotationSelected.value.set(annotation.id, selected);
+const onChangeSelected = function (annotationId: string, selected: ConfirmAnnotationType) {
+  if (!selected) annotationSelected.value.delete(annotationId);
+  else annotationSelected.value.set(annotationId, selected);
 };
 
 const selectAll = (type: ConfirmAnnotationType) => {
-  modifiedAnnotations.forEach((annotation) => {
-    onChangeSelected(annotation.original, type);
+  props.views.forEach((view) => {
+    onChangeSelected(view.id, type);
   });
 };
 
@@ -97,9 +83,6 @@ const emit = defineEmits([
   "confirmAnnotations",
   "confirmAnnotation",
   "deleteAnnotation",
-  "modifyAnnotations",
-  "processesAnnotation",
-  "highlightAnnotation",
   "needsAttention",
   "reviewDone",
 ]);
@@ -109,10 +92,10 @@ const confirmSelectedAnnotations = () => {
 };
 
 // Button event handlers
-const confirmAnnotation = (annotation: RuleAnnotation, type: ConfirmAnnotationType) => {
+const confirmAnnotation = (annotation: { id: string }, type: ConfirmAnnotationType) => {
   emit("confirmAnnotation", annotation.id, type);
 };
-const deleteAnnotation = (annotation: RuleAnnotation) => {
+const deleteAnnotation = (annotation: { id: string }) => {
   emit("deleteAnnotation", annotation.id);
 };
 

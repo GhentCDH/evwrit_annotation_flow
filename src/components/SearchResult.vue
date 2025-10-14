@@ -152,11 +152,13 @@ const calculatePages = (value: SearchResultProps) => {
   };
 
   const filteredPages = Array.from({ length: totalInc }).map((_, idx) => pageObj(idx + startIndex));
-  if (filteredPages[0]?.page > 2) filteredPages.unshift(createDummy(-1));
-  if (filteredPages[0]?.page !== 1) filteredPages.unshift(pageObj(1));
+  const firstPage = filteredPages[0]?.page ?? 1;
+  if (firstPage > 2) filteredPages.unshift(createDummy(-1));
+  if (firstPage !== 1) filteredPages.unshift(pageObj(1));
 
-  if (filteredPages[filteredPages.length - 1]?.page < totalPages - 1) filteredPages.push(createDummy(-2));
-  if (filteredPages[filteredPages.length - 1]?.page !== totalPages) filteredPages.push(pageObj(totalPages));
+  const lastPage = filteredPages[filteredPages.length - 1]?.page ?? totalPages;
+  if (lastPage < totalPages - 1) filteredPages.push(createDummy(-2));
+  if (lastPage !== totalPages) filteredPages.push(pageObj(totalPages));
 
   pages.value = filteredPages.flat();
 };

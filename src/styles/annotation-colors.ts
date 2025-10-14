@@ -1,7 +1,6 @@
-import { createAnnotationColors } from "@ghentcdh/vue-component-annotated-text";
+import { createAnnotationColors } from "@ghentcdh/annotated-text";
 import type { AnnotationType } from "../types/Annotation";
 
-// FIXME after update @ghentcdh/vue-component-annotated-text
 type AnnotationColor = any;
 
 export const annotationHtmlColors: Partial<Record<AnnotationType, string>> = {

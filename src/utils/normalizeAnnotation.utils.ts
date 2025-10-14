@@ -30,7 +30,7 @@ export const normalizeProperties = (type: AnnotationType, properties: Properties
   return (
     Object.keys(properties)
       // .filter(key => key.startsWith(`${type}_`))
-      .map((key) => normalizeProperty(type, key, properties[key]))
+      .map((key) => normalizeProperty(type, key, properties[key]!))
       .filter((p) => !!p) as RuleAnnotationProperty[]
   );
 };

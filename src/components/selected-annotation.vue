@@ -1,20 +1,22 @@
 <template>
-  <AnnotatedText
-    :annotations="[annotation]"
-    :lines="getAnnotatedLines(textLines, annotation.start, annotation.end).lines"
-    :allow-edit="false"
-  />
-  <AnnotationMetadata :annotation="annotation" />
+  <div :id="view.viewerId"></div>
+  <AnnotationMetadata :annotation="view.annotation.original" />
 </template>
 
 <script setup lang="ts">
-import { AnnotatedText, type Line } from "@ghentcdh/vue-component-annotated-text";
+import { onMounted, onUnmounted } from "vue";
 import AnnotationMetadata from "./AnnotationMetadata.vue";
-import { getAnnotatedLines } from "../utils/annotation_utils";
-import type { RuleAnnotation } from "@/types/Annotation";
+import type { SingleAnnotationView } from "../stores/annotation-viewer.ts";
 
-defineProps<{
-  textLines: Line[];
-  annotation: RuleAnnotation;
+const props = defineProps<{
+  view: SingleAnnotationView;
 }>();
+
+onMounted(() => {
+  props.view.initViewer();
+});
+
+onUnmounted(() => {
+  props.view.destroy();
+});
 </script>

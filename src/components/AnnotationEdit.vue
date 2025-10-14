@@ -3,6 +3,7 @@
     <div
       class="card border rounded-md w-full"
       :class="{ 'border-black': highlight, shadow: highlight, 'opacity-20': disabled }"
+      v-if="view"
     >
       <div class="card-body p-2">
         <div role="alert" class="alert alert-error" v-if="error">Annotatie niet bewaard, probeer opnieuw.</div>
@@ -13,14 +14,14 @@
               :style="getColor()"
               @click="onHighlightAnnotation"
             >
-              {{ originalAnnotation.type }}
+              {{ view.annotation.original.type }}
             </button>
             <button
-              v-if="duplicates.length > 1"
+              v-if="view.annotation.duplicates.length > 1"
               class="badge badge-sm badge-warning cursor-pointer"
               @click="onHighlight()"
             >
-              Duplicaat? ({{ originalAnnotation.id }})
+              Duplicaat? ({{ view.id }})
             </button>
           </div>
           <div class="flex gap-2">
@@ -34,97 +35,86 @@
             </button>
           </div>
         </div>
-        <div>
-          <div class="annotation-body">
-            <AnnotationEditItem
-              v-if="annotation"
-              :annotation="annotation"
-              tip="Bewaar gewijzigde annotatie"
-              :selected-annotation="selectedAnnotation === 'modified'"
-              :disabled="disabled"
-              :text-lines="textLines"
-              :allow-edit="true"
-              :snapper="snapper"
-              @change-selected="changeSelected('modified')"
-              @confirm-annotation="confirmAnnotation('modified')"
-              @modifyAnnotations="emit('modifyAnnotations', $event)"
-              @processesAnnotation="emit('processesAnnotation', $event)"
-            />
-            <hr />
-            <AnnotationEditItem
-              :annotation="originalAnnotation"
-              tip="Bewaar originele annotatie"
-              :selected-annotation="selectedAnnotation === 'original'"
-              :disabled="disabled"
-              :text-lines="textLines"
-              @change-selected="changeSelected('original')"
-              @confirm-annotation="confirmAnnotation('original')"
-            />
-          </div>
-          <div class="flex items-center">
-            <ul class="flex-grow">
-              <li class="badge badge-xs" v-for="rule in appliedRules" :key="rule">{{ rule }}</li>
-            </ul>
-            <router-link
-              class="badge badge-info badge-xs badge-outline tooltip tooltip-left"
-              data-tip="Info over regels"
-              :to="{ name: 'docs' }"
-              target="_blank"
-            >
-              i
-            </router-link>
-          </div>
-          <p class="pt-2 text-sm text-gray-400">
-            <strong class="underline">LineLinguisticCharacteristic:</strong>
-            {{ originalAnnotation.metadata?.lineLinguisticCharacteristic }}
-          </p>
+
+        <div class="annotation-body">
+          <AnnotationEditItem
+            v-if="view.displayEdit"
+            :annotation-view="view"
+            :view-id="view.editId"
+            tip="Bewaar gewijzigde annotatie"
+            :selected-annotation="selectedAnnotation === 'modified'"
+            :disabled="disabled"
+            :allow-edit="true"
+            @change-selected="changeSelected('modified')"
+            @confirm-annotation="confirmAnnotation('modified')"
+          />
+          <hr />
+          <AnnotationEditItem
+            :annotation-view="view"
+            :annotationId="view.id"
+            :view-id="view.viewerId"
+            tip="Bewaar originele annotatie"
+            :selected-annotation="selectedAnnotation === 'original'"
+            :disabled="disabled"
+            @change-selected="changeSelected('original')"
+            @confirm-annotation="confirmAnnotation('original')"
+          />
         </div>
+        <div class="flex items-center">
+          <ul class="flex-grow">
+            <li class="badge badge-xs" v-for="rule in view.annotation.appliedRules" :key="rule">{{ rule }}</li>
+          </ul>
+          <router-link
+            class="badge badge-info badge-xs badge-outline tooltip tooltip-left"
+            data-tip="Info over regels"
+            :to="{ name: 'docs' }"
+            target="_blank"
+          >
+            i
+          </router-link>
+        </div>
+        <p class="pt-2 text-sm text-gray-400">
+          <strong class="underline">LineLinguisticCharacteristic:</strong>
+          {{ view.metadata?.lineLinguisticCharacteristic }}
+        </p>
       </div>
     </div>
     <div v-if="showMetadata">
-      <AnnotationMetadata :annotation="originalAnnotation" />
+      <AnnotationMetadata :annotation="view.annotation.original" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed, ref, watch } from "vue";
 import { TrashIcon } from "@heroicons/vue/16/solid";
-import { type Line } from "@ghentcdh/vue-component-annotated-text";
-import { ref, watch } from "vue";
-import AnnotationEditItem from "./AnnotationEditItem.vue";
 import AnnotationMetadata from "./AnnotationMetadata.vue";
-import type { AnnotationType, RuleAnnotation } from "../types/Annotation";
-import { annotationHtmlColors } from "../styles/annotation-colors";
+import AnnotationEditItem from "./AnnotationEditItem.vue";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
-import { WordSnapper } from "../lib/snapper";
+import { SingleAnnotationView } from "../stores/annotation-viewer.ts";
+import { annotationHtmlColors } from "../styles/annotation-colors.ts";
+import type { AnnotationType } from "@/types/Annotation.ts";
 
 const selectedAnnotation = ref<ConfirmAnnotationType>();
 
 interface AnnotationEditProps {
-  annotation?: RuleAnnotation;
-  originalAnnotation: RuleAnnotation;
-  appliedRules: string[];
-  textLines: Line[];
   selected: ConfirmAnnotationType;
-  duplicates: string[];
   highlight: boolean;
-  disabled: boolean;
-  error: boolean;
   showMetadata: boolean;
-  snapper?: WordSnapper;
+  view: SingleAnnotationView;
 }
 
 const props = defineProps<AnnotationEditProps>();
-const { originalAnnotation } = props;
 const emit = defineEmits([
   "confirmAnnotation",
   "deleteAnnotation",
   "changeSelected",
   "onHighlight",
-  "modifyAnnotations",
-  "processesAnnotation",
   "highlightAnnotation",
 ]);
+
+const error = computed(() => props.view.annotation.error.value);
+const disabled = computed(() => props.view.annotation.error.value || props.view.annotation.saving.value);
 
 watch(
   () => props.selected,
@@ -134,28 +124,28 @@ watch(
 );
 
 const confirmAnnotation = (type: ConfirmAnnotationType) => {
-  emit("confirmAnnotation", originalAnnotation, type);
+  emit("confirmAnnotation", type);
 };
 
 const deleteAnnotation = () => {
-  emit("deleteAnnotation", originalAnnotation);
+  emit("deleteAnnotation");
 };
 
 const getColor = () => {
-  const type = originalAnnotation.type as AnnotationType;
+  const type = props.view.annotation.original.type as AnnotationType;
   return `--text-color-custom:${annotationHtmlColors[type]}`;
 };
 
 const changeSelected = (type: ConfirmAnnotationType) => {
   selectedAnnotation.value = type === selectedAnnotation.value ? null : type;
-  emit("changeSelected", originalAnnotation, type);
+  emit("changeSelected", type);
 };
 
 const onHighlight = () => {
-  emit("onHighlight", props.duplicates);
+  emit("onHighlight", props.view.annotation.duplicates);
 };
 
 const onHighlightAnnotation = () => {
-  emit("highlightAnnotation", props.originalAnnotation);
+  emit("highlightAnnotation");
 };
 </script>

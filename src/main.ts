@@ -1,4 +1,4 @@
-import "@ghentcdh/vue-component-annotated-text/style.css";
+import "@ghentcdh/annotated-text/annotated-text.css";
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";

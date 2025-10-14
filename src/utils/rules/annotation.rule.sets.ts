@@ -1,3 +1,4 @@
+import { ref } from "vue";
 import type { AnnotationRuleResult } from "./annotation.rule";
 import { AnnotationRuleSet, SanitizeAnnotationRule, TokenizeRule } from "../annotation_utilities";
 import type { AnnotationType, ModifiedAnnotation, RuleAnnotation } from "../../types/Annotation";
@@ -92,19 +93,20 @@ export class AnnotationRuleSets {
   public runRules(normalizedAnnotations: RuleAnnotation, debug = false): ModifiedAnnotation | null {
     const resultAnnotation = this._applyRules(normalizedAnnotations, debug);
 
-    const processedAnnotion = resultAnnotation.rule_applied ? resultAnnotation.annotation : normalizedAnnotations;
+    const processedAnnotation = resultAnnotation.rule_applied ? resultAnnotation.annotation : normalizedAnnotations;
 
     if (resultAnnotation.rule_applied)
-      processedAnnotion.color = annotationHighlightColors[processedAnnotion.type as AnnotationType];
+      processedAnnotation.color = annotationHighlightColors[processedAnnotation.type as AnnotationType];
 
     return {
       id: normalizedAnnotations.id,
-      processed: processedAnnotion,
+      processed: processedAnnotation,
       original: normalizedAnnotations,
-      modified: resultAnnotation.rule_applied ? resultAnnotation.annotation : null,
+      isModified: resultAnnotation.rule_applied,
+      // modified: resultAnnotation.rule_applied ? resultAnnotation.annotation : null,
       appliedRules: resultAnnotation.appliedRules,
-      saving: false,
-      error: false,
+      saving: ref(false),
+      error: ref(false),
     } as ModifiedAnnotation;
   }
 }
