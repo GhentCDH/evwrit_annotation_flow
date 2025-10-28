@@ -110,80 +110,11 @@ export function shiftToAnnotationMetaDataText(
     //console.log("fixes",[filteredIndexes[0],filteredIndexes[0] + annotationText.length]);
     return {
       start: filteredIndexes[0]!,
-      end: filteredIndexes[0]! + annotationText.length - 1,
+      end: filteredIndexes[0]! + annotationText.length,
       modified: true,
     };
   }
 
   //no single clear acceptable result
   return { start: annotationStartCharIndex, end: annotationStopCharIndex, modified: false };
-}
-
-/**
- * this function changes the stop index and/or start index of the annotation to match
- * a word boundry in the given text. The text is tokenized with https://github.com/rse/tokenizr
- * @param text The text to use for word boundries
- * @param annotationStartCharIndex The unfixed character start index.
- * @param annotationStopCharIndex The unfixed character stop index.
- * @returns An array in three parts: the fixed start and stop index and a boolean
- * representing if a nearby word boundry has been found.
- */
-export function shiftToWordBoundary(
-  text: string,
-  annotationStartCharIndex: number,
-  annotationStopCharIndex: number,
-  max_shift: number,
-): AnnotationFix {
-  //max shift dependent on annotation length (with a min of two characters)
-  //shift goes in two directions -2 to +2 characters
-  const maxAnnotationIndexShift = max_shift;
-
-  // Create two maps:
-  // one with the character index of each starting word
-  // one with the character index of the end of each word
-  const mapStartCharIndexToToken: { [index: number]: number } = {};
-  const mapStopCharIndexToToken: { [index: number]: number } = {};
-
-  tokenize(text).forEach((token: any) => {
-    mapStartCharIndexToToken[token["pos"]] = token;
-    mapStopCharIndexToToken[token["pos"] + token["value"].length - 1] = token;
-  });
-
-  let newAnnotationStartCharIndex = -1;
-  let newAnnotationStopCharIndex = -1;
-
-  //search for closest token start or stop index by shifting the start and stop indexes and
-  //doing a lookup in the maps.
-  for (let shift = 0; shift < maxAnnotationIndexShift; shift++) {
-    if (newAnnotationStartCharIndex == -1 && mapStartCharIndexToToken[annotationStartCharIndex + shift])
-      newAnnotationStartCharIndex = annotationStartCharIndex + shift;
-
-    if (newAnnotationStartCharIndex == -1 && mapStartCharIndexToToken[annotationStartCharIndex - shift])
-      newAnnotationStartCharIndex = annotationStartCharIndex - shift;
-
-    if (newAnnotationStopCharIndex == -1 && mapStopCharIndexToToken[annotationStopCharIndex + shift])
-      newAnnotationStopCharIndex = annotationStopCharIndex + shift;
-    if (newAnnotationStopCharIndex == -1 && mapStopCharIndexToToken[annotationStopCharIndex - shift])
-      newAnnotationStopCharIndex = annotationStopCharIndex - shift;
-  }
-
-  //return if the start or stop have been modified
-  let fixed = true;
-  let fixedStart = true;
-  let fixedStop = true;
-
-  //no word boundry found in range at start
-  if (newAnnotationStartCharIndex == -1) {
-    newAnnotationStartCharIndex = annotationStartCharIndex;
-    fixedStart = false;
-  }
-
-  //no word boundry found in range at stop
-  if (newAnnotationStopCharIndex == -1) {
-    newAnnotationStopCharIndex = annotationStopCharIndex;
-    fixedStop = false;
-  }
-  fixed = fixedStart || fixedStop;
-
-  return { start: newAnnotationStartCharIndex, end: newAnnotationStopCharIndex, modified: fixed };
 }
