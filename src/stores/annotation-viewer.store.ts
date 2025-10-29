@@ -26,7 +26,6 @@ export const useAnnotationStoreViewer = defineStore("useAnnotationStoreViewer" +
       if (newIdInt && id.value !== newIdInt) changeId(newIdInt);
     },
   );
-
   const scrollTo = (annotationId: string) => {
     const elementSelector = `[data-highlight="${annotationId}"]`;
     const element = document.querySelector(elementSelector);
@@ -43,6 +42,7 @@ export const useAnnotationStoreViewer = defineStore("useAnnotationStoreViewer" +
   const annotationViewer = new AnnotationViewer(
     (annotationId) => scrollTo(annotationId),
     (annotationId) => debugRUle(annotationId),
+    route.query.debug === "true",
   );
   let annotationStore = new AnnotationStore();
 

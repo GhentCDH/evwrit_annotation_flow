@@ -20,6 +20,7 @@ export class AnnotationView {
     idPrefix: string,
     private readonly moveCallback: (annotation: RuleAnnotation) => void,
     private readonly dblClickCallback: (annotation: RuleAnnotation) => void,
+    private readonly debugMode: boolean,
   ) {
     const uuid = uuidv4();
     this.viewerId = `${idPrefix}--viewer--${uuid}`;
@@ -27,7 +28,7 @@ export class AnnotationView {
   }
 
   initViewer() {
-    this.readonlyView = createAnnotatedTextComponent(this.viewerId, this.text, { edit: false });
+    this.readonlyView = createAnnotatedTextComponent(this.viewerId, this.text, { edit: false }, this.debugMode);
 
     if (this.limit) {
       this.changeLimit(this.limit.start, this.limit.end);
@@ -44,7 +45,7 @@ export class AnnotationView {
   }
 
   initEditor() {
-    this.editView = createAnnotatedTextComponent(this.editId, this.text, { edit: true });
+    this.editView = createAnnotatedTextComponent(this.editId, this.text, { edit: true }, false);
     if (this.limit) {
       this.editView.changeTextAdapterConfig("limit", this.limit);
     }
@@ -121,7 +122,7 @@ export class SingleAnnotationView extends AnnotationView {
     moveCallback: (annotation: RuleAnnotation) => void,
     doubleClickCallback: (annotation: RuleAnnotation) => void,
   ) {
-    super(`annotated-text-edit-item`, moveCallback, doubleClickCallback);
+    super(`annotated-text-edit-item`, moveCallback, doubleClickCallback, false);
     this.setLimit();
     super.setOriginalAnnotations([annotation.original]);
     super.setUpdatedAnnotations([annotation.processed]);
@@ -164,11 +165,7 @@ export class SingleAnnotationView extends AnnotationView {
 }
 
 export class AnnotationViewer {
-  public readonly completeTextView = new AnnotationView(
-    `annotation-text-viewer`,
-    (annotation) => this.updateSingleView(annotation),
-    (annotation) => this.dblClick(annotation),
-  );
+  public readonly completeTextView: AnnotationView;
   private views = new Map<string, SingleAnnotationView>();
   private text!: string;
   private annotations: ModifiedAnnotation[] = [];
@@ -181,7 +178,15 @@ export class AnnotationViewer {
   constructor(
     private readonly highlightCallback: (annotationId: string) => void,
     private readonly debugLine: (annotationId: string) => void,
-  ) {}
+    private readonly debugMode: boolean,
+  ) {
+    this.completeTextView = new AnnotationView(
+      `annotation-text-viewer`,
+      (annotation) => this.updateSingleView(annotation),
+      (annotation) => this.dblClick(annotation),
+      debugMode,
+    );
+  }
 
   updateText(text: string) {
     this.text = text;
