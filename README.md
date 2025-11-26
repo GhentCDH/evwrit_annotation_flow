@@ -90,3 +90,9 @@ The following packages are used for development:
     - Currently, the application doesn't properly handle the right-to-left reading order for Arabic texts. There should
       be an option allowing users to switch to right-to-left (RTL) text alignment when working with Arabic or other RTL
       languages, ensuring correct display and interaction with annotations. As example the text with id 3.
+
+## Credits
+
+Development by [Ghent Centre for Digital Humanities - Ghent University](https://www.ghentcdh.ugent.be/). Funded by the [GhentCDH research projects](https://www.ghentcdh.ugent.be/projects).
+
+<img src="https://www.ghentcdh.ugent.be/ghentcdh_logo_blue_text_transparent_bg_landscape.svg" alt="Landscape" width="500">
