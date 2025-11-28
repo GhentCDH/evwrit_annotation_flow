@@ -1,8 +1,7 @@
 import { cloneDeep, pick } from "lodash-es";
 import type { AnnotationRule, AnnotationRuleResult } from "./rules/annotation.rule";
+import { ShiftToWordBoundary } from "./rules/shiftToWordBoundary.ts";
 import { type AnnotationType, type RuleAnnotation } from "../types/Annotation";
-
-import { shiftToWordBoundary } from "../text_utilities";
 
 /**
  * Makes sure the indexes are valid:  0 >= index < text.length
@@ -26,7 +25,7 @@ export class SanitizeAnnotationRule implements AnnotationRule {
       fixedAnnotation.start = 0;
     }
     if (annotation.end >= this.text.length) {
-      fixedAnnotation.end = this.text.length - 1;
+      fixedAnnotation.end = this.text.length;
     }
     const changed = annotation.start != fixedAnnotation.start || annotation.end != fixedAnnotation.end;
 
@@ -105,6 +104,7 @@ export class TokenizeRule implements AnnotationRule {
   name: string;
   text: string;
   max_shift: number;
+  private shiftToWordBoundary = new ShiftToWordBoundary();
 
   /**
    *
@@ -116,6 +116,7 @@ export class TokenizeRule implements AnnotationRule {
     this.name = "tokenize_rule";
     this.text = text;
     this.max_shift = max_shift;
+    this.shiftToWordBoundary.setText(text);
   }
 
   apply(annotation: RuleAnnotation): AnnotationRuleResult {
@@ -124,14 +125,16 @@ export class TokenizeRule implements AnnotationRule {
     if (max_shift < 0) {
       max_shift = 2 + Math.floor((annotation.end - annotation.start) / 3);
     }
-    const result = shiftToWordBoundary(this.text, annotation.start, annotation.end, max_shift);
-    if (result.modified) {
+    const result = this.shiftToWordBoundary.apply(annotation, max_shift);
+
+    // const result = shiftToWordBoundary(this.text, annotation.start, annotation.end, max_shift);
+    if (result) {
       fixedAnnotation.start = result.start;
       fixedAnnotation.end = result.end;
     }
     return {
       annotation: fixedAnnotation,
-      rule_applied: result.modified,
+      rule_applied: !!result,
     };
   }
 }
