@@ -1,5 +1,6 @@
-import type { AnnotationStyle ,
+import {
   type AnnotatedText,
+  type AnnotationStyle,
   createAnnotatedText,
   TextLineAdapter,
   WordSnapper,
