@@ -3,21 +3,28 @@
     <div class="card-title flex justify-between">
       <div class="flex-grow">Aangepaste Annotaties</div>
       <div class="gap-2 text-right">
-        <button class="btn btn-xs btn-outline text-gray-500" @click="selectAll('modified')">
+        <button
+          class="btn btn-xs btn-outline text-gray-500"
+          @click="selectAll('modified')"
+        >
           Selecteer alle aangepaste
         </button>
-        <button class="btn btn-xs btn-outline text-gray-500" @click="selectAll('original')">
+        <button
+          class="btn btn-xs btn-outline text-gray-500"
+          @click="selectAll('original')"
+        >
           Selecteer alle originele
         </button>
       </div>
     </div>
-    <ul class="flex flex-col gap-2 overflow-auto">
+    <ul class="overflow-auto">
       <li
         v-for="view in views"
         :key="view.id"
         :data-annotation="view.id"
         :ref="`annotation-${view.id}`"
         :data-highlight="view.id"
+        class="mb-2 block"
       >
         <AnnotationEdit
           v-if="view"
@@ -35,9 +42,13 @@
     </ul>
     <hr />
     <div class="flex justify-end gap-2">
-      <button class="btn" @click="emit('needsAttention')">Text heeft extra aandacht nodig</button>
+      <button class="btn" @click="emit('needsAttention')">
+        Text heeft extra aandacht nodig
+      </button>
       <button class="btn" @click="emit('reviewDone')">Text Verwerkt</button>
-      <button class="btn" @click="confirmSelectedAnnotations">Bevestig Selectie</button>
+      <button class="btn" @click="confirmSelectedAnnotations">
+        Bevestig Selectie
+      </button>
     </div>
   </div>
 </template>
@@ -56,7 +67,9 @@ interface AnnotationEditListProps {
   views: SingleAnnotationView[];
 }
 
-const annotationSelected: Ref<Map<string, ConfirmAnnotationType>> = ref(new Map());
+const annotationSelected: Ref<Map<string, ConfirmAnnotationType>> = ref(
+  new Map(),
+);
 
 const props = defineProps<AnnotationEditListProps>();
 
@@ -67,7 +80,10 @@ watch(
   },
 );
 
-const onChangeSelected = function (annotationId: string, selected: ConfirmAnnotationType) {
+const onChangeSelected = function (
+  annotationId: string,
+  selected: ConfirmAnnotationType,
+) {
   if (!selected) annotationSelected.value.delete(annotationId);
   else annotationSelected.value.set(annotationId, selected);
 };
@@ -92,7 +108,10 @@ const confirmSelectedAnnotations = () => {
 };
 
 // Button event handlers
-const confirmAnnotation = (annotation: { id: string }, type: ConfirmAnnotationType) => {
+const confirmAnnotation = (
+  annotation: { id: string },
+  type: ConfirmAnnotationType,
+) => {
   emit("confirmAnnotation", annotation.id, type);
 };
 const deleteAnnotation = (annotation: { id: string }) => {

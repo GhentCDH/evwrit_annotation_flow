@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { TokenizeRule } from "../../annotation_utilities";
+import { TokenizeRule } from "../tokenizeRule";
 
 describe("TokenizeRule", () => {
   describe("Basic boundary alignment tests", () => {
@@ -9,14 +9,25 @@ describe("TokenizeRule", () => {
       ${"exact word boundaries mid-text"} | ${"Hello world test"} | ${6}       | ${11}     | ${5}     | ${6}          | ${11}       | ${false}
       ${"start at beginning"}             | ${"Hello world"}      | ${0}       | ${3}      | ${5}     | ${0}          | ${5}        | ${true}
       ${"end at text end"}                | ${"Hello world"}      | ${8}       | ${11}     | ${5}     | ${6}          | ${11}       | ${true}
-    `("$description", ({ text, startIndex, stopIndex, maxShift, expectedStart, expectedEnd, expectedModified }) => {
-      const rule = new TokenizeRule(text, maxShift);
-      const result = rule.apply({ start: startIndex, end: stopIndex } as any); // Dummy annotation object
+    `(
+      "$description",
+      ({
+        text,
+        startIndex,
+        stopIndex,
+        maxShift,
+        expectedStart,
+        expectedEnd,
+        expectedModified,
+      }) => {
+        const rule = new TokenizeRule(text, maxShift);
+        const result = rule.apply({ start: startIndex, end: stopIndex } as any); // Dummy annotation object
 
-      expect(result.annotation.start).toBe(expectedStart);
-      expect(result.annotation.end).toBe(expectedEnd);
-      expect(result.rule_applied).toBe(expectedModified);
-    });
+        expect(result.annotation.start).toBe(expectedStart);
+        expect(result.annotation.end).toBe(expectedEnd);
+        expect(result.rule_applied).toBe(expectedModified);
+      },
+    );
   });
 
   describe("Shift direction tests", () => {
@@ -27,14 +38,25 @@ describe("TokenizeRule", () => {
       ${"start needs backward shift -1"} | ${"Hello world test"} | ${7}       | ${11}     | ${5}     | ${6}          | ${11}       | ${true}
       ${"end needs backward shift -1"}   | ${"Hello world test"} | ${6}       | ${12}     | ${5}     | ${6}          | ${11}       | ${true}
       ${"both need shifting"}            | ${"Hello world test"} | ${1}       | ${4}      | ${5}     | ${0}          | ${5}        | ${true}
-    `("$description", ({ text, startIndex, stopIndex, maxShift, expectedStart, expectedEnd, expectedModified }) => {
-      const rule = new TokenizeRule(text, maxShift);
-      const result = rule.apply({ start: startIndex, end: stopIndex } as any); // Dummy annotation object
+    `(
+      "$description",
+      ({
+        text,
+        startIndex,
+        stopIndex,
+        maxShift,
+        expectedStart,
+        expectedEnd,
+        expectedModified,
+      }) => {
+        const rule = new TokenizeRule(text, maxShift);
+        const result = rule.apply({ start: startIndex, end: stopIndex } as any); // Dummy annotation object
 
-      expect(result.annotation.start).toBe(expectedStart);
-      expect(result.annotation.end).toBe(expectedEnd);
-      expect(result.rule_applied).toBe(expectedModified);
-    });
+        expect(result.annotation.start).toBe(expectedStart);
+        expect(result.annotation.end).toBe(expectedEnd);
+        expect(result.rule_applied).toBe(expectedModified);
+      },
+    );
   });
 
   describe("Max shift boundary tests", () => {
@@ -45,14 +67,25 @@ describe("TokenizeRule", () => {
       ${"beyond max shift - no fix possible"} | ${"Hellowworld test"} | ${3}       | ${4}      | ${1}     | ${3}          | ${4}        | ${false}
       ${"max shift 0 - exact match"}          | ${"Hello world"}      | ${0}       | ${5}      | ${0}     | ${0}          | ${5}        | ${false}
       ${"max shift 0 - no match"}             | ${"Hello world"}      | ${1}       | ${4}      | ${0}     | ${1}          | ${4}        | ${false}
-    `("$description", ({ text, startIndex, stopIndex, maxShift, expectedStart, expectedEnd, expectedModified }) => {
-      const rule = new TokenizeRule(text, maxShift);
-      const result = rule.apply({ start: startIndex, end: stopIndex } as any); // Dummy annotation object
+    `(
+      "$description",
+      ({
+        text,
+        startIndex,
+        stopIndex,
+        maxShift,
+        expectedStart,
+        expectedEnd,
+        expectedModified,
+      }) => {
+        const rule = new TokenizeRule(text, maxShift);
+        const result = rule.apply({ start: startIndex, end: stopIndex } as any); // Dummy annotation object
 
-      expect(result.annotation.start).toBe(expectedStart);
-      expect(result.annotation.end).toBe(expectedEnd);
-      expect(result.rule_applied).toBe(expectedModified);
-    });
+        expect(result.annotation.start).toBe(expectedStart);
+        expect(result.annotation.end).toBe(expectedEnd);
+        expect(result.rule_applied).toBe(expectedModified);
+      },
+    );
   });
 
   describe.skip("Ancient Greek and papyri-specific tests", () => {
@@ -100,20 +133,32 @@ describe("TokenizeRule", () => {
       ${"Greek with shift needed"}          | ${"φιλανθρω-2.[π-  .. τ]ῶν"}                  | ${2}       | ${8}      | ${5}     | ${0}          | ${9}        | ${true}
       ${"Bracket text shift"}               | ${"[πρὸς Ῥ]οῦφον"}                            | ${1}       | ${9}      | ${5}     | ${0}          | ${10}       | ${true}
       ${"Underdot text shift"}              | ${"τ]α̣σ̣χὼν τὴν"}                              | ${2}       | ${5}      | ${5}     | ${0}          | ${6}        | ${true}
-    `("$description", ({ text, startIndex, stopIndex, maxShift, expectedStart, expectedEnd, expectedModified }) => {
-      const rule = new TokenizeRule(text, maxShift);
-      const result = rule.apply({ start: startIndex, end: stopIndex } as any);
+    `(
+      "$description",
+      ({
+        text,
+        startIndex,
+        stopIndex,
+        maxShift,
+        expectedStart,
+        expectedEnd,
+        expectedModified,
+      }) => {
+        const rule = new TokenizeRule(text, maxShift);
+        const result = rule.apply({ start: startIndex, end: stopIndex } as any);
 
-      expect(text.substring(expectedStart, expectedEnd)).toBe(
-        text.substring(result.annotation.start, result.annotation.end),
-      );
-      expect(result.annotation.start).toBe(expectedStart);
-      expect(result.annotation.end).toBe(expectedEnd);
-      expect(result.rule_applied).toBe(expectedModified);
-    });
+        expect(text.substring(expectedStart, expectedEnd)).toBe(
+          text.substring(result.annotation.start, result.annotation.end),
+        );
+        expect(result.annotation.start).toBe(expectedStart);
+        expect(result.annotation.end).toBe(expectedEnd);
+        expect(result.rule_applied).toBe(expectedModified);
+      },
+    );
 
     it("handles full papyri line with all special characters", () => {
-      const text = "r 1.------ 1.[ - ca. 12 - 15]ω φιλανθρω-2.[π-  .. τ]ῶν λοιπῶν μηνῶν";
+      const text =
+        "r 1.------ 1.[ - ca. 12 - 15]ω φιλανθρω-2.[π-  .. τ]ῶν λοιπῶν μηνῶν";
       const rule = new TokenizeRule(text, 5);
       const result = rule.apply({ start: 10, end: 30 } as any);
       expect(result).toBeDefined();

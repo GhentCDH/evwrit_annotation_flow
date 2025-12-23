@@ -26,10 +26,16 @@ export class ShiftToWordBoundary extends WordSnapper {
     if (original.start < 0) return null;
     if (original.end > this.textLength) return null;
 
-    const modified = this.fixOffset("drag", { start: original.start, end: original.end } as any);
+    const modified = this.fixOffset({
+      start: original.start,
+      end: original.end,
+    } as any);
     if (!modified.modified) return null;
 
-    const validatePosition = (originalPos: number, newPosition: number | null) => {
+    const validatePosition = (
+      originalPos: number,
+      newPosition: number | null,
+    ) => {
       if (newPosition === null) return originalPos;
       if (Math.abs(newPosition - originalPos) <= maxShift) return newPosition;
 
@@ -51,7 +57,7 @@ export class ShiftToWordBoundary extends WordSnapper {
       let nextEnd = original.end + 1;
 
       while (nextEnd <= maxEnd && newEnd !== end) {
-        newEnd = this.mapStopCharIndexToToken[nextEnd] ?? original.end;
+        newEnd = this.snapStart(nextEnd) ?? original.end;
         end = validatePosition(original.end, newEnd);
         nextEnd += 1;
       }

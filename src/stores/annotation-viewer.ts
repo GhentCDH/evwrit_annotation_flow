@@ -1,9 +1,16 @@
-import { type AnnotatedText } from "@ghentcdh/annotated-text";
+import {
+  type AnnotatedText,
+  type AnnotationId,
+} from "@ghentcdh/annotated-text";
 import { v4 as uuidv4 } from "uuid";
 import { computed, ref } from "vue";
 import { createAnnotatedTextComponent } from "../components/createAnnotatedTextComponent.ts";
 import { filterAnnotations } from "../utils/filter.utils.ts";
-import type { AnnotationType, ModifiedAnnotation, RuleAnnotation } from "@/types/Annotation.ts";
+import type {
+  AnnotationType,
+  ModifiedAnnotation,
+  RuleAnnotation,
+} from "@/types/Annotation.ts";
 
 export class AnnotationView {
   public readonlyView!: AnnotatedText<RuleAnnotation> | null;
@@ -11,16 +18,24 @@ export class AnnotationView {
 
   protected text: string = "";
   private originalAnnotations: RuleAnnotation[] = [];
-  private updatedAnnotations: RuleAnnotation[] = [];
+  public updatedAnnotations: RuleAnnotation[] = [];
   private limit: { start: number; end: number } | null = null;
   public readonly viewerId: string;
   public readonly editId: string;
 
   constructor(
     idPrefix: string,
-    private readonly moveCallback: (annotation: RuleAnnotation) => void,
+    private readonly moveCallback: (
+      annotationUuid: AnnotationId,
+      annotation: RuleAnnotation,
+    ) => void,
+    private readonly moveEndCallback: (
+      moveId: AnnotationId,
+      annotation: RuleAnnotation,
+    ) => void,
     private readonly dblClickCallback: (annotation: RuleAnnotation) => void,
     private readonly debugMode: boolean,
+    private readonly showGutter: boolean,
   ) {
     const uuid = uuidv4();
     this.viewerId = `${idPrefix}--viewer--${uuid}`;
@@ -28,14 +43,22 @@ export class AnnotationView {
   }
 
   initViewer() {
-    this.readonlyView = createAnnotatedTextComponent(this.viewerId, this.text, { edit: false }, this.debugMode);
+    this.readonlyView = createAnnotatedTextComponent(
+      this.viewerId,
+      this.text,
+      { edit: false },
+      this.debugMode,
+      this.showGutter,
+    );
 
     if (this.limit) {
       this.changeLimit(this.limit.start, this.limit.end);
     }
 
     this.readonlyView.setAnnotations(this.originalAnnotations ?? []);
-    this.readonlyView.on("double-click", (data: any) => this.dblClickCallback(data.data.annotation));
+    this.readonlyView.on("double-click", (data: any) =>
+      this.dblClickCallback(data.data.annotation),
+    );
     return this.readonlyView;
   }
 
@@ -45,16 +68,33 @@ export class AnnotationView {
   }
 
   initEditor() {
-    this.editView = createAnnotatedTextComponent(this.editId, this.text, { edit: true }, false);
+    this.editView = createAnnotatedTextComponent(
+      this.editId,
+      this.text,
+      { edit: true },
+      this.debugMode,
+      this.showGutter,
+      (annotation) => annotation.id,
+    );
     if (this.limit) {
       this.editView.changeTextAdapterConfig("limit", this.limit);
     }
     setTimeout(() => {
+      let moveId: AnnotationId = null;
       // Delay to ensure the component is fully initialized
       this.editView
         ?.setAnnotations(this.updatedAnnotations ?? [])
-        .on("annotation-edit--move", (data: any) => this.moveCallback(data.data.annotation))
-        .on("double-click", (data: any) => this.dblClickCallback(data.data.annotation));
+        .on("annotation-edit--move", (event) => {
+          // Get the dummy id to put it here.
+          moveId = event.data.moveId;
+          this.moveCallback(event.data.moveId, event.data.annotation);
+        })
+        .on("annotation-edit--end", (event) => {
+          this.moveEndCallback(moveId, event.data.annotation);
+        })
+        .on("double-click", (data: any) =>
+          this.dblClickCallback(data.data.annotation),
+        );
     }, 200);
     return this.editView;
   }
@@ -102,12 +142,15 @@ export class AnnotationView {
   }
 
   updateAnnotation(annotation: RuleAnnotation) {
-    const index = this.updatedAnnotations.findIndex((a) => a.id === annotation.id);
+    const index = this.updatedAnnotations.findIndex(
+      (a) => a.id === annotation.id,
+    );
     if (index !== -1) {
       this.updatedAnnotations[index] = annotation;
     } else {
       this.updatedAnnotations.push(annotation);
     }
+
     this.editView?.setAnnotations(this.updatedAnnotations);
 
     return this;
@@ -119,11 +162,22 @@ export class SingleAnnotationView extends AnnotationView {
 
   constructor(
     public readonly annotation: ModifiedAnnotation,
-    moveCallback: (annotation: RuleAnnotation) => void,
+    moveCallback: (
+      annotationId: AnnotationId,
+      annotation: RuleAnnotation,
+    ) => void,
+    moveEndCallback: (moveId: AnnotationId, annotation: RuleAnnotation) => void,
     doubleClickCallback: (annotation: RuleAnnotation) => void,
   ) {
-    super(`annotated-text-edit-item`, moveCallback, doubleClickCallback, false);
-    this.setLimit();
+    super(
+      `annotated-text-edit-item`,
+      moveCallback,
+      moveEndCallback,
+      doubleClickCallback,
+      false,
+      false,
+    );
+    this.setLimit(annotation.original);
     super.setOriginalAnnotations([annotation.original]);
     super.setUpdatedAnnotations([annotation.processed]);
     this.displayEdit = this.annotation.isModified;
@@ -145,10 +199,17 @@ export class SingleAnnotationView extends AnnotationView {
     return this;
   }
 
-  private setLimit() {
-    const start = Math.min(this.annotation.original.start, this.annotation.processed.start);
-    const end = Math.max(this.annotation.original.end, this.annotation.processed.end);
-
+  public setLimit(startEnd: Pick<RuleAnnotation, "end" | "start">) {
+    const start = Math.min(
+      this.annotation.original.start,
+      this.annotation.processed.start,
+      startEnd?.start,
+    );
+    const end = Math.max(
+      this.annotation.original.end,
+      this.annotation.processed.end,
+      startEnd?.end,
+    );
     super.changeLimit(start, end);
 
     super.setOriginalAnnotations([this.annotation.original]);
@@ -157,7 +218,7 @@ export class SingleAnnotationView extends AnnotationView {
 
   public updateAnnotation(annotation: RuleAnnotation): this {
     this.displayEdit = true;
-    this.setLimit();
+    this.setLimit(annotation);
     super.updateAnnotation(this.annotation.processed);
 
     return this;
@@ -166,7 +227,7 @@ export class SingleAnnotationView extends AnnotationView {
 
 export class AnnotationViewer {
   public readonly completeTextView: AnnotationView;
-  private views = new Map<string, SingleAnnotationView>();
+  private views = new Map<AnnotationId, SingleAnnotationView>();
   private text!: string;
   private annotations: ModifiedAnnotation[] = [];
   private showOnlyDuplicates: boolean = false;
@@ -176,15 +237,19 @@ export class AnnotationViewer {
   public displayModified = ref([] as string[]);
 
   constructor(
-    private readonly highlightCallback: (annotationId: string) => void,
-    private readonly debugLine: (annotationId: string) => void,
+    private readonly highlightCallback: (annotationId: AnnotationId) => void,
+    private readonly debugLine: (annotationId: AnnotationId) => void,
     private readonly debugMode: boolean,
   ) {
     this.completeTextView = new AnnotationView(
       `annotation-text-viewer`,
-      (annotation) => this.updateSingleView(annotation),
+      (annotationId: AnnotationId, annotation) =>
+        this.updateSingleView(annotationId, annotation),
+      (moveId: AnnotationId, annotation) =>
+        this.endAddSingleView(moveId, annotation),
       (annotation) => this.dblClick(annotation),
       debugMode,
+      true,
     );
   }
 
@@ -218,8 +283,10 @@ export class AnnotationViewer {
       return this;
     }
 
-    const selectedFilters = filters.selectedFilters ?? this.selectedFilters ?? [];
-    const showOnlyDuplicates = filters.showOnlyDuplicates ?? this.showOnlyDuplicates;
+    const selectedFilters =
+      filters.selectedFilters ?? this.selectedFilters ?? [];
+    const showOnlyDuplicates =
+      filters.showOnlyDuplicates ?? this.showOnlyDuplicates;
     const showModified = filters.showModified ?? this.showModified;
 
     const hasChanged =
@@ -257,9 +324,13 @@ export class AnnotationViewer {
     const original = filtered.map((a) => a.original);
     const processed = filtered.map((a) => a.processed);
 
-    this.displayModified.value = filtered.filter((a) => a.isModified || a.duplicates.length > 1).map((a) => a.id);
+    this.displayModified.value = filtered
+      .filter((a) => a.isModified || a.duplicates.length > 1)
+      .map((a) => a.id);
 
-    this.completeTextView.setOriginalAnnotations(original).setUpdatedAnnotations(processed);
+    this.completeTextView
+      .setOriginalAnnotations(original)
+      .setUpdatedAnnotations(processed);
 
     return this;
   }
@@ -270,12 +341,18 @@ export class AnnotationViewer {
     });
   }
 
-  private registerAnnotationView(annotationId: string, annotation: ModifiedAnnotation) {
+  private registerAnnotationView(
+    annotationId: string,
+    annotation: ModifiedAnnotation,
+  ) {
     const view =
       this.views.get(annotationId) ??
       new SingleAnnotationView(
         annotation,
-        (annotation) => this.updateCompleteView(annotation),
+        (annotationId, annotation) =>
+          this.updateCompleteView(annotationId, annotation),
+        (annotationId, annotation) =>
+          this.endUpdateCompleteView(annotationId, annotation),
         () => this.debugLine(annotationId),
       );
 
@@ -315,19 +392,66 @@ export class AnnotationViewer {
     find.processed = annotation;
     find.isModified = true;
     if (!this.displayModified.value.includes(annotation.id)) {
-      this.displayModified.value = this.displayModified.value.concat([annotation.id]);
+      this.displayModified.value = this.displayModified.value.concat([
+        annotation.id,
+      ]);
     }
   }
 
-  private updateCompleteView(annotation: RuleAnnotation) {
-    this.completeTextView.updateAnnotation(annotation);
-    this.updateModified(annotation);
+  private updateCompleteView(
+    annotationUuid: AnnotationId,
+    annotation: RuleAnnotation,
+  ) {
+    this.updateEditView(this.completeTextView, annotation);
   }
 
-  private updateSingleView(annotation: RuleAnnotation) {
+  private updateEditView(view: AnnotationView, annotation: RuleAnnotation) {
+    let annotations = view.updatedAnnotations ?? [];
+    annotations = annotations.filter((a) => a.id !== annotation.id);
+    annotations.push(annotation);
+    view.setUpdatedAnnotations(annotations);
+  }
+
+  private updateEndEditView(
+    view: AnnotationView,
+    removeId: AnnotationId,
+    annotation: RuleAnnotation,
+  ) {
     this.updateModified(annotation);
+
+    let annotations = view.updatedAnnotations ?? [];
+    annotations = annotations.filter(
+      (a) => a.id !== annotation.id || a.id !== removeId,
+    );
+    annotations.push(annotation);
+    view.setUpdatedAnnotations(annotations);
+  }
+
+  private endUpdateCompleteView(
+    moveId: AnnotationId,
+    annotation: RuleAnnotation,
+  ) {
+    this.updateEndEditView(this.completeTextView, moveId, annotation);
+  }
+
+  private updateSingleView(
+    annotationId: AnnotationId,
+    annotation: RuleAnnotation,
+  ) {
     const view = this.views.get(annotation.id);
-    view?.updateAnnotation(annotation);
+
+    if (!view) return;
+
+    view.setLimit(annotation);
+    this.updateEditView(view, annotation);
+  }
+
+  private endAddSingleView(moveId: AnnotationId, annotation: RuleAnnotation) {
+    const view = this.views.get(annotation.id);
+
+    if (!view) return;
+    view.setLimit(annotation);
+    this.updateEndEditView(view, moveId, annotation);
   }
 
   private dblClick(annotation: RuleAnnotation) {

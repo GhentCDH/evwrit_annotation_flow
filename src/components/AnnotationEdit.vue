@@ -1,12 +1,23 @@
 <template>
-  <div :class="[`grid gap-2 `, { 'grid-cols-1': !showMetadata, 'grid-cols-2': showMetadata }]">
+  <div
+    :class="[
+      `grid gap-2 `,
+      { 'grid-cols-1': !showMetadata, 'grid-cols-2': showMetadata },
+    ]"
+  >
     <div
       class="card border rounded-md w-full"
-      :class="{ 'border-black': highlight, shadow: highlight, 'opacity-20': disabled }"
+      :class="{
+        'border-black': highlight,
+        shadow: highlight,
+        'opacity-20': disabled,
+      }"
       v-if="view"
     >
       <div class="card-body p-2">
-        <div role="alert" class="alert alert-error" v-if="error">Annotatie niet bewaard, probeer opnieuw.</div>
+        <div role="alert" class="alert alert-error" v-if="error">
+          Annotatie niet bewaard, probeer opnieuw.
+        </div>
         <div class="flex justify-between items-center">
           <div class="flex gap-2 justify-center">
             <button
@@ -36,7 +47,7 @@
           </div>
         </div>
 
-        <div class="annotation-body">
+        <div>
           <AnnotationEditItem
             v-if="view.displayEdit"
             :annotation-view="view"
@@ -62,7 +73,13 @@
         </div>
         <div class="flex items-center">
           <ul class="flex-grow">
-            <li class="badge badge-xs" v-for="rule in view.annotation.appliedRules" :key="rule">{{ rule }}</li>
+            <li
+              class="badge badge-xs"
+              v-for="rule in view.annotation.appliedRules"
+              :key="rule"
+            >
+              {{ rule }}
+            </li>
           </ul>
           <router-link
             class="badge badge-info badge-xs badge-outline tooltip tooltip-left"
@@ -80,7 +97,10 @@
       </div>
     </div>
     <div v-if="showMetadata">
-      <AnnotationMetadata :annotation="view.annotation.original" />
+      <AnnotationMetadata
+        :annotation="view.annotation.original"
+        :modified="view.annotation.processed"
+      />
     </div>
   </div>
 </template>
@@ -114,7 +134,9 @@ const emit = defineEmits([
 ]);
 
 const error = computed(() => props.view.annotation.error.value);
-const disabled = computed(() => props.view.annotation.error.value || props.view.annotation.saving.value);
+const disabled = computed(
+  () => props.view.annotation.error.value || props.view.annotation.saving.value,
+);
 
 watch(
   () => props.selected,

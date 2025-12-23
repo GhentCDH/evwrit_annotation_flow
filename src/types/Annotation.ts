@@ -1,4 +1,4 @@
-import type { Annotation, AnnotationColor } from "@ghentcdh/annotated-text";
+import type { Annotation } from "@ghentcdh/annotated-text";
 import type { Ref } from "vue";
 
 export const annotationTypes = [
@@ -24,12 +24,11 @@ export interface RuleAnnotationProperty {
 }
 
 export interface RuleAnnotation extends Annotation {
-  id: string;
+  id: string | number;
   start: number;
   end: number;
-  color?: AnnotationColor;
+  isModified: boolean;
   label?: string;
-  target: AnnotationTarget;
   type?: AnnotationType;
   weight?: number;
   text?: string;
@@ -38,12 +37,10 @@ export interface RuleAnnotation extends Annotation {
   properties: RuleAnnotationProperty[];
 }
 
-export type AnnotationTarget = "gutter" | "text";
-
 export type AnnotationMetaData = {
   text: string;
   index: number;
-  id: string;
+  id: string | number;
   lineLinguisticCharacteristic: string;
 };
 
