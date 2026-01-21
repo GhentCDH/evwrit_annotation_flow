@@ -1,4 +1,4 @@
-import type { Annotation } from "@ghentcdh/annotated-text";
+import type { Annotation, AnnotationId } from "@ghentcdh/annotated-text";
 import type { Ref } from "vue";
 
 export const annotationTypes = [
@@ -50,8 +50,8 @@ export type ModifiedAnnotation = {
   processed: RuleAnnotation;
   isModified: boolean;
   hasOverride: boolean;
-  duplicates: string[];
-  appliedRules: string[];
+  duplicates: AnnotationId[];
+  appliedRules: AnnotationId[];
   saving: Ref<boolean>;
   error: Ref<boolean>;
 };

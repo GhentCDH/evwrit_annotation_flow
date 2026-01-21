@@ -24,7 +24,7 @@
     "release:major": "npm version major && git push && git push --tags"
   },
   "dependencies": {
-    "@ghentcdh/annotated-text": "^0.12.19",
+    "@ghentcdh/annotated-text": "^0.12.20",
     "@heroicons/vue": "^2.2.0",
     "@rollup/rollup-linux-arm64-gnu": "^4.52.4",
     "@vueuse/core": "^13.9.0",

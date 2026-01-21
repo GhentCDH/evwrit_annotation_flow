@@ -55,14 +55,15 @@
 
 <script setup lang="ts">
 import { type Ref, ref, watch } from "vue";
+import type { AnnotationId } from "@ghentcdh/annotated-text";
 import AnnotationEdit from "./AnnotationEdit.vue";
 import type { ConfirmAnnotationType } from "../stores/annotation.store";
 import { SingleAnnotationView } from "../stores/annotation-viewer.ts";
 
-const highlightIds: Ref<string[]> = ref([]);
+const highlightIds: Ref<AnnotationId[]> = ref([]);
 
 interface AnnotationEditListProps {
-  highlightAnnotationIds: string[];
+  highlightAnnotationIds: AnnotationId[];
   showMetadata: boolean;
   views: SingleAnnotationView[];
 }
@@ -118,7 +119,7 @@ const deleteAnnotation = (annotation: { id: string }) => {
   emit("deleteAnnotation", annotation.id);
 };
 
-const highlight = (ids: string[]) => {
+const highlight = (ids: AnnotationId[]) => {
   highlightIds.value = ids;
 };
 //#endregion

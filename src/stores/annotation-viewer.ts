@@ -74,13 +74,13 @@ export class AnnotationView {
       { edit: true },
       this.debugMode,
       this.showGutter,
-      (annotation) => annotation.id,
+      (annotation) => annotation.id as string,
     );
     if (this.limit) {
       this.editView.changeTextAdapterConfig("limit", this.limit);
     }
     setTimeout(() => {
-      let moveId: AnnotationId = null;
+      let moveId: AnnotationId;
       // Delay to ensure the component is fully initialized
       this.editView
         ?.setAnnotations(this.updatedAnnotations ?? [])
@@ -234,7 +234,7 @@ export class AnnotationViewer {
   private showModified: boolean = false;
   private selectedFilters: AnnotationType[] = [];
 
-  public displayModified = ref([] as string[]);
+  public displayModified = ref([] as AnnotationId[]);
 
   constructor(
     private readonly highlightCallback: (annotationId: AnnotationId) => void,
@@ -368,7 +368,7 @@ export class AnnotationViewer {
     }),
   );
 
-  getView(annotationId: string) {
+  getView(annotationId: AnnotationId) {
     return this.views.get(annotationId) as SingleAnnotationView;
   }
 

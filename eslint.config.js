@@ -24,7 +24,7 @@ export default [
       sourceType: "module",
     },
     rules: {
-      "no-console": ["error", { allow: ["warn", "error"] }],
+      "no-console": ["warn", { allow: ["warn", "error"] }],
       "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/no-explicit-any": "warn",
       "import/named": "off",

@@ -17,7 +17,7 @@ export const useQueryParams = defineStore("query-params", () => {
     history.replaceState(
       null,
       "",
-      `${location.pathname}?${new URLSearchParams(query).toString()}`,
+      `${location.pathname}?${new URLSearchParams(query as any).toString()}`,
     );
   };
 

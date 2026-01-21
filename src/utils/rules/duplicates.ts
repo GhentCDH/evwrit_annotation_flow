@@ -1,3 +1,4 @@
+import type { AnnotationId } from "@ghentcdh/annotated-text";
 import type { RuleAnnotation } from "../../types/Annotation";
 
 const createDuplicateKey = (annotation: RuleAnnotation): string => {
@@ -7,9 +8,12 @@ const createDuplicateKey = (annotation: RuleAnnotation): string => {
 export class DuplicateRule {
   name: string = "Duplicate rule";
   // First value is a string of the value where a check is performed on
-  private readonly duplicateRuleSet = new Map<string, RuleAnnotation[]>();
+  private readonly duplicateRuleSet = new Map<AnnotationId, RuleAnnotation[]>();
   // First value is id of the annotation with duplicates
-  private readonly duplicates = new Map<string, { duplicates: string[]; duplicateKey: string }>();
+  private readonly duplicates = new Map<
+    AnnotationId,
+    { duplicates: AnnotationId[]; duplicateKey: AnnotationId }
+  >();
 
   /**
    *
@@ -33,11 +37,14 @@ export class DuplicateRule {
     return { key, annotations };
   }
 
-  private updateDuplicates(key: string, annotations: RuleAnnotation[]) {
+  private updateDuplicates(key: AnnotationId, annotations: RuleAnnotation[]) {
     if (annotations.length < 2) {
       annotations.forEach((annotation) => {
         this.duplicateRuleSet.delete(annotation.id);
-        this.duplicates.set(annotation.id, { duplicateKey: key, duplicates: [] });
+        this.duplicates.set(annotation.id, {
+          duplicateKey: key,
+          duplicates: [],
+        });
       });
       return;
     }
@@ -45,7 +52,10 @@ export class DuplicateRule {
     const ids = annotations.map((annotation) => annotation.id);
 
     annotations.forEach((annotation) => {
-      this.duplicates.set(annotation.id, { duplicateKey: key, duplicates: ids });
+      this.duplicates.set(annotation.id, {
+        duplicateKey: key,
+        duplicates: ids,
+      });
     });
   }
 
@@ -63,7 +73,10 @@ export class DuplicateRule {
   public removeAnnotation(annotation: RuleAnnotation): RuleAnnotation[] {
     const oldKey = this.duplicates.get(annotation.id)?.duplicateKey as string;
 
-    const oldAnnotations = this.duplicateRuleSet.get(oldKey)?.filter((a) => a.id !== annotation.id) ?? [];
+    const oldAnnotations =
+      this.duplicateRuleSet
+        .get(oldKey)
+        ?.filter((a) => a.id !== annotation.id) ?? [];
 
     this.duplicates.delete(annotation.id);
 
@@ -77,7 +90,10 @@ export class DuplicateRule {
 
   public updateAnnotation(annotation: RuleAnnotation) {
     const oldKey = this.duplicates.get(annotation.id)?.duplicateKey as string;
-    const oldAnnotations = this.duplicateRuleSet.get(oldKey)?.filter((a) => a.id !== annotation.id) ?? [];
+    const oldAnnotations =
+      this.duplicateRuleSet
+        .get(oldKey)
+        ?.filter((a) => a.id !== annotation.id) ?? [];
 
     this.duplicates.delete(annotation.id);
 
@@ -86,14 +102,17 @@ export class DuplicateRule {
       this.updateDuplicates(oldKey, oldAnnotations);
     }
 
-    const { key: newKey, annotations: updatedAnnotations } = this.addAnnotationToRules(annotation);
+    const { key: newKey, annotations: updatedAnnotations } =
+      this.addAnnotationToRules(annotation);
 
     this.updateDuplicates(newKey, updatedAnnotations);
 
     return oldAnnotations;
   }
 
-  public hasDuplicate(annotation: RuleAnnotation): string[] {
-    return this.duplicates.get(annotation.id)?.duplicates ?? ([] as string[]);
+  public hasDuplicate(annotation: RuleAnnotation): AnnotationId[] {
+    return (
+      this.duplicates.get(annotation.id)?.duplicates ?? ([] as AnnotationId[])
+    );
   }
 }

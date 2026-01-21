@@ -1,5 +1,6 @@
 import { computed } from "vue";
 import { cloneDeep } from "lodash-es";
+import type { AnnotationId } from "@ghentcdh/annotated-text";
 import { AnnotationRepository } from "../data-access/annotationRepository";
 import type { ModifiedAnnotation, RuleAnnotation } from "../types/Annotation";
 import { DuplicateRule } from "../utils/rules/duplicates";
@@ -21,8 +22,10 @@ export class AnnotationStore {
   private id!: number | string;
   private text: string = "";
   // private readonly annotations = ref<Map<string, ModifiedAnnotation>>(new Map());
-  private readonly annotations = new Map<string, ModifiedAnnotation>();
-  public readonly annotationValues = computed(() => Array.from(this.annotations.values()));
+  private readonly annotations = new Map<AnnotationId, ModifiedAnnotation>();
+  public readonly annotationValues = computed(() =>
+    Array.from(this.annotations.values()),
+  );
 
   async getAnnotation(id: string | number) {
     this.reset();
@@ -32,13 +35,20 @@ export class AnnotationStore {
       this.id = id;
       this.createRulesSet(text);
       console.group("Load annotations for ", id);
-      console.log("Totaal aantal annotaties", annotations.length, "textlengte", text.length);
+      console.log(
+        "Totaal aantal annotaties",
+        annotations.length,
+        "textlengte",
+        text.length,
+      );
       console.time(`process_${id}`);
 
       // TODO combine annotations original and modified from the backend!
 
       const annotationAppliedResults = (
-        await Promise.all(annotations.map((annotation: any) => this.applyRules(annotation)))
+        await Promise.all(
+          annotations.map((annotation: any) => this.applyRules(annotation)),
+        )
       ).filter((a) => !!a) as ModifiedAnnotation[];
 
       this.checkForDuplicates(annotationAppliedResults);
@@ -61,7 +71,9 @@ export class AnnotationStore {
     this.duplicateRule = new DuplicateRule(this.text, annotations);
 
     modifiedAnnotations.forEach((modifiedAnnotation) => {
-      modifiedAnnotation.duplicates = this.duplicateRule.hasDuplicate(modifiedAnnotation.processed);
+      modifiedAnnotation.duplicates = this.duplicateRule.hasDuplicate(
+        modifiedAnnotation.processed,
+      );
     });
   }
 
@@ -80,18 +92,27 @@ export class AnnotationStore {
     return annotationObj;
   }
 
-  public async debugRule(annotationId: string) {
+  public async debugRule(annotationId: AnnotationId) {
     const annotation = this.annotations.get(annotationId)!;
-    const annotationObj = this.annotationRuleSets.runRules(annotation.original, true);
+    const annotationObj = this.annotationRuleSets.runRules(
+      annotation.original,
+      true,
+    );
 
     if (!annotationObj) return null;
 
     return annotationObj;
   }
 
-  private async confirmAnnotationLocal(id: string, confirm: ConfirmAnnotationType) {
+  private async confirmAnnotationLocal(
+    id: AnnotationId,
+    confirm: ConfirmAnnotationType,
+  ) {
     const ann = this.annotations.get(id)!;
-    const processed = confirm === "modified" ? cloneDeep(ann.processed!) : cloneDeep(ann.original);
+    const processed =
+      confirm === "modified"
+        ? cloneDeep(ann.processed!)
+        : cloneDeep(ann.original);
 
     ann.saving.value = true;
     ann.error.value = false;
@@ -152,13 +173,16 @@ export class AnnotationStore {
 
   private updateDuplicates(annotation: RuleAnnotation) {
     const original = this.annotations.get(annotation.id);
-    if (original) original.duplicates = this.duplicateRule.hasDuplicate(annotation);
+    if (original)
+      original.duplicates = this.duplicateRule.hasDuplicate(annotation);
   }
 
   public async confirmAnnotations(confirm: Map<string, ConfirmAnnotationType>) {
     const promises: Array<Promise<ModifiedAnnotation>> = [];
 
-    confirm.forEach((value, key) => promises.push(this.confirmAnnotationLocal(key, value)));
+    confirm.forEach((value, key) =>
+      promises.push(this.confirmAnnotationLocal(key, value)),
+    );
 
     await Promise.all(promises);
 

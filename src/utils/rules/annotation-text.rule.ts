@@ -55,7 +55,7 @@ export function shiftToAnnotationMetaDataText(
   if (filteredIndexes.length == 1) {
     //use the annotation text to determine end char index
     //console.log("fixes",[filteredIndexes[0],filteredIndexes[0] + annotationText.length]);
-    const newStart = filteredIndexes[0];
+    const newStart = filteredIndexes[0]!;
     const newEnd = newStart + annotationText.length;
 
     return {
