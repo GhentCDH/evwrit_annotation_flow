@@ -3,7 +3,7 @@ import type { RuleAnnotation } from "../../../types/Annotation";
 import { AnnotationTextRule } from "../annotation-text.rule";
 
 const annotation1 = {
-  start: 10,
+  start: 9,
   end: 14,
   text: "test",
   metadata: {
@@ -18,9 +18,9 @@ const text = `this is a test text`;
 describe("AnnotationTextRule", () => {
   test.each`
     annotation     | rule_applied | start | end
-    ${annotation1} | ${true}      | ${10} | ${14}
+    ${annotation1} | ${true}      | ${11} | ${15}
   `(
-    "rule.hasDuplicate($annotation) -> rule_applied: $rule_applied, start: $start, end: $end",
+    "AnnotationTextRule($annotation) -> rule_applied: $rule_applied, start: $start, end: $end",
     ({
       annotation,
       rule_applied,
@@ -38,6 +38,10 @@ describe("AnnotationTextRule", () => {
       expect(result.rule_applied).toEqual(rule_applied);
       expect(result.annotation).toBeDefined();
       expect(result.annotation).not.toBe(annotation);
+
+      const selection = text.substring(start + 1, end + 1);
+      const origSelection = text.substring(annotation.start, annotation.end);
+      expect(origSelection).toEqual("__" + selection);
 
       if (!rule_applied) {
         return;
