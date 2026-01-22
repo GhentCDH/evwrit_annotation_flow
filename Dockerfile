@@ -13,8 +13,8 @@ COPY . .
 RUN pnpm run build
 
 FROM caddy:alpine
-COPY --from=builder /app/dist /usr/share/caddy
+COPY --from=builder /app/dist /usr/share/caddy/annotation_flow
 
-EXPOSE 80
+EXPOSE 9000
 
-CMD ["caddy", "file-server", "--root", "/usr/share/caddy", "--listen", ":80"]
+CMD ["caddy", "file-server", "--root", "/usr/share/caddy", "--listen", ":9000"]
