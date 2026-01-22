@@ -1,24 +1,21 @@
-ARG NODE_VERSION=20
-
-FROM node:${NODE_VERSION}-slim AS builder
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
-
-# Install dependencies
+FROM node:23-alpine AS builder
 WORKDIR /app
 
-COPY package*.json ./
-COPY pnpm*.json ./
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
-RUN rm -rf app/dist
-RUN corepack enable
-RUN corepack prepare pnpm --activate
+# Copy package files
+COPY package.json pnpm-lock.yaml* ./
+
+# Install dependencies (including dev dependencies)
 RUN pnpm install
 
-# copy project files and folders to the current working directory (i.e. 'app' folder)
 COPY . .
-
 RUN pnpm run build
 
-CMD npx vite serve --port 9000 /app/dist --host
+FROM caddy:alpine
+COPY --from=builder /app/dist /usr/share/caddy/annotation_flow
+COPY --from=builder /app/dist /usr/share/caddy
+
+EXPOSE 9000
+
+CMD ["caddy", "file-server", "--root", "/usr/share/caddy", "--listen", ":9000"]
