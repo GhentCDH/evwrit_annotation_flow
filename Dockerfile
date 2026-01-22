@@ -14,6 +14,7 @@ RUN pnpm run build
 
 FROM caddy:alpine
 COPY --from=builder /app/dist /usr/share/caddy/annotation_flow
+COPY --from=builder /app/dist /usr/share/caddy
 
 EXPOSE 9000
 
