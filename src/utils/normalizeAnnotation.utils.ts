@@ -1,6 +1,13 @@
-import { type AnnotationType, type RuleAnnotation, type RuleAnnotationProperty } from "../types/Annotation";
-import { annotationColors } from "../styles/annotation-colors";
-import type { AnnotationItem, Properties, Property } from "../types/annotation-response";
+import {
+  type AnnotationType,
+  type RuleAnnotation,
+  type RuleAnnotationProperty,
+} from "../types/Annotation";
+import type {
+  AnnotationItem,
+  Properties,
+  Property,
+} from "../types/annotation-response";
 
 export const normalizeProperty = (
   type: AnnotationType,
@@ -26,7 +33,10 @@ export const normalizeProperty = (
   };
 };
 
-export const normalizeProperties = (type: AnnotationType, properties: Properties): RuleAnnotationProperty[] => {
+export const normalizeProperties = (
+  type: AnnotationType,
+  properties: Properties,
+): RuleAnnotationProperty[] => {
   return (
     Object.keys(properties)
       // .filter(key => key.startsWith(`${type}_`))
@@ -35,7 +45,10 @@ export const normalizeProperties = (type: AnnotationType, properties: Properties
   );
 };
 
-export const normalizeAnnotation = (annotation: AnnotationItem, text: string): RuleAnnotation | null => {
+export const normalizeAnnotation = (
+  annotation: AnnotationItem,
+  text: string,
+): RuleAnnotation | null => {
   // const textLength = annotation.text_selection.selection_end - annotation.text_selection.selection_start;
 
   if (!annotation.text_selection) {
@@ -56,9 +69,7 @@ export const normalizeAnnotation = (annotation: AnnotationItem, text: string): R
     start: annotation.text_selection.selection_start,
     end: annotation.text_selection.selection_end,
     text: annotation.text_selection.text,
-    class: `annotation-${type}`,
     label: type,
-    target: annotationTarget,
     type: type,
     metadata: {
       text: selectedText,
@@ -66,8 +77,8 @@ export const normalizeAnnotation = (annotation: AnnotationItem, text: string): R
       index: annotation.id,
       lineLinguisticCharacteristic: annotation.text_selection.text,
     },
-    color: annotationColors[type],
     hasOverride: annotation.hasOverride,
     properties: normalizeProperties(type, annotation.properties),
-  } as unknown as RuleAnnotation;
+    isModified: false,
+  } as RuleAnnotation;
 };

@@ -1,9 +1,15 @@
 import { ref } from "vue";
 import type { AnnotationRuleResult } from "./annotation.rule";
-import { AnnotationRuleSet, SanitizeAnnotationRule, TokenizeRule } from "../annotation_utilities";
-import type { AnnotationType, ModifiedAnnotation, RuleAnnotation } from "../../types/Annotation";
+import { TokenizeRule } from "../rules/tokenizeRule";
+import {
+  AnnotationRuleSet,
+  SanitizeAnnotationRule,
+} from "../annotation_utilities";
+import type {
+  ModifiedAnnotation,
+  RuleAnnotation,
+} from "../../types/Annotation";
 import { normalizeAnnotation } from "../normalizeAnnotation.utils";
-import { annotationHighlightColors } from "../../styles/annotation-colors";
 import { AnnotationTextRule } from "../rules/annotation-text.rule";
 import type { AnnotationItem } from "@/types/annotation-response";
 
@@ -24,18 +30,48 @@ export class AnnotationRuleSets {
     const textRule = new AnnotationTextRule(text, 3);
     const sanitizeRule = new SanitizeAnnotationRule(text);
 
-    this.languageRuleSet = new AnnotationRuleSet("language", [sanitizeRule, tokenizeRule], true, true);
-    this.typographyRuleSet = new AnnotationRuleSet("typography", [sanitizeRule, textRule, tokenizeRule], true, true);
-    this.orthographyRuleSet = new AnnotationRuleSet("orthography", [sanitizeRule, tokenizeRule, textRule], true, true);
-    this.lexisRuleSet = new AnnotationRuleSet("lexis", [sanitizeRule, tokenizeRule], true, true);
+    this.languageRuleSet = new AnnotationRuleSet(
+      "language",
+      [sanitizeRule, tokenizeRule],
+      true,
+      true,
+    );
+    this.typographyRuleSet = new AnnotationRuleSet(
+      "typography",
+      [sanitizeRule, textRule, tokenizeRule],
+      true,
+      true,
+    );
+    this.orthographyRuleSet = new AnnotationRuleSet(
+      "orthography",
+      [sanitizeRule, tokenizeRule, textRule],
+      true,
+      true,
+    );
+    this.lexisRuleSet = new AnnotationRuleSet(
+      "lexis",
+      [sanitizeRule, tokenizeRule],
+      true,
+      true,
+    );
     this.morphoSyntacticalRuleSet = new AnnotationRuleSet(
       "morpho_syntactical",
       [sanitizeRule, textRule, tokenizeRule],
       true,
       false,
     );
-    this.handshiftRuleSet = new AnnotationRuleSet("handshift", [sanitizeRule, tokenizeRule], true, true);
-    this.defaultRuleSet = new AnnotationRuleSet("default", [sanitizeRule], true, false);
+    this.handshiftRuleSet = new AnnotationRuleSet(
+      "handshift",
+      [sanitizeRule, tokenizeRule],
+      true,
+      true,
+    );
+    this.defaultRuleSet = new AnnotationRuleSet(
+      "default",
+      [sanitizeRule],
+      true,
+      false,
+    );
   }
 
   private _applyRules(normalizedAnnotations: RuleAnnotation, debug = false) {
@@ -50,22 +86,40 @@ export class AnnotationRuleSets {
 
     switch (normalizedAnnotations.type) {
       case "typography":
-        resultAnnotation = this.typographyRuleSet.apply(normalizedAnnotations, debug);
+        resultAnnotation = this.typographyRuleSet.apply(
+          normalizedAnnotations,
+          debug,
+        );
         break;
       case "orthography":
-        resultAnnotation = this.orthographyRuleSet.apply(normalizedAnnotations, debug);
+        resultAnnotation = this.orthographyRuleSet.apply(
+          normalizedAnnotations,
+          debug,
+        );
         break;
       case "lexis":
-        resultAnnotation = this.lexisRuleSet.apply(normalizedAnnotations, debug);
+        resultAnnotation = this.lexisRuleSet.apply(
+          normalizedAnnotations,
+          debug,
+        );
         break;
       case "morpho_syntactical":
-        resultAnnotation = this.morphoSyntacticalRuleSet.apply(normalizedAnnotations, debug);
+        resultAnnotation = this.morphoSyntacticalRuleSet.apply(
+          normalizedAnnotations,
+          debug,
+        );
         break;
       case "handshift":
-        resultAnnotation = this.handshiftRuleSet.apply(normalizedAnnotations, debug);
+        resultAnnotation = this.handshiftRuleSet.apply(
+          normalizedAnnotations,
+          debug,
+        );
         break;
       case "language":
-        resultAnnotation = this.languageRuleSet.apply(normalizedAnnotations, debug);
+        resultAnnotation = this.languageRuleSet.apply(
+          normalizedAnnotations,
+          debug,
+        );
         break;
       default:
         console.warn("no default applied rule for", normalizedAnnotations.type);
@@ -73,10 +127,14 @@ export class AnnotationRuleSets {
         break;
     }
 
+    resultAnnotation.annotation.isModified = resultAnnotation.rule_applied;
+
     return resultAnnotation;
   }
 
-  public applyRules(annotation: AnnotationItem): Promise<ModifiedAnnotation | null> {
+  public applyRules(
+    annotation: AnnotationItem,
+  ): Promise<ModifiedAnnotation | null> {
     return new Promise((resolve) => {
       const normalizedAnnotations = normalizeAnnotation(annotation, this.text);
 
@@ -90,13 +148,18 @@ export class AnnotationRuleSets {
     });
   }
 
-  public runRules(normalizedAnnotations: RuleAnnotation, debug = false): ModifiedAnnotation | null {
+  public runRules(
+    normalizedAnnotations: RuleAnnotation,
+    debug = false,
+  ): ModifiedAnnotation | null {
     const resultAnnotation = this._applyRules(normalizedAnnotations, debug);
 
-    const processedAnnotation = resultAnnotation.rule_applied ? resultAnnotation.annotation : normalizedAnnotations;
+    const processedAnnotation = resultAnnotation.rule_applied
+      ? resultAnnotation.annotation
+      : normalizedAnnotations;
 
-    if (resultAnnotation.rule_applied)
-      processedAnnotation.color = annotationHighlightColors[processedAnnotation.type as AnnotationType];
+    // if (resultAnnotation.rule_applied)
+    // processedAnnotation.color = annotationHighlightColors[processedAnnotation.type as AnnotationType];
 
     return {
       id: normalizedAnnotations.id,

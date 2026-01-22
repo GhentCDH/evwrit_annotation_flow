@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@ghentcdh/annotated-text':
-        specifier: ^0.7.9
-        version: 0.7.9
+        specifier: ^0.12.20
+        version: 0.12.20
       '@heroicons/vue':
         specifier: ^2.2.0
         version: 2.2.0(vue@3.5.22(typescript@5.9.3))
@@ -51,8 +51,8 @@ importers:
         specifier: ^3.0.3
         version: 3.0.3(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       tokenizr:
-        specifier: ^2.0.3
-        version: 2.0.3
+        specifier: ^2.1.1
+        version: 2.1.1
       uuid:
         specifier: ^13.0.0
         version: 13.0.0
@@ -561,8 +561,8 @@ packages:
     resolution: {integrity: sha512-sB5uyeq+dwCWyPi31B2gQlVlo+j5brPlWx4yZBrEaRo/nhdDE8Xke1gsGgtiBdaBTxuTkceLVuVt/pclrasb0A==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@ghentcdh/annotated-text@0.7.9':
-    resolution: {integrity: sha512-ulC5o1tZHgbvTE8mWnznFqyJs1Nw6sy9/XRZhpHn6deblj6QJGg+aimw1dN/XvP4Z6WhvdfGoEh+bREjW2tY2A==}
+  '@ghentcdh/annotated-text@0.12.20':
+    resolution: {integrity: sha512-R51SH4rzHJmnz9SUIHyaHiyNPhtzOJGrSrIqmb1aPHyAq+yxtqgGAbxo2aoQSzDFH1QQJjgckQ3Vu+rXNbmNbA==}
 
   '@heroicons/vue@2.2.0':
     resolution: {integrity: sha512-G3dbSxoeEKqbi/DFalhRxJU4mTXJn7GwZ7ae8NuEQzd1bqdd0jAbdaBZlHPcvPD2xI1iGzNVB4k20Un2AguYPw==}
@@ -3219,8 +3219,8 @@ packages:
   tokenizr@1.7.0:
     resolution: {integrity: sha512-XHJRmcTZRK4xr9Rjci/Z5JerDwV4SOczO7G/hhrIddNLDJY9hZY7pX6vC7GvDUtlfjFb0BvBblE5JAVKbB2OEQ==}
 
-  tokenizr@2.0.3:
-    resolution: {integrity: sha512-9NIFr8Iiv9DZYnLaGbjIL4UYZA+mcwRTJQLDtvcYKTiQf5eHSvZzZxX8L/oj9tA8/t7kF3k0iAEykRsxnMdq0g==}
+  tokenizr@2.1.1:
+    resolution: {integrity: sha512-VlGO+RG7LztjdjwDBY3BmAjAjopzxtTH+cKYc3v3YNKQYtWK2rYmUwE8sCGOF0LxgQbDTbclTMc2B95ztvlUZQ==}
 
   tough-cookie@6.0.0:
     resolution: {integrity: sha512-kXuRi1mtaKMrsLUxz3sQYvVl37B0Ns6MzfrtV5DvJceE9bPyspOqk9xxv7XbZWcfLWbFmm997vl83qUWVJA64w==}
@@ -3816,7 +3816,7 @@ snapshots:
       '@eslint/core': 0.16.0
       levn: 0.4.1
 
-  '@ghentcdh/annotated-text@0.7.9':
+  '@ghentcdh/annotated-text@0.12.20':
     dependencies:
       d3: 7.9.0
       lodash-es: 4.17.21
@@ -6722,7 +6722,7 @@ snapshots:
 
   tokenizr@1.7.0: {}
 
-  tokenizr@2.0.3: {}
+  tokenizr@2.1.1: {}
 
   tough-cookie@6.0.0:
     dependencies:

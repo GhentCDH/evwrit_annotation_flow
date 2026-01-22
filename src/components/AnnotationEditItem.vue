@@ -9,7 +9,7 @@
         :checked="selectedAnnotation"
         @click="changeSelected"
       />
-      <div class="w-full">
+      <div class="w-full block">
         <div :id="viewId" />
       </div>
       <button

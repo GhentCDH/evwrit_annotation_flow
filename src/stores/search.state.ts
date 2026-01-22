@@ -47,15 +47,22 @@ export const useSearchStore = defineStore("searchStore", () => {
     const p = page.value;
     const { ascending, orderBy } = sort.value;
     const r = refresh.value;
-    console.log("refresh", r);
 
     if (!p) return { count: 0, results: [] };
-    return annotationRepository.listTexts(filter, p, pageSize.value, orderBy, ascending);
+    return annotationRepository.listTexts(
+      filter,
+      p,
+      pageSize.value,
+      orderBy,
+      ascending,
+    );
   }) as ComputedRef<Search>;
 
   const data = computed(() => searchResult.value?.data ?? []);
   const count = computed(() => searchResult.value?.count ?? 0);
-  const searchFilters = computed(() => searchResult.value?.filters ?? ([] as SearchFilter[]));
+  const searchFilters = computed(
+    () => searchResult.value?.filters ?? ([] as SearchFilter[]),
+  );
 
   const onSearch = (filter: any) => {
     filterValues.value = cloneDeep(filter);
@@ -73,7 +80,6 @@ export const useSearchStore = defineStore("searchStore", () => {
 
     page.value = nextP;
 
-    console.log("change page", maxPage, nextP);
     return router.replace({ query: { ...route.query, page: page.value } });
   };
 
@@ -82,7 +88,12 @@ export const useSearchStore = defineStore("searchStore", () => {
     return router.replace({ query: { ...route.query, orderBy, ascending } });
   };
 
-  if (!route.query.pageSize || !route.query.page || !route.query.orderBy || !route.query.ascending) {
+  if (
+    !route.query.pageSize ||
+    !route.query.page ||
+    !route.query.orderBy ||
+    !route.query.ascending
+  ) {
     router.replace({
       query: {
         ...route.query,
