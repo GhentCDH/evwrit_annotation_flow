@@ -1,14 +1,14 @@
-:80 {
+:9000 {
     root * /srv
     encode gzip
 
     file_server {
-        hide .git
-    }
+                    hide .git
+                }
 
     handle_path /annotation_flow/* {
-        root * /srv
-		file_server
-    }
+                                       root * /srv
+                                       file_server
+                                   }
 
 }
