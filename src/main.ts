@@ -4,9 +4,12 @@ import { createPinia } from "pinia";
 import App from "./App.vue";
 import "./styles/index.scss";
 import router from "./router";
+import { initKeycloak } from "./plugins/keycloak";
 
 const app = createApp(App);
 
 app.use(createPinia()).use(router);
 
-app.mount("#app");
+initKeycloak(app).then(() => {
+  app.mount("#app");
+});

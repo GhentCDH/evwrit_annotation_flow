@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm install && vite",
+    "dev": "vite",
     "dev:local": "DEV=local vite",
     "build": "run-p type-check \"build-only {@}\" --",
     "deploy": "run-s build && rm -r deploy && cp -r dist/ deploy",
@@ -32,6 +32,7 @@
     "d3": "^7.9.0",
     "diff": "^8.0.2",
     "express": "^5.1.0",
+    "keycloak-js": "^26.2.2",
     "linkify-it": "^5.0.0",
     "lodash-es": "^4.17.21",
     "markdown-it": "^14.1.0",
