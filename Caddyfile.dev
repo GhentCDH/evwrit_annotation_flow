@@ -9,6 +9,7 @@
 
     handle_path /annotation_flow/* {
         root * /srv
+        try_files {path} /index.html
         file_server
     }
 

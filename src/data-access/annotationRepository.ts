@@ -1,5 +1,6 @@
 import type { Filters, Search, SearchDto } from "../types/Search";
 import type { AnnotationList } from "../types/annotation-response";
+import { useAuthStore } from "../stores/auth.store";
 import type { AnnotationPatch, AnnotationType } from "@/types/Annotation";
 
 export const DEFAULT_LIMIT = 25;
@@ -98,11 +99,20 @@ export class AnnotationRepository {
     body?: BODY;
   }): Promise<RESPONSE> {
     try {
+      const authStore = useAuthStore();
+      const token = await authStore.getToken();
+
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const response = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: body ? JSON.stringify(body) : undefined,
       });
 

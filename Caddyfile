@@ -2,11 +2,15 @@
     root * /srv
     encode gzip
 
+    # Sub-route for Vue SPA
     handle_path /annotation_flow/* {
         root * /srv
+        try_files {path} /index.html
         file_server
     }
 
+    # Root route for Vue SPA
+    try_files {path} /index.html
     file_server {
         hide .git
     }

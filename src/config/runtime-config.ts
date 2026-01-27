@@ -21,9 +21,10 @@ export async function loadRuntimeConfig(): Promise<RuntimeConfig> {
     return cachedConfig;
   }
 
-  // In production, fetch from config.json
+  // In production, fetch from config.json (relative to base URL)
   try {
-    const response = await fetch("/config.json");
+    const baseUrl = import.meta.env.BASE_URL || "/";
+    const response = await fetch(`${baseUrl}config.json`);
     if (!response.ok) {
       throw new Error(`Failed to load config: ${response.status}`);
     }
