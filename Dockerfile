@@ -13,9 +13,11 @@ COPY . .
 RUN pnpm run build
 
 FROM caddy:alpine
-COPY --from=builder /app/dist /usr/share/caddy/annotation_flow
-COPY --from=builder /app/dist /usr/share/caddy
+COPY --from=builder /app/dist /srv
+COPY Caddyfile /etc/caddy/Caddyfile
 
-EXPOSE 9000
+ENV PORT=9000
 
-CMD ["caddy", "file-server", "--root", "/usr/share/caddy", "--listen", ":9000"]
+EXPOSE ${PORT}
+
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
