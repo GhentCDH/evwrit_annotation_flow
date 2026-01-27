@@ -1,5 +1,6 @@
 import type { App } from "vue";
-import keycloak from "../config/keycloak";
+import type Keycloak from "keycloak-js";
+import { createKeycloak } from "../config/keycloak";
 import { useAuthStore } from "../stores/auth.store";
 
 export interface KeycloakPluginOptions {
@@ -11,6 +12,7 @@ export async function initKeycloak(
   options: KeycloakPluginOptions = {},
 ): Promise<boolean> {
   const authStore = useAuthStore();
+  const keycloak = createKeycloak();
 
   authStore.setKeycloak(keycloak);
 
@@ -29,7 +31,6 @@ export async function initKeycloak(
 
       try {
         const profile = await keycloak.loadUserProfile();
-        console.log(profile);
         authStore.setUser(profile);
       } catch (profileError) {
         console.warn("Failed to load user profile:", profileError);
@@ -61,6 +62,6 @@ export async function initKeycloak(
 
 declare module "vue" {
   interface ComponentCustomProperties {
-    $keycloak: typeof keycloak;
+    $keycloak: Keycloak;
   }
 }

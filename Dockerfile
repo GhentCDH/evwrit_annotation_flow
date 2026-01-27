@@ -15,9 +15,11 @@ RUN pnpm run build
 FROM caddy:alpine
 COPY --from=builder /app/dist /srv
 COPY Caddyfile /etc/caddy/Caddyfile
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 ENV PORT=9000
 
 EXPOSE ${PORT}
 
-CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
