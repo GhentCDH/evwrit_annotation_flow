@@ -4,9 +4,9 @@ set -e
 # Generate runtime config from environment variables
 cat > /srv/config.json <<EOF
 {
-  "KEYCLOAK_URL": "${VITE_KEYCLOAK_URL:-}",
-  "KEYCLOAK_REALM": "${VITE_KEYCLOAK_REALM:-}",
-  "KEYCLOAK_CLIENT_ID": "${VITE_KEYCLOAK_CLIENT_ID:-}"
+  "KEYCLOAK_URL": "${KEYCLOAK_URL:-}",
+  "KEYCLOAK_REALM": "${KEYCLOAK_REALM:-}",
+  "KEYCLOAK_CLIENT_ID": "${KEYCLOAK_CLIENT_ID:-}"
 }
 EOF
 
