@@ -8,11 +8,17 @@ export class AnnotationRepository {
   constructor() {}
 
   async fetchAnnotation(annotationId: string | number) {
-    return this.sendJsonRequest<AnnotationList>({ url: `/text/${annotationId}/annotations`, method: "GET" });
+    return this.sendJsonRequest<AnnotationList>({
+      url: `/text/${annotationId}/annotations`,
+      method: "GET",
+    });
   }
 
   async filters(): Promise<Filters> {
-    return this.sendJsonRequest<Filters>({ url: `/text/search_flags/filters`, method: "GET" });
+    return this.sendJsonRequest<Filters>({
+      url: `/text/search_flags/filters`,
+      method: "GET",
+    });
   }
 
   async listTexts(
@@ -22,9 +28,18 @@ export class AnnotationRepository {
     orderBy: string,
     ascending: 0 | 1,
   ): Promise<Search> {
-    const params = this.buildSearchParams(filter, page, pageSize, orderBy, ascending);
+    const params = this.buildSearchParams(
+      filter,
+      page,
+      pageSize,
+      orderBy,
+      ascending,
+    );
 
-    return this.sendJsonRequest<Search>({ url: `/text/search_flags?${params.toString()}`, method: "GET" });
+    return this.sendJsonRequest<Search>({
+      url: `/text/search_flags?${params.toString()}`,
+      method: "GET",
+    });
   }
 
   async paginate(
@@ -34,12 +49,22 @@ export class AnnotationRepository {
     orderBy: string,
     ascending: 0 | 1,
   ): Promise<number[]> {
-    const search = await this.listTexts(filter, page, pageSize, orderBy, ascending);
+    const search = await this.listTexts(
+      filter,
+      page,
+      pageSize,
+      orderBy,
+      ascending,
+    );
 
     return search.data.map((d) => d.id);
   }
 
-  async patchAnnotation(annotationId: string | number, type: AnnotationType, annotation: AnnotationPatch) {
+  async patchAnnotation(
+    annotationId: string | number,
+    type: AnnotationType,
+    annotation: AnnotationPatch,
+  ) {
     return this.sendJsonRequest<number[]>({
       url: `/annotation/${type}/${annotationId}/override`,
       method: "PATCH",

@@ -1,0 +1,139 @@
+{
+  "realm": "evwrit",
+  "enabled": true,
+  "displayName": "Evwrit",
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "registrationAllowed": false,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "sslRequired": "none",
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "Administrator role with full access"
+      },
+      {
+        "name": "user",
+        "description": "Standard user role"
+      },
+      {
+        "name": "default-roles-evwrit",
+        "description": "Default realm roles",
+        "composite": true,
+        "composites": {
+          "client": {
+            "account": [
+              "view-profile",
+              "manage-account"
+            ]
+          }
+        }
+      }
+    ],
+    "client": {
+      "account": [
+        {
+          "name": "view-profile",
+          "description": "View profile"
+        },
+        {
+          "name": "manage-account",
+          "description": "Manage account"
+        }
+      ]
+    }
+  },
+  "defaultRole": {
+    "name": "default-roles-evwrit",
+    "description": "Default realm roles",
+    "composite": true,
+    "composites": {
+      "client": {
+        "account": [
+          "view-profile",
+          "manage-account"
+        ]
+      }
+    }
+  },
+  "clients": [
+    {
+      "clientId": "account",
+      "name": "Account",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "rootUrl": "${authBaseUrl}",
+      "baseUrl": "/realms/evwrit/account/",
+      "redirectUris": [
+        "/realms/evwrit/account/*"
+      ],
+      "webOrigins": [
+        "+"
+      ],
+      "fullScopeAllowed": false
+    },
+    {
+      "clientId": "evwrit",
+      "name": "Evwrit App",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "fullScopeAllowed": true,
+      "rootUrl": "http://localhost:5173",
+      "baseUrl": "/",
+      "redirectUris": [
+        "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "http://localhost:5173",
+        "+"
+      ],
+      "defaultClientScopes": [
+        "openid",
+        "profile",
+        "email",
+        "roles",
+        "web-origins"
+      ],
+      "optionalClientScopes": [
+        "offline_access"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "email": "admin@ghentcdh.ugent.be",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "admin",
+        "user",
+        "default-roles-evwrit"
+      ],
+      "clientRoles": {
+        "account": [
+          "view-profile",
+          "manage-account"
+        ]
+      }
+    }
+  ]
+}

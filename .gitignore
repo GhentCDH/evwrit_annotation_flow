@@ -29,3 +29,5 @@ coverage
 
 *.tsbuildinfo
 /vue_component_annotated_text/
+var
+.env
