@@ -2,13 +2,12 @@
     root * /srv
     encode gzip
 
-    file_server {
-                    hide .git
-                }
-
     handle_path /annotation_flow/* {
-                                       root * /srv
-                                       file_server
-                                   }
+        root * /srv
+        file_server
+    }
 
+    file_server {
+        hide .git
+    }
 }

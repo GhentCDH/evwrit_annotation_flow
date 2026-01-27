@@ -1,0 +1,18 @@
+:{$PORT:9000} {
+    root * /srv
+    encode gzip
+
+    # API reverse proxy (dev only)
+    reverse_proxy /text/* {$API_URL:http://host.docker.internal:8080}
+    reverse_proxy /annotation/* {$API_URL:http://host.docker.internal:8080}
+    reverse_proxy /health {$API_URL:http://host.docker.internal:8080}
+
+    handle_path /annotation_flow/* {
+        root * /srv
+        file_server
+    }
+
+    file_server {
+        hide .git
+    }
+}

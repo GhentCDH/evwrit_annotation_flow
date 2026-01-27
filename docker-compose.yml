@@ -6,14 +6,15 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      # Mount source code for hot reloading
-      - .:/app
-      # Preserve node_modules from container (prevents host overwrite)
-      - /app/node_modules
+      # Mount dev Caddyfile with API proxy
+      - ./Caddyfile.dev:/etc/caddy/Caddyfile:ro
     env_file:
       - .env
     environment:
       PORT: 5173
+      API_URL: http://host.docker.internal:8080
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     stdin_open: true
     tty: true
 
