@@ -15,7 +15,7 @@
         <chevron-left-icon class="h-3" />
       </button>
       <a
-        :href="`https://dev.evwrit.ugent.be/text/${activeId}`"
+        :href="`${config.EVWRIT_BASE_URL}/text/${activeId}`"
         target="_blank"
         class="text-sm w-16 text-center hover:underline"
       >
@@ -52,6 +52,7 @@ import {
 
 import { useRoute } from "vue-router";
 import { usePaginationStore } from "../stores/pagination.state";
+import { getRuntimeConfig } from "../config/runtime-config";
 
 interface SearchPaginatorProps {
   activeId: number;
@@ -62,6 +63,7 @@ defineProps<SearchPaginatorProps>();
 // #region pagination
 const paginationStore = usePaginationStore();
 const route = useRoute();
+const config = getRuntimeConfig();
 
 // #endregion
 </script>
