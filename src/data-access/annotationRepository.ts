@@ -10,14 +10,14 @@ export class AnnotationRepository {
 
   async fetchAnnotation(annotationId: string | number) {
     return this.sendJsonRequest<AnnotationList>({
-      url: `/text/${annotationId}/annotations`,
+      url: `/api/text/${annotationId}/annotations`,
       method: "GET",
     });
   }
 
   async filters(): Promise<Filters> {
     return this.sendJsonRequest<Filters>({
-      url: `/text/search_flags/filters`,
+      url: `/api/text/search_flags/filters`,
       method: "GET",
     });
   }
@@ -38,7 +38,7 @@ export class AnnotationRepository {
     );
 
     return this.sendJsonRequest<Search>({
-      url: `/text/search_flags?${params.toString()}`,
+      url: `/api/text/search_flags?${params.toString()}`,
       method: "GET",
     });
   }
@@ -67,7 +67,7 @@ export class AnnotationRepository {
     annotation: AnnotationPatch,
   ) {
     return this.sendJsonRequest<number[]>({
-      url: `/annotation/${type}/${annotationId}/override`,
+      url: `/api/annotation/${type}/${annotationId}/override`,
       method: "PATCH",
       body: annotation,
     });
@@ -75,7 +75,7 @@ export class AnnotationRepository {
 
   async reviewDone(textId: string | number) {
     return this.sendJsonRequest<number[]>({
-      url: `/text/${textId}/flags`,
+      url: `/api/text/${textId}/flags`,
       method: "PATCH",
       body: { review_done: true, needs_attention: false },
     });
@@ -83,7 +83,7 @@ export class AnnotationRepository {
 
   async needsAttention(textId: string | number) {
     return this.sendJsonRequest<number[]>({
-      url: `/text/${textId}/flags`,
+      url: `/api/text/${textId}/flags`,
       method: "PATCH",
       body: { review_done: false, needs_attention: true },
     });
