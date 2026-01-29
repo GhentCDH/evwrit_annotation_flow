@@ -2,6 +2,7 @@ export interface RuntimeConfig {
   KEYCLOAK_URL: string;
   KEYCLOAK_REALM: string;
   KEYCLOAK_CLIENT_ID: string;
+  EVWRIT_BASE_URL: string;
 }
 
 let cachedConfig: RuntimeConfig | null = null;
@@ -17,6 +18,7 @@ export async function loadRuntimeConfig(): Promise<RuntimeConfig> {
       KEYCLOAK_URL: import.meta.env.VITE_KEYCLOAK_URL || "",
       KEYCLOAK_REALM: import.meta.env.VITE_KEYCLOAK_REALM || "",
       KEYCLOAK_CLIENT_ID: import.meta.env.VITE_KEYCLOAK_CLIENT_ID || "",
+      EVWRIT_BASE_URL: import.meta.env.VITE_EVWRIT_BASE_URL || "",
     };
     return cachedConfig;
   }
@@ -37,6 +39,7 @@ export async function loadRuntimeConfig(): Promise<RuntimeConfig> {
       KEYCLOAK_URL: import.meta.env.VITE_KEYCLOAK_URL || "",
       KEYCLOAK_REALM: import.meta.env.VITE_KEYCLOAK_REALM || "",
       KEYCLOAK_CLIENT_ID: import.meta.env.VITE_KEYCLOAK_CLIENT_ID || "",
+      EVWRIT_BASE_URL: import.meta.env.VITE_EVWRIT_BASE_URL || "",
     };
     return cachedConfig;
   }
