@@ -2,6 +2,7 @@ import type { Filters, Search, SearchDto } from "../types/Search";
 import type { AnnotationList } from "../types/annotation-response";
 import { useAuthStore } from "../stores/auth.store";
 import type { AnnotationPatch, AnnotationType } from "@/types/Annotation";
+import { getRuntimeConfig } from "../config/runtime-config.ts";
 
 export const DEFAULT_LIMIT = 25;
 
@@ -101,6 +102,7 @@ export class AnnotationRepository {
     try {
       const authStore = useAuthStore();
       const token = await authStore.getToken();
+      const config = getRuntimeConfig();
 
       const headers: HeadersInit = {
         "Content-Type": "application/json",
@@ -110,7 +112,7 @@ export class AnnotationRepository {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      const response = await fetch(url, {
+      const response = await fetch(config.EVWRIT_BASE_URL + url, {
         method,
         headers,
         body: body ? JSON.stringify(body) : undefined,
