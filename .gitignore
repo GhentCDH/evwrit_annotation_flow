@@ -31,3 +31,4 @@ coverage
 /vue_component_annotated_text/
 var
 .env
+*.override.yml
