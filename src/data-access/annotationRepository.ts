@@ -1,7 +1,8 @@
 import type { Filters, Search, SearchDto } from "../types/Search";
-import type { AnnotationList } from "../types/annotation-response";
+import type { AnnotationList, JSend } from "../types/annotation-response";
 import { useAuthStore } from "../stores/auth.store";
 import type { AnnotationPatch, AnnotationType } from "@/types/Annotation";
+import { getRuntimeConfig } from "../config/runtime-config.ts";
 
 export const DEFAULT_LIMIT = 25;
 
@@ -101,6 +102,7 @@ export class AnnotationRepository {
     try {
       const authStore = useAuthStore();
       const token = await authStore.getToken();
+      const config = getRuntimeConfig();
 
       const headers: HeadersInit = {
         "Content-Type": "application/json",
@@ -110,7 +112,7 @@ export class AnnotationRepository {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      const response = await fetch(url, {
+      const response = await fetch(config.EVWRIT_BASE_URL + url, {
         method,
         headers,
         body: body ? JSON.stringify(body) : undefined,
@@ -124,7 +126,26 @@ export class AnnotationRepository {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return await response.json();
+      const jsonResponse = await response.json();
+      const jsendResponse = jsonResponse as JSend<RESPONSE>;
+
+      if (jsendResponse.status === "error") {
+        throw new Error(
+          jsendResponse.message || "Request error"
+        );
+      }
+
+      if (jsendResponse.status === "fail") {
+        throw new Error(
+          jsendResponse.message || "Request failed"
+        );
+      }
+
+      if (jsendResponse.status !== "success") {
+        throw new Error(`Unexpected JSend status: ${jsendResponse.status}`);
+      }
+
+      return jsendResponse.data;
     } catch (error) {
       console.error(error);
       throw new Error(error as any);
